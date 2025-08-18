@@ -154,28 +154,49 @@ class PickominoEnv(gym.Env):
 if __name__ == "__main__":
     env = PickominoEnv(2)
     observation, info = env.reset()
-    print("Reset", observation, info)
+    print("Reset", observation)
+    for key, value in info.items():
+        print(key, value)
+    print("--------------------")
 
     action = (5, 1)
     observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated, info)
+    print(action, observation, reward, terminated, truncated)
+    for key, value in info.items():
+        print(key, value)
+    print("--------------------")
 
     action = (3, 1)
     observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated, info)
+    print(action, observation, reward, terminated, truncated)
+    for key, value in info.items():
+        print(key, value)
+    print("--------------------")
 
     action = (2, 1)
     observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated, info)
+    print(action, observation, reward, terminated, truncated)
+    for key, value in info.items():
+        print(key, value)
+    print("--------------------")
 
     action = (1, 1)
     observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated, info)
+    print(action, observation, reward, terminated, truncated)
+    for key, value in info.items():
+        print(key, value)
+    print("--------------------")
 
     action = (0, 1)
     observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated, info)
+    print(action, observation, reward, terminated, truncated)
+    for key, value in info.items():
+        print(key, value)
+    print("--------------------")
 
     action = (4, 1)
     observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated, info)
+    print(action, observation, reward, terminated, truncated)
+    for key, value in info.items():
+        print(key, value)
+    print("--------------------")
