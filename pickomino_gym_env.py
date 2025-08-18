@@ -145,10 +145,9 @@ class PickominoEnv(gym.Env):
         reward = self._get_sum(self._dices_collected)
 
         observation = self._get_obs_dices()
-        info = self._get_info(action)
 
         self.roll_counter += 1
-
+        info = self._get_info(action)
         return observation, reward, terminated, truncated, info
 
 
