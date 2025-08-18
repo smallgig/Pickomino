@@ -28,16 +28,16 @@ class PickominoEnv(gym.Env):
         # Action space is a tuple. First action: which dice you take. Second action: roll again or not.
         self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(6), gym.spaces.Discrete(2)))
 
-    def _get_sum(self, collected_dices):
+    def _get_sum(self):
         """Return the sum of the collected dices."""
         return_value = 0
 
         # Dice with eyes = number of eyes per dice times the number of dices.
-        for ind, dice in enumerate(collected_dices):
+        for ind, dice in enumerate(self._dices_collected):
             return_value += dice * ind
 
         # Worms have value five.
-        return_value = return_value + collected_dices[0] * 5
+        return_value += self._dices_collected[0] * 5
 
         return return_value
 
@@ -73,7 +73,7 @@ class PickominoEnv(gym.Env):
             "self.roll_counter": self.roll_counter,
             "self.observation_space": self.observation_space,
             "self.action_space": self.action_space,
-            "self._get_sum(self._dices_collected)": self._get_sum(self._dices_collected),
+            "self._get_sum()": self._get_sum(),
             "self._get_obs_dices()": self._get_obs_dices(),
             "self._get_obs_tiles()": self._get_obs_tiles(),
             "self.legal_move(action)": self.legal_move(action)
@@ -142,7 +142,7 @@ class PickominoEnv(gym.Env):
             for i in range(self.remaining_dice):
                 self._dices_rolled[rand.randint(0, 5)] += 1
 
-        reward = self._get_sum(self._dices_collected)
+        reward = self._get_sum()
 
         observation = self._get_obs_dices()
 
