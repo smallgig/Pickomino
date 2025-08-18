@@ -115,15 +115,17 @@ class PickominoEnv(gym.Env):
             self._dices_collected = np.array([0, 0, 0, 0, 0, 0])
             self._dices_rolled = np.array([0, 0, 0, 0, 0, 0])
             self.roll_counter = 0
-
-
         self._dices_collected[action[0]] = self._dices_rolled[action[0]]
-        self._dices_rolled = np.array([0, 0, 0, 0, 0 ,0])
-
+        self._dices_rolled[action[0]] = 0
+        # Finally
         if action[1]:
-            for i in range(self.remaining_dice):
+            max_dices = 8 - np.sum(self._dices_collected)
+            dices_to_roll = min(self.remaining_dice, max_dices)
+
+            self._dices_rolled = np.zeros(6, dtype=int)
+            for i in range(dices_to_roll):
                 self._dices_rolled[rand.randint(0, 5)] += 1
-                self.remaining_dice -= 1
+            self.remaining_dice -= sum(self._dices_collected)
 
         reward = self._get_sum(self._dices_collected)
 
