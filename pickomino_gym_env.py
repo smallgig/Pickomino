@@ -64,7 +64,21 @@ class PickominoEnv(gym.Env):
         Returns:
             dict: Info with additional information which is useful for debugging but not necessary for learning.
         """
-        return self.legal_move(action)
+        return_value = {
+            "action": action,
+            "self.num_dice": self.num_dice,
+            "self.remaining_dice": self.remaining_dice,
+            "self._dices_collected": self._dices_collected,
+            "self._dices_rolled": self._dices_rolled,
+            "self.roll_counter": self.roll_counter,
+            "self.observation_space": self.observation_space,
+            "self.action_space": self.action_space,
+            "self._get_sum(self._dices_collected)": self._get_sum(self._dices_collected),
+            "self._get_obs_dices()": self._get_obs_dices(),
+            "self._get_obs_tiles()": self._get_obs_tiles(),
+            "self.legal_move(action)": self.legal_move(action)
+        }
+        return return_value
 
     def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         """Start a new episode.
