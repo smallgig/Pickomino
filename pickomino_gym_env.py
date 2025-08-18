@@ -134,12 +134,13 @@ class PickominoEnv(gym.Env):
             self.roll_counter = 0
 
         self._dices_collected[action[0]] = self._dices_rolled[action[0]]
+        # Reduce the remaining number of dices by the number collected.
+        self.remaining_dice -= self._dices_collected[action[0]]
         self._dices_rolled = np.array([0, 0, 0, 0, 0, 0])
 
         if action[1]:
             for i in range(self.remaining_dice):
                 self._dices_rolled[rand.randint(0, 5)] += 1
-                self.remaining_dice -= 1
 
         reward = self._get_sum(self._dices_collected)
 
