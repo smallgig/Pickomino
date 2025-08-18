@@ -164,7 +164,7 @@ if __name__ == "__main__":
         print("step", step, "    selection", selection)
         action = (selection, 1)
         observation, reward, terminated, truncated, info = env.step(action)
-        print(action, observation, reward, terminated, truncated)
-        for key, value in info.items():
-            print(key, value)
+        print(f"act: {action}, obs: {observation}, rew: {reward}, ter: {terminated}, tru: {truncated}")
+        # for key, value in info.items():
+        #     print(key, value)
         print("--------------------")
