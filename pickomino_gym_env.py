@@ -6,6 +6,7 @@ import random as rand
 
 
 class PickominoEnv(gym.Env):
+    """The environment class."""
 
     def __init__(self, num_players):
         """Constructor."""
@@ -57,13 +58,13 @@ class PickominoEnv(gym.Env):
         # TODO: implement correct return value
         return self.observation_space
 
-    def _get_info(self):
+    def _get_info(self, action):
         """Compute auxiliary information for debugging.
 
         Returns:
             dict: Info with additional information which is useful for debugging but not necessary for learning.
         """
-        pass
+        return self.legal_move(action)
 
     def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         """Start a new episode.
@@ -85,7 +86,7 @@ class PickominoEnv(gym.Env):
 
         self.remaining_dice = self.num_dice
         observation = self._get_obs_dices()
-        info = self._get_info()
+        info = self._get_info((0, 1))  # Arbitrary action in reset only for debugging
 
         return observation, info
 
@@ -129,7 +130,7 @@ class PickominoEnv(gym.Env):
         reward = self._get_sum(self._dices_collected)
 
         observation = self._get_obs_dices()
-        info = self._get_info()
+        info = self._get_info(action)
 
         self.roll_counter += 1
 
@@ -139,22 +140,28 @@ class PickominoEnv(gym.Env):
 if __name__ == "__main__":
     env = PickominoEnv(2)
     observation, info = env.reset()
-    print(observation)
-    observation, reward, _, _, _ = env.step(action=(5, 1))
-    print(observation, reward)
-    observation, reward, _, _, _ = env.step(action=(3, 1))
-    print(observation, reward)
-    observation, reward, _, _, _ = env.step(action=(2, 1))
-    print(observation, reward)
-    observation, reward, _, _, _ = env.step(action=(1, 1))
-    print(observation, reward)
-    observation, reward, _, _, _ = env.step(action=(5, 1))
-    print(observation, reward)
-    observation, reward, _, _, _ = env.step(action=(5, 1))
-    print(observation, reward)
-    observation, reward, _, _, _ = env.step(action=(5, 1))
-    print(observation, reward)
-    observation, reward, _, _, _ = env.step(action=(5, 1))
-    print(observation, reward)
-    observation, reward, _, _, _ = env.step(action=(5, 1))
-    print(observation, reward)
+    print("Reset", observation, info)
+
+    action = (5, 1)
+    observation, reward, terminated, truncated, info = env.step(action)
+    print(action, observation, reward, terminated, truncated, info)
+
+    action = (3, 1)
+    observation, reward, terminated, truncated, info = env.step(action)
+    print(action, observation, reward, terminated, truncated, info)
+
+    action = (2, 1)
+    observation, reward, terminated, truncated, info = env.step(action)
+    print(action, observation, reward, terminated, truncated, info)
+
+    action = (1, 1)
+    observation, reward, terminated, truncated, info = env.step(action)
+    print(action, observation, reward, terminated, truncated, info)
+
+    action = (0, 1)
+    observation, reward, terminated, truncated, info = env.step(action)
+    print(action, observation, reward, terminated, truncated, info)
+
+    action = (4, 1)
+    observation, reward, terminated, truncated, info = env.step(action)
+    print(action, observation, reward, terminated, truncated, info)
