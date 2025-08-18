@@ -159,44 +159,12 @@ if __name__ == "__main__":
         print(key, value)
     print("--------------------")
 
-    action = (5, 1)
-    observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated)
-    for key, value in info.items():
-        print(key, value)
-    print("--------------------")
-
-    action = (3, 1)
-    observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated)
-    for key, value in info.items():
-        print(key, value)
-    print("--------------------")
-
-    action = (2, 1)
-    observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated)
-    for key, value in info.items():
-        print(key, value)
-    print("--------------------")
-
-    action = (1, 1)
-    observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated)
-    for key, value in info.items():
-        print(key, value)
-    print("--------------------")
-
-    action = (0, 1)
-    observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated)
-    for key, value in info.items():
-        print(key, value)
-    print("--------------------")
-
-    action = (4, 1)
-    observation, reward, terminated, truncated, info = env.step(action)
-    print(action, observation, reward, terminated, truncated)
-    for key, value in info.items():
-        print(key, value)
-    print("--------------------")
+    for step in range(6):
+        selection = int(np.argmax(observation[1]))
+        print("step", step, "    selection", selection)
+        action = (selection, 1)
+        observation, reward, terminated, truncated, info = env.step(action)
+        print(action, observation, reward, terminated, truncated)
+        for key, value in info.items():
+            print(key, value)
+        print("--------------------")
