@@ -94,6 +94,7 @@ class PickominoEnv(gym.Env):
         super().reset(seed=seed)
 
         self._dices_collected = np.array([0, 0, 0, 0, 0, 0])
+        # TODO: PyCharm suggested resetting dices_rolled and remaining_dice here as well
 
         for i in range(self.num_dice):
             self._dices_rolled[rand.randint(0, 5)] += 1
@@ -132,6 +133,8 @@ class PickominoEnv(gym.Env):
             self._dices_collected = np.array([0, 0, 0, 0, 0, 0])
             self._dices_rolled = np.array([0, 0, 0, 0, 0, 0])
             self.roll_counter = 0
+            # TODO: PyCharm suggests resetting remaining_dices here.
+            # TODO: Check: if terminated or truncated should we not stop updating dice values completely??
 
         self._dices_collected[action[0]] = self._dices_rolled[action[0]]
         # Reduce the remaining number of dices by the number collected.
