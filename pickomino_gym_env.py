@@ -94,10 +94,12 @@ class PickominoEnv(gym.Env):
         super().reset(seed=seed)
 
         self._dices_collected = np.array([0, 0, 0, 0, 0, 0])
+        self._dices_rolled = np.array([0, 0, 0, 0, 0, 0])
         # TODO: PyCharm suggested resetting dices_rolled and remaining_dice here as well
 
-        for i in range(self.num_dice):
-            self._dices_rolled[rand.randint(0, 5)] += 1
+        # for i in range(self.num_dice):
+        #     self._dices_rolled[rand.randint(0, 5)] += 1
+
 
         self.remaining_dice = self.num_dice
         observation = self._get_obs_dices()
@@ -142,10 +144,9 @@ class PickominoEnv(gym.Env):
         self._dices_rolled = np.array([0, 0, 0, 0, 0, 0])
 
         if action[1]:
-            max_dices = 8 - np.sum(self._dices_collected)
+            max_dices = self.num_dice - np.sum(self._dices_collected)
             dices_to_roll = min(self.remaining_dice, max_dices)
 
-            self._dices_rolled = np.zeros(6, dtype=int)
             for i in range(dices_to_roll):
                 self._dices_rolled[rand.randint(0, 5)] += 1
 
