@@ -88,6 +88,12 @@ class PickominoEnv(gym.Env):
         }
         return return_value
 
+    def _soft_reset(self):
+        self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
+        self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
+        self.roll_counter = 0
+        self.remaining_dice = 8
+
     def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         """Start a new episode.
 
@@ -110,7 +116,6 @@ class PickominoEnv(gym.Env):
         self.truncated = False
 
         # self._dice_rolled = np.array([0, 2, 1, 4, 1, 0])
-        # TODO: PyCharm suggested resetting dices_rolled and remaining_dice here as well
 
         for i in range(self.num_dice):
             self._dice_rolled[rand.randint(0, 5)] += 1
@@ -121,12 +126,6 @@ class PickominoEnv(gym.Env):
 
         return observation, info
 
-    def soft_reset(self):
-        self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
-        self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
-        self.roll_counter = 0
-        self.remaining_dice = 8
-
     def legal_move(self, action):
         """Check if action is allowed."""
         terminated = False
@@ -134,7 +133,6 @@ class PickominoEnv(gym.Env):
 
         if action[1] == 0:
             truncated = True
-        # TODO: This is wrong! There is no limit to the number of rolls of the dice.
         # Terminated should be when a misthrow occurs
 
         # Dice already collected cannot be taken again.
@@ -142,18 +140,20 @@ class PickominoEnv(gym.Env):
             self.terminated = True
             for die_collected in self._dice_collected:
                 for die_rolled in self._dice_rolled:
-
                     if die_rolled > 0 and die_collected == 0:
                         self.terminated = False
+
+        if self.remaining_dice == 0 and self._get_sum() <= 21:
+            self.terminated = True
+
+        if self.remaining_dice == 0 and self._dice_collected[0] == 0:
+            self.terminated = True
 
             # terminated = True
             # for die in self._dice_rolled:
             #     if die not in self._dice_collected:
             #         terminated = False
             #         break
-
-        if self._dice_collected[0] == 0 and self.remaining_dice == 0:
-            terminated = True
 
         return terminated, truncated
 
@@ -166,12 +166,10 @@ class PickominoEnv(gym.Env):
         Returns:
             tuple: (observation, reward, terminated, truncated, info)
         """
-        # TODO: currently only the roll of the dice is implemented. The tile moving phase is not implemented yet.
         self.terminated, self.truncated = self.legal_move(action)
 
         if self.terminated or self.truncated:
-            self.soft_reset()
-            # TODO: PyCharm suggests resetting remaining_dice here.
+            self._soft_reset()
             # TODO: Check: if terminated or truncated should we not stop updating dice values completely??
         else:
             self._dice_collected[action[0]] = self._dice_rolled[action[0]]
@@ -196,7 +194,7 @@ class PickominoEnv(gym.Env):
             self.player_tiles.append(dice_sum)
             print("Your tiles:", self.player_tiles)
             self.truncated = True
-            self.soft_reset()
+            self._soft_reset()
         else:
             self.truncated = False
 
@@ -210,32 +208,3 @@ class PickominoEnv(gym.Env):
         reward = self._get_sum()
 
         return observation, reward, self.terminated, self.truncated, info
-
-
-if __name__ == "__main__":
-    env = PickominoEnv(2)
-    observation, info = env.reset()
-    print("Reset", observation)
-    for key, value in info.items():
-        print(key, value)
-    print("--------------------")
-
-    taken = []
-    print(observation)
-    for step in range(20):
-
-        selection = int(np.argmax(observation[1]))
-
-        # Do not select the same die face value again
-        if selection in taken:
-            observation[1][selection] = 0
-            selection = int(np.argmax(observation[1]))
-
-        taken.append(selection)
-        print("step:", step, "    selection:", selection, "   taken:", taken)
-        action = (selection, 1)
-        observation, reward, terminated, truncated, info = env.step(action)
-        print(f"act: {action}, obs(col, rol): {observation}, rew: {reward}, ter: {terminated}, tru: {truncated}")
-        for key, value in info.items():
-            print(key, value)
-        print("--------------------")
