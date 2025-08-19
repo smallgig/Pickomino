@@ -16,6 +16,7 @@ class PickominoEnv(gym.Env):
         self.num_players = num_players
         self.terminated = False
         self.truncated = False
+        self.player_tiles = []
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
@@ -171,12 +172,11 @@ class PickominoEnv(gym.Env):
 
     def step_tiles(self):
         dice_sum = self._get_sum()
-        tile_test = []
         # Environment takes the highest tile on the table or from a player.
         if dice_sum >= 21:
             self.tile_table.remove(dice_sum)
-            tile_test.append(dice_sum)
-            print("Your tiles:", tile_test)
+            self.player_tiles.append(dice_sum)
+            print("Your tiles:", self.player_tiles)
             self.truncated = True
         else:
             self.truncated = False
@@ -203,7 +203,7 @@ if __name__ == "__main__":
 
     taken = []
     print(observation)
-    for step in range(6):
+    for step in range(20):
 
         selection = int(np.argmax(observation[1]))
 
