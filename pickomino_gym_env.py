@@ -12,15 +12,16 @@ class PickominoEnv(gym.Env):
         """Constructor."""
         self.num_dice = 8
         self.remaining_dice = self.num_dice
-        # Define what the agent can observe
-        # Dict space gives us structured, human-readable observations
-        self._dices_collected = np.array([0, 0, 0, 0, 0, 0])
-        self._dices_rolled = np.array([0, 0, 0, 0, 0, 0])
+        # Define what the agent can observe.
+        # Dict space gives us structured, human-readable observations.
+        # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
+        self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
+        self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
         self.roll_counter = 0
         self.observation_space = gym.spaces.Dict(
             {
-                "dices_collected": gym.spaces.Discrete(n=6),
-                "dices_rolled": gym.spaces.Discrete(n=6),
+                "dice_collected": gym.spaces.Discrete(n=6),
+                "dice_rolled": gym.spaces.Discrete(n=6),
                 "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
                 # "tiles": gym.spaces.Discrete(n=16, start=21) # Tiles that can be taken.
             }
@@ -32,22 +33,22 @@ class PickominoEnv(gym.Env):
         """Return the sum of the collected dices."""
         return_value = 0
 
-        # Dice with eyes = number of eyes per dice times the number of dices.
-        for ind, dice in enumerate(self._dices_collected):
-            return_value += dice * ind
+        # Dice with eyes = number of eyes per die times the number of dice.
+        for ind, die in enumerate(self._dice_collected):
+            return_value += ind * die  # Worms have ind = 0 and hence are not counted here.
 
         # Worms have value five.
-        return_value += self._dices_collected[0] * 5
+        return_value += self._dice_collected[0] * 5
 
         return return_value
 
-    def _get_obs_dices(self):
+    def _get_obs_dice(self):
         """Convert internal state to observation format.
 
         Returns:
             tuple: Dices collected and dices rolled.
         """
-        return self._dices_collected, self._dices_rolled
+        return self._dice_collected, self._dice_rolled
 
     def _get_obs_tiles(self):
         """Convert internal state to observation format.
@@ -68,13 +69,13 @@ class PickominoEnv(gym.Env):
             "action": action,
             "self.num_dice": self.num_dice,
             "self.remaining_dice": self.remaining_dice,
-            "self._dices_collected": self._dices_collected,
-            "self._dices_rolled": self._dices_rolled,
+            "self._dice_collected": self._dice_collected,
+            "self._dice_rolled": self._dice_rolled,
             "self.roll_counter": self.roll_counter,
             "self.observation_space": self.observation_space,
             "self.action_space": self.action_space,
             "self._get_sum()": self._get_sum(),
-            "self._get_obs_dices()": self._get_obs_dices(),
+            "self._get_obs_dice()": self._get_obs_dice(),
             "self._get_obs_tiles()": self._get_obs_tiles(),
             "self.legal_move(action)": self.legal_move(action)
         }
@@ -93,14 +94,14 @@ class PickominoEnv(gym.Env):
         # IMPORTANT: Must call this first to seed the random number generator
         super().reset(seed=seed)
 
-        self._dices_collected = np.array([0, 0, 0, 0, 0, 0])
+        self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
         # TODO: PyCharm suggested resetting dices_rolled and remaining_dice here as well
 
         for i in range(self.num_dice):
-            self._dices_rolled[rand.randint(0, 5)] += 1
+            self._dice_rolled[rand.randint(0, 5)] += 1
 
         self.remaining_dice = self.num_dice
-        observation = self._get_obs_dices()
+        observation = self._get_obs_dice()
         info = self._get_info((0, 1))  # Arbitrary action in reset only for debugging
 
         return observation, info
@@ -126,28 +127,28 @@ class PickominoEnv(gym.Env):
         Returns:
             tuple: (observation, reward, terminated, truncated, info)
         """
-        # TODO: currently only the roll of the dices is implemented. The tile moving phase is not implemented yet.
+        # TODO: currently only the roll of the dice is implemented. The tile moving phase is not implemented yet.
         terminated, truncated = self.legal_move(action)
 
         if terminated or truncated:
-            self._dices_collected = np.array([0, 0, 0, 0, 0, 0])
-            self._dices_rolled = np.array([0, 0, 0, 0, 0, 0])
+            self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
+            self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
             self.roll_counter = 0
-            # TODO: PyCharm suggests resetting remaining_dices here.
+            # TODO: PyCharm suggests resetting remaining_dice here.
             # TODO: Check: if terminated or truncated should we not stop updating dice values completely??
 
-        self._dices_collected[action[0]] = self._dices_rolled[action[0]]
-        # Reduce the remaining number of dices by the number collected.
-        self.remaining_dice -= self._dices_collected[action[0]]
-        self._dices_rolled = np.array([0, 0, 0, 0, 0, 0])
+        self._dice_collected[action[0]] = self._dice_rolled[action[0]]
+        # Reduce the remaining number of dice by the number collected.
+        self.remaining_dice -= self._dice_collected[action[0]]
+        self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
 
         if action[1]:
             for i in range(self.remaining_dice):
-                self._dices_rolled[rand.randint(0, 5)] += 1
+                self._dice_rolled[rand.randint(0, 5)] += 1
 
         reward = self._get_sum()
 
-        observation = self._get_obs_dices()
+        observation = self._get_obs_dice()
 
         self.roll_counter += 1
         info = self._get_info(action)
@@ -167,7 +168,7 @@ if __name__ == "__main__":
         print("step", step, "    selection", selection)
         action = (selection, 1)
         observation, reward, terminated, truncated, info = env.step(action)
-        print(f"act: {action}, obs: {observation}, rew: {reward}, ter: {terminated}, tru: {truncated}")
+        print(f"act: {action}, obs(col, rol): {observation}, rew: {reward}, ter: {terminated}, tru: {truncated}")
         # for key, value in info.items():
         #     print(key, value)
         print("--------------------")
