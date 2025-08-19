@@ -113,6 +113,8 @@ class PickominoEnv(gym.Env):
 
         if action[1] == 0:
             truncated = True
+        # TODO: This is wrong! There is no limit to the number of rolls of the dice.
+        # Terminated should be when a misthrow occurs
         elif self.roll_counter == 3:
             terminated = True
 
@@ -183,4 +185,3 @@ if __name__ == "__main__":
         # for key, value in info.items():
         #     print(key, value)
         print("--------------------")
-
