@@ -117,7 +117,7 @@ class PickominoEnv(gym.Env):
 
         # self._dice_rolled = np.array([0, 2, 1, 4, 1, 0])
 
-        for i in range(self.num_dice):
+        for _ in range(self.num_dice):
             self._dice_rolled[rand.randint(0, 5)] += 1
 
         self.remaining_dice = self.num_dice
@@ -138,17 +138,24 @@ class PickominoEnv(gym.Env):
         # Dice already collected cannot be taken again.
         elif self.roll_counter >= 2:
             self.terminated = True
+            # TODO: Jarl: still think this is not right. It compares all combinations = 36 checks. But only 6 checks
+            # are needed. Consider:
+            # for index in range(len(self._dice_rolled)):
+            # #### if dice_rolled[index] > 0 and die_collected[index] == 0:
+            # #### ##### self.terminated = False
             for die_collected in self._dice_collected:
                 for die_rolled in self._dice_rolled:
                     if die_rolled > 0 and die_collected == 0:
                         self.terminated = False
-
+        # TODO: Jarl: think it should be ... and self._get_sum() < 21  <- strictly less than 21 NOT less than or equal
+        # as the 'smallest' tile is 21 and hence can be taken if the sum is equal (==) to 21
         if self.remaining_dice == 0 and self._get_sum() <= 21:
             self.terminated = True
 
         if self.remaining_dice == 0 and self._dice_collected[0] == 0:
             self.terminated = True
 
+            # TODO: Jarl: can this commented out code be deleted now?
             # terminated = True
             # for die in self._dice_rolled:
             #     if die not in self._dice_collected:
@@ -160,11 +167,7 @@ class PickominoEnv(gym.Env):
     def step_dice(self, action):
         """Execute one roll of the dice and picking or returning a tile.
 
-        Args:
-            action: The action to take: which dice to collect.
-
-        Returns:
-            tuple: (observation, reward, terminated, truncated, info)
+        :param: action: The action to take: which dice to collect.
         """
         self.terminated, self.truncated = self.legal_move(action)
 
@@ -181,7 +184,7 @@ class PickominoEnv(gym.Env):
                 max_dice = self.num_dice - np.sum(self._dice_collected)
                 dices_to_roll = min(self.remaining_dice, max_dice)
 
-                for i in range(dices_to_roll):
+                for _ in range(dices_to_roll):
                     self._dice_rolled[rand.randint(0, 5)] += 1
 
             self.roll_counter += 1
@@ -209,6 +212,9 @@ class PickominoEnv(gym.Env):
         reward = self._get_sum()
 
         return observation, reward, self.terminated, self.truncated, info
+
+
+# The next 18 lines, until 'print(*line)', were copied from Stack Overflow
 
 
 die_faces = [
@@ -244,7 +250,7 @@ def print_roll(observation, reward):
 
 
 if __name__ == "__main__":
-    NUMBER_OF_DICE = 8
+    NUMBER_OF_DICE: int = 8
     NUMBER_OF_PLAYERS = 2
     env = PickominoEnv(NUMBER_OF_PLAYERS)
     """Interactive test."""
@@ -263,8 +269,7 @@ if __name__ == "__main__":
         # print("step:", step, "    selection:", selection)
         if selection == -1:
             break
-        else:
-            if selection == 6:
-                selection = 0
-            action = (selection, 1)
+        if selection == 6:
+            selection = 0
+        action = (selection, 1)
         observation, reward, terminated, truncated, info = env.step(action)
