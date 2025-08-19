@@ -1,8 +1,9 @@
 """Pickomino game with gymnasium API."""
+
+import random as rand
 from typing import Optional
 import numpy as np
 import gymnasium as gym
-import random as rand
 
 
 class PickominoEnv(gym.Env):
@@ -12,12 +13,17 @@ class PickominoEnv(gym.Env):
         """Constructor."""
         self.num_dice = 8
         self.remaining_dice = self.num_dice
+        self.num_players = num_players
+        self.terminated = False
+        self.truncated = False
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
         self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
         self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
         self.roll_counter = 0
+        self.tile_table = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+
         self.observation_space = gym.spaces.Dict(
             {
                 "dice_collected": gym.spaces.Discrete(n=6),
@@ -77,7 +83,7 @@ class PickominoEnv(gym.Env):
             "self._get_sum()": self._get_sum(),
             "self._get_obs_dice()": self._get_obs_dice(),
             "self._get_obs_tiles()": self._get_obs_tiles(),
-            "self.legal_move(action)": self.legal_move(action)
+            "self.legal_move(action)": self.legal_move(action),
         }
         return return_value
 
@@ -95,6 +101,7 @@ class PickominoEnv(gym.Env):
         super().reset(seed=seed)
 
         self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
+        # self._dice_rolled = np.array([0, 2, 1, 4, 1, 0])
         # TODO: PyCharm suggested resetting dices_rolled and remaining_dice here as well
 
         for i in range(self.num_dice):
@@ -115,13 +122,21 @@ class PickominoEnv(gym.Env):
             truncated = True
         # TODO: This is wrong! There is no limit to the number of rolls of the dice.
         # Terminated should be when a misthrow occurs
-        elif self.roll_counter == 3:
+
+        # Dice already collected cannot be taken again.
+        elif self.roll_counter >= 2:
+            terminated = True
+            for die in self._dice_rolled:
+                if die not in self._dice_collected:
+                    terminated = False
+
+        if self._dice_collected[0] == 0 and self.remaining_dice == 0:
             terminated = True
 
         return terminated, truncated
 
-    def step(self, action):
-        """Execute one roll of the dices and picking or returning a tile.
+    def step_dice(self, action):
+        """Execute one roll of the dice and picking or returning a tile.
 
         Args:
             action: The action to take: which dice to collect.
@@ -130,34 +145,52 @@ class PickominoEnv(gym.Env):
             tuple: (observation, reward, terminated, truncated, info)
         """
         # TODO: currently only the roll of the dice is implemented. The tile moving phase is not implemented yet.
-        terminated, truncated = self.legal_move(action)
+        self.terminated, self.truncated = self.legal_move(action)
 
-        if terminated or truncated:
+        if self.terminated or self.truncated:
             self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
             self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
             self.roll_counter = 0
+            self.remaining_dice = 8
             # TODO: PyCharm suggests resetting remaining_dice here.
             # TODO: Check: if terminated or truncated should we not stop updating dice values completely??
+        else:
+            self._dice_collected[action[0]] = self._dice_rolled[action[0]]
+            # Reduce the remaining number of dice by the number collected.
+            self.remaining_dice -= self._dice_collected[action[0]]
+            self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
 
-        self._dice_collected[action[0]] = self._dice_rolled[action[0]]
-        # Reduce the remaining number of dice by the number collected.
-        self.remaining_dice -= self._dice_collected[action[0]]
-        self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
+            if action[1]:
+                max_dice = self.num_dice - np.sum(self._dice_collected)
+                dices_to_roll = min(self.remaining_dice, max_dice)
 
-        if action[1]:
-            max_dice = self.num_dice - np.sum(self._dice_collected)
-            dices_to_roll = min(self.remaining_dice, max_dice)
+                for i in range(dices_to_roll):
+                    self._dice_rolled[rand.randint(0, 5)] += 1
 
-            for i in range(dices_to_roll):
-                self._dice_rolled[rand.randint(0, 5)] += 1
+            self.roll_counter += 1
 
-        reward = self._get_sum()
+    def step_tiles(self):
+        dice_sum = self._get_sum()
+        tile_test = []
+        # Environment takes the highest tile on the table or from a player.
+        if dice_sum >= 21:
+            self.tile_table.remove(dice_sum)
+            tile_test.append(dice_sum)
+            print("Your tiles:", tile_test)
+            self.truncated = True
+        else:
+            self.truncated = False
+
+    def step(self, action):
+
+        self.step_dice(action)
+        self.step_tiles()
 
         observation = self._get_obs_dice()
-
-        self.roll_counter += 1
         info = self._get_info(action)
-        return observation, reward, terminated, truncated, info
+        reward = self._get_sum()
+
+        return observation, reward, self.terminated, self.truncated, info
 
 
 if __name__ == "__main__":
@@ -169,7 +202,9 @@ if __name__ == "__main__":
     print("--------------------")
 
     taken = []
+    print(observation)
     for step in range(6):
+
         selection = int(np.argmax(observation[1]))
 
         # Do not select the same die face value again
@@ -182,6 +217,6 @@ if __name__ == "__main__":
         action = (selection, 1)
         observation, reward, terminated, truncated, info = env.step(action)
         print(f"act: {action}, obs(col, rol): {observation}, rew: {reward}, ter: {terminated}, tru: {truncated}")
-        # for key, value in info.items():
-        #     print(key, value)
+        for key, value in info.items():
+            print(key, value)
         print("--------------------")
