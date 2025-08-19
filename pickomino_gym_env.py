@@ -100,8 +100,15 @@ class PickominoEnv(gym.Env):
         """
         # IMPORTANT: Must call this first to seed the random number generator
         super().reset(seed=seed)
-
         self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
+        self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
+        self.roll_counter = 0
+        self.remaining_dice = 8
+        self.player_tiles = []
+        self.tile_table = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+        self.terminated = False
+        self.truncated = False
+
         # self._dice_rolled = np.array([0, 2, 1, 4, 1, 0])
         # TODO: PyCharm suggested resetting dices_rolled and remaining_dice here as well
 
@@ -113,6 +120,12 @@ class PickominoEnv(gym.Env):
         info = self._get_info((0, 1))  # Arbitrary action in reset only for debugging
 
         return observation, info
+
+    def soft_reset(self):
+        self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
+        self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
+        self.roll_counter = 0
+        self.remaining_dice = 8
 
     def legal_move(self, action):
         """Check if action is allowed."""
@@ -126,10 +139,18 @@ class PickominoEnv(gym.Env):
 
         # Dice already collected cannot be taken again.
         elif self.roll_counter >= 2:
-            terminated = True
-            for die in self._dice_rolled:
-                if die not in self._dice_collected:
-                    terminated = False
+            self.terminated = True
+            for die_collected in self._dice_collected:
+                for die_rolled in self._dice_rolled:
+
+                    if die_rolled > 0 and die_collected == 0:
+                        self.terminated = False
+
+            # terminated = True
+            # for die in self._dice_rolled:
+            #     if die not in self._dice_collected:
+            #         terminated = False
+            #         break
 
         if self._dice_collected[0] == 0 and self.remaining_dice == 0:
             terminated = True
@@ -149,10 +170,7 @@ class PickominoEnv(gym.Env):
         self.terminated, self.truncated = self.legal_move(action)
 
         if self.terminated or self.truncated:
-            self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
-            self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
-            self.roll_counter = 0
-            self.remaining_dice = 8
+            self.soft_reset()
             # TODO: PyCharm suggests resetting remaining_dice here.
             # TODO: Check: if terminated or truncated should we not stop updating dice values completely??
         else:
@@ -178,6 +196,7 @@ class PickominoEnv(gym.Env):
             self.player_tiles.append(dice_sum)
             print("Your tiles:", self.player_tiles)
             self.truncated = True
+            self.soft_reset()
         else:
             self.truncated = False
 
