@@ -242,13 +242,13 @@ def print_roll(observation, reward) -> None:
     print_dice([1, 2, 3, 4, 5, 6])
     # Print line of collected dice.
     for collected in range(len(observation[0]) - 1):
-        print(f"   {observation[0][collected+1]}    ", end="")
+        print(f"   {observation[0][collected + 1]}    ", end="")
     print(f"   {observation[0][0]}    ", end="")
     # Print sum at the end of the collected dice line
     print(f" collected   sum = {reward}")
     # Print line of rolled dice.
     for rolled in range(len(observation[1]) - 1):
-        print(f"   {observation[1][rolled+1]}    ", end="")
+        print(f"   {observation[1][rolled + 1]}    ", end="")
     print(f"   {observation[1][0]}    ", end="")
     print(" rolled")
     print("----------------------------------------------------------")
