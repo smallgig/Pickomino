@@ -9,21 +9,23 @@ import gymnasium as gym
 class PickominoEnv(gym.Env):
     """The environment class."""
 
-    def __init__(self, num_players):
+    def __init__(self, num_players: int) -> None:
         """Constructor."""
-        self.num_dice = 8
-        self.remaining_dice = self.num_dice
-        self.num_players = num_players
-        self.terminated = False
-        self.truncated = False
-        self.player_tiles = []
+        self.num_dice: int = 8
+        self.remaining_dice: int = self.num_dice
+        self.num_players: int = num_players
+        self.terminated: bool = False
+        self.truncated: bool = False
+        self.player_tiles: list[int] = []
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
+        # TODO: Jarl: do they have to be np.arrays? What about Python lists for simplicity? Are we using np array
+        # compare?
         self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
         self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
-        self.roll_counter = 0
-        self.tile_table = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+        self.roll_counter: int = 0
+        self.tile_table: list[int] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
 
         self.observation_space = gym.spaces.Dict(
             {
@@ -36,7 +38,7 @@ class PickominoEnv(gym.Env):
         # Action space is a tuple. First action: which dice you take. Second action: roll again or not.
         self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(6), gym.spaces.Discrete(2)))
 
-    def _get_sum(self):
+    def _get_sum(self) -> int:
         """Return the sum of the collected dices."""
         return_value = 0
 
@@ -49,7 +51,7 @@ class PickominoEnv(gym.Env):
 
         return return_value
 
-    def _get_obs_dice(self):
+    def _get_obs_dice(self):  # -> tuple[list[int], list[int]] or npt arrays if we keep them
         """Convert internal state to observation format.
 
         Returns:
@@ -88,7 +90,7 @@ class PickominoEnv(gym.Env):
         }
         return return_value
 
-    def _soft_reset(self):
+    def _soft_reset(self) -> None:
         self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
         self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
         self.roll_counter = 0
@@ -126,10 +128,10 @@ class PickominoEnv(gym.Env):
 
         return observation, info
 
-    def legal_move(self, action):
+    def legal_move(self, action: tuple[int, int]) -> tuple[bool, bool]:
         """Check if action is allowed."""
-        terminated = False
-        truncated = False
+        terminated: bool = False
+        truncated: bool = False
 
         if action[1] == 0:
             truncated = True
@@ -164,7 +166,7 @@ class PickominoEnv(gym.Env):
 
         return terminated, truncated
 
-    def step_dice(self, action):
+    def step_dice(self, action: tuple[int, int]) -> None:
         """Execute one roll of the dice and picking or returning a tile.
 
         :param: action: The action to take: which dice to collect.
@@ -181,17 +183,17 @@ class PickominoEnv(gym.Env):
             self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
 
             if action[1]:
-                max_dice = self.num_dice - np.sum(self._dice_collected)
-                dices_to_roll = min(self.remaining_dice, max_dice)
+                max_dice: int = self.num_dice - np.sum(self._dice_collected)
+                dices_to_roll: int = min(self.remaining_dice, max_dice)
 
                 for _ in range(dices_to_roll):
                     self._dice_rolled[rand.randint(0, 5)] += 1
 
             self.roll_counter += 1
 
-    def step_tiles(self):
+    def step_tiles(self) -> None:
         """Internal step for picking or returning a tile."""
-        dice_sum = self._get_sum()
+        dice_sum: int = self._get_sum()
         # Environment takes the highest tile on the table or from a player.
         if dice_sum >= 21:
             self.tile_table.remove(dice_sum)
@@ -202,14 +204,14 @@ class PickominoEnv(gym.Env):
         else:
             self.truncated = False
 
-    def step(self, action):
+    def step(self, action: tuple[int, int]):
 
         self.step_dice(action)
         self.step_tiles()
 
         observation = self._get_obs_dice()
         info = self._get_info(action)
-        reward = self._get_sum()
+        reward: int = self._get_sum()
 
         return observation, reward, self.terminated, self.truncated, info
 
@@ -217,7 +219,7 @@ class PickominoEnv(gym.Env):
 # The next 18 lines, until 'print(*line)', were copied from Stack Overflow
 
 
-die_faces = [
+die_faces: list[str] = [
     "",  # index = 0 doesn't have a face
     "[     ]\n[  0  ]\n[     ]",  # index 1
     "[0    ]\n[     ]\n[    0]",  # index 2
@@ -228,22 +230,25 @@ die_faces = [
 ]
 
 
-def print_dice(values: list[int]):
+def print_dice(values: list[int]) -> None:
     """Print one dice."""
     faces = [die_faces[v].splitlines() for v in values]
     for line in zip(*faces):
         print(*line)
 
 
-def print_roll(observation, reward):
+def print_roll(observation, reward) -> None:
     """Print one roll."""
     print_dice([1, 2, 3, 4, 5, 6])
-    for i in range(len(observation[0]) - 1):
-        print(f"   {observation[0][i+1]}    ", end="")
+    # Print line of collected dice.
+    for collected in range(len(observation[0]) - 1):
+        print(f"   {observation[0][collected+1]}    ", end="")
     print(f"   {observation[0][0]}    ", end="")
+    # Print sum at the end of the collected dice line
     print(f" collected   sum = {reward}")
-    for i in range(len(observation[1]) - 1):
-        print(f"   {observation[1][i+1]}    ", end="")
+    # Print line of rolled dice.
+    for rolled in range(len(observation[1]) - 1):
+        print(f"   {observation[1][rolled+1]}    ", end="")
     print(f"   {observation[1][0]}    ", end="")
     print(" rolled")
     print("----------------------------------------------------------")
@@ -251,11 +256,11 @@ def print_roll(observation, reward):
 
 if __name__ == "__main__":
     NUMBER_OF_DICE: int = 8
-    NUMBER_OF_PLAYERS = 2
+    NUMBER_OF_PLAYERS: int = 2
     env = PickominoEnv(NUMBER_OF_PLAYERS)
     """Interactive test."""
     observation, info = env.reset()
-    reward = 0
+    reward: int = 0
     print("Reset")
     print()
     for step in range(6):
@@ -265,11 +270,11 @@ if __name__ == "__main__":
         # for key, value in info.items():
         #    print(key, value)
         # print("--------------------")
-        selection = int(input("Which dice do you want to collect? (1..5 or worm =6) or -1 to stop: "))
+        selection: int = int(input("Which dice do you want to collect? (1..5 or worm =6) or -1 to stop: "))
         # print("step:", step, "    selection:", selection)
         if selection == -1:
             break
         if selection == 6:
-            selection = 0
-        action = (selection, 1)
+            selection = 0  # Collecting a worm is the action (0, 1).
+        action: tuple[int, int] = (selection, 1)
         observation, reward, terminated, truncated, info = env.step(action)
