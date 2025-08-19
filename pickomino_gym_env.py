@@ -166,12 +166,21 @@ if __name__ == "__main__":
         print(key, value)
     print("--------------------")
 
+    taken = []
     for step in range(6):
         selection = int(np.argmax(observation[1]))
-        print("step", step, "    selection", selection)
+
+        # Do not select the same die face value again
+        if selection in taken:
+            observation[1][selection] = 0
+            selection = int(np.argmax(observation[1]))
+
+        taken.append(selection)
+        print("step:", step, "    selection:", selection, "   taken:", taken)
         action = (selection, 1)
         observation, reward, terminated, truncated, info = env.step(action)
         print(f"act: {action}, obs(col, rol): {observation}, rew: {reward}, ter: {terminated}, tru: {truncated}")
         # for key, value in info.items():
         #     print(key, value)
         print("--------------------")
+
