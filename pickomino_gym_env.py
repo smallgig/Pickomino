@@ -187,6 +187,7 @@ class PickominoEnv(gym.Env):
             self.roll_counter += 1
 
     def step_tiles(self):
+        """Internal step for picking or returning a tile."""
         dice_sum = self._get_sum()
         # Environment takes the highest tile on the table or from a player.
         if dice_sum >= 21:
@@ -208,3 +209,62 @@ class PickominoEnv(gym.Env):
         reward = self._get_sum()
 
         return observation, reward, self.terminated, self.truncated, info
+
+
+die_faces = [
+    "",  # index = 0 doesn't have a face
+    "[     ]\n[  0  ]\n[     ]",  # index 1
+    "[0    ]\n[     ]\n[    0]",  # index 2
+    "[0    ]\n[  0  ]\n[    0]",  # index 3
+    "[0   0]\n[     ]\n[0   0]",  # index 4
+    "[0   0]\n[  0  ]\n[0   0]",  # index 5
+    "[0   0]\n[0   0]\n[0   0]",  # index 6
+]
+
+
+def print_dice(values: list[int]):
+    """Print one dice."""
+    faces = [die_faces[v].splitlines() for v in values]
+    for line in zip(*faces):
+        print(*line)
+
+
+def print_roll(observation, reward):
+    """Print one roll."""
+    print_dice([1, 2, 3, 4, 5, 6])
+    for i in range(len(observation[0]) - 1):
+        print(f"   {observation[0][i+1]}    ", end="")
+    print(f"   {observation[0][0]}    ", end="")
+    print(f" collected   sum = {reward}")
+    for i in range(len(observation[1]) - 1):
+        print(f"   {observation[1][i+1]}    ", end="")
+    print(f"   {observation[1][0]}    ", end="")
+    print(" rolled")
+    print("----------------------------------------------------------")
+
+
+if __name__ == "__main__":
+    NUMBER_OF_DICE = 8
+    NUMBER_OF_PLAYERS = 2
+    env = PickominoEnv(NUMBER_OF_PLAYERS)
+    """Interactive test."""
+    observation, info = env.reset()
+    reward = 0
+    print("Reset")
+    print()
+    for step in range(6):
+        print_roll(observation, reward)
+        # action = (0, 1)  # dummy
+        # print(f"act: {action}")
+        # for key, value in info.items():
+        #    print(key, value)
+        # print("--------------------")
+        selection = int(input("Which dice do you want to collect? (1..5 or worm =6) or -1 to stop: "))
+        # print("step:", step, "    selection:", selection)
+        if selection == -1:
+            break
+        else:
+            if selection == 6:
+                selection = 0
+            action = (selection, 1)
+        observation, reward, terminated, truncated, info = env.step(action)

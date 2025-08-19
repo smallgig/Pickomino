@@ -1,5 +1,4 @@
-from torch.ao.quantization.backend_config.onednn import observation_type
-
+"""Test Pickomino."""
 import pickomino_gym_env
 import numpy as np
 
@@ -33,7 +32,14 @@ def test_multiple_actions():
             observation, reward, terminated, truncated, info = env.step(selection)
 
     assert
+def test__init__():
+    """Test init function."""
 
 
-env = pickomino_gym_env.PickominoEnv(2)
-test_basics()
+def run_all_test():
+    """Run all tests."""
+    test__init__()
+
+if __name__ == "__main__":
+    env = pickomino_gym_env.PickominoEnv(2)
+    run_all_test()
