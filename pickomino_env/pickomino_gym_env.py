@@ -257,7 +257,6 @@ class PickominoEnv(gym.Env):
         Mapping:
         21–24 -> 1, 25–28 -> 2, 29–32 -> 3, 33–36 -> 4
         """
-
         if not 21 <= moved_key <= 36:
             raise ValueError("dice_sum muss zwischen 21 und 36 liegen.")
         return (moved_key - 21) // 4 + 1
@@ -281,6 +280,8 @@ class PickominoEnv(gym.Env):
         return return_value
 
     def step(self, action: tuple[int, int]):
+        # TODO Ob gerollt wird oder nicht sollte von außen gewählt werden, aktuell nach jedem genommenen Würfel automatisch roll
+        # TODO Zweiten Spieler hinzufügen damit Agent lernen kann (1 Spieler unrealistisch, nicht gut für Training?)
         reward = 0
         self._step_dice(action)  # legal_move in step_dice
         # if self._remaining_dice == 0 or action[self._action_index_roll] == self._action_stop:
