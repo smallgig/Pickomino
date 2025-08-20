@@ -11,12 +11,13 @@ class PickominoEnv(gym.Env):
 
     def __init__(self, num_players: int) -> None:
         """Constructor."""
+        self.action_dice = 0
+        self.action_roll = 1
         self.num_dice: int = 8
         self.remaining_dice: int = self.num_dice
-        self.num_players: int = num_players
+        self.num_players: int = 2
         self.terminated: bool = False
         self.truncated: bool = False
-        self.player_tiles: list[int] = []
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
@@ -24,15 +25,16 @@ class PickominoEnv(gym.Env):
         self._dice_rolled: list[int] = [0, 0, 0, 0, 0, 0]
         self.roll_counter: int = 0
         self.tile_table: list[int] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
-        self.player1: list[int] = []
-        self.player2: list[int] = []
+        self.you: list[int] = []
+        self.computer: list[int] = []
 
         self.observation_space = gym.spaces.Dict(
             {
                 "dice_collected": gym.spaces.Discrete(n=6),
                 "dice_rolled": gym.spaces.Discrete(n=6),
-                "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
-                # "tiles": gym.spaces.Discrete(n=16, start=21) # Tiles that can be taken.
+                # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
+                "tiles_table": gym.spaces.Discrete(n=16, start=21),  # Tiles that can be taken.
+                "tiles_player": gym.spaces.Discrete(n=16),
             }
         )
         # Action space is a tuple. First action: which dice you take. Second action: roll again or not.
@@ -65,10 +67,7 @@ class PickominoEnv(gym.Env):
         Returns:
             dict: Tiles distribution
         """
-        # self.player1.append()
-        # self.player2.append()
-        # TODO: implement correct return value
-        return self.observation_space
+        return (self.tile_table, self.you)
 
     def _get_info(self, action):
         """Compute auxiliary information for debugging.
@@ -114,7 +113,6 @@ class PickominoEnv(gym.Env):
         self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
         self.roll_counter = 0
         self.remaining_dice = 8
-        self.player_tiles = []
         self.tile_table = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
         self.terminated = False
         self.truncated = False
@@ -130,7 +128,7 @@ class PickominoEnv(gym.Env):
 
         return observation, info
 
-    def legal_move(self, action: tuple[int, int]) -> tuple[bool, bool]:
+    def _legal_move(self, action: tuple[int, int]) -> tuple[bool, bool]:
         """Check if action is allowed."""
         terminated: bool = False
         truncated: bool = False
@@ -159,48 +157,53 @@ class PickominoEnv(gym.Env):
 
         return terminated, truncated
 
-    def step_dice(self, action: tuple[int, int]) -> None:
+    def _step_dice(self, action: tuple[int, int]) -> None:
         """Execute one roll of the dice and picking or returning a tile.
 
         :param: action: The action to take: which dice to collect.
         """
-        self.terminated, self.truncated = self.legal_move(action)
+        self.terminated, self.truncated = self._legal_move(action)
 
         if self.terminated or self.truncated:
             self._soft_reset()
         else:
-            self._dice_collected[action[0]] = self._dice_rolled[action[0]]
+            self._dice_collected[action[self.action_dice]] = self._dice_rolled[action[self.action_dice]]
             # Reduce the remaining number of dice by the number collected.
-            self.remaining_dice -= self._dice_collected[action[0]]
-            self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
+            self.remaining_dice -= self._dice_collected[action[self.action_dice]]
+            self._dice_rolled: list[int] = [0, 0, 0, 0, 0, 0]
 
-            if action[1]:
+            if action[self.action_roll] == 0:
                 max_dice: int = self.num_dice - np.sum(self._dice_collected)
                 dices_to_roll: int = min(self.remaining_dice, max_dice)
-
                 for _ in range(dices_to_roll):
                     self._dice_rolled[rand.randint(0, 5)] += 1
+                self.roll_counter += 1
+            else:
+                # dice_sum = sum(self._dice_collected)
+                # if dice_sum >= 21 and action[self.action_roll] == 1 and self._dice_collected[0]:
+                #     self.tile_table.remove(dice_sum)
+                #     self.you.append(dice_sum)
+                self.truncated = True
 
-            self.roll_counter += 1
-
-    def step_tiles(self) -> None:
+    def _step_tiles(self) -> None:
         """Internal step for picking or returning a tile."""
         dice_sum: int = self._get_sum()
         # Environment takes the highest tile on the table or from a player.
-        if dice_sum >= 21:
+        if dice_sum >= 21 and self._dice_collected[0]:
             self.tile_table.remove(dice_sum)
-            self.player_tiles.append(dice_sum)
-            print("Your tiles:", self.player_tiles)
+            self.computer.append(dice_sum)
+            print("Your tiles:", self.computer)
             self.truncated = True
             self._soft_reset()
         else:
             self.truncated = False
 
     def step(self, action: tuple[int, int]):
-        self.step_dice(action)
-        self.step_tiles()
 
-        observation = self._get_obs_dice()
+        self._step_dice(action)
+        self._step_tiles()
+
+        observation = self._get_obs_tiles()
         info = self._get_info(action)
         reward: int = self._get_sum()
 
