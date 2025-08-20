@@ -1,0 +1,12 @@
+Noch zu erledigen:
+
+- Auswahl ob Tile genommen wird oder nicht(Env)
+- Nach dem ein Tile genommen wurde, erneut rollen
+- Gains nach einem Spiel (max. 50)
+- register gym 
+- automatisierter Test
+- Typing 
+- Players
+
+- rewards nach jedem Spielzug (Anzahl der Würfel)
+- custom reward von Agent
