@@ -1,2 +1,2 @@
 # Pickomino
-Implements the game Pickomino as an Environment with a standard API for Reinforcement Learning.
+Implements the game [Pickomino](https://www.maartenpoirot.com/pickomino/) as an Environment with a standard API for Reinforcement Learning.
