@@ -4,6 +4,7 @@ import random as rand
 from typing import Optional
 import numpy as np
 import gymnasium as gym
+from openpyxl.styles.builtins import total
 
 
 class PickominoEnv(gym.Env):
@@ -106,7 +107,7 @@ class PickominoEnv(gym.Env):
             "self.roll_counter": self._roll_counter,
             "self.observation_space": self.observation_space,
             "self.action_space": self.action_space,
-            "self._get_sum()": self._get_dice_sum(),
+            "self._sum": self._get_dice_sum(),
             "self._get_obs_dice()": self._get_obs_dice(),
             "self._get_obs_tiles()": self._get_obs_tiles(),
             # "self.legal_move(action)": self._legal_move(action),
@@ -235,6 +236,7 @@ class PickominoEnv(gym.Env):
         if self._legal_move(action):
             self._dice_collected[action[self._action_index_dice]] = self._dice_rolled[action[self._action_index_dice]]
         else:
+            self._terminated = False
             return
         # Reduce the remaining number of dice by the number collected.
         self._remaining_dice -= self._dice_collected[action[self._action_index_dice]]
@@ -339,15 +341,16 @@ def print_roll(observation, total) -> None:
 if __name__ == "__main__":
     NUMBER_OF_DICE: int = 8
     NUMBER_OF_PLAYERS: int = 2
+    total: int = 0
     env = PickominoEnv(NUMBER_OF_PLAYERS)
     """Interactive test."""
     observation, info = env.reset()
     for key, value in info.items():
         print(key, value)
-    total = info["self._get_sum()"]
+
     dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
     print("Reset")
-    for step in range(6):
+    for step in range(10):
         print_roll(dices_rolled_coll, total)
         # action = (0, 1)  # dummy
         # print(f"act: {action}")
@@ -363,4 +366,5 @@ if __name__ == "__main__":
         observation, reward, terminated, truncated, info = env.step(action)
         dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
         player_tiles = observation["tiles_player"]
+        total = info["self._sum"]
         print(player_tiles)
