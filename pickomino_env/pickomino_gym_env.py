@@ -232,34 +232,53 @@ class PickominoEnv(gym.Env):
         return (moved_key - 21) // 4 + 1
 
     def _step_tiles(self) -> int:
-        """Internal step for picking or returning a tile."""
-        return_value = 0
+        """Pick or return a tile.
+
+        Internal sub-step for picking or returning a tile after finishing rolling dice.
+
+        :return: Value of moving the tile [-4 ... +4]
+        """
+        return_value = 0  # No tile is moved.
         dice_sum: int = self._get_dice_sum()
+        print("PRINT DEBUGGING - dice_sum: ", dice_sum)
 
         # Environment takes the highest tile on the table.
-        if dice_sum >= 21 and self._tile_table[dice_sum]:
-            self.you[dice_sum] = self._tile_table[dice_sum]
-            self._tile_table[dice_sum] = False
+        # Only pick a tile if it is on the table.
+        if self._tile_table[dice_sum]:
+            self.you.append(dice_sum)  # Add the tile to the player.
+            self._tile_table[dice_sum] = False  # Mark the tile as no longer on the table.
             print("Your tiles:", self.you)
-            return_value = self.you[dice_sum]
+            return_value = self.get_worms(dice_sum)
             self._truncated = True
             self._soft_reset()
-        # Environment takes no Tile
+        # Tile is not available on the table
         else:
-            # Empty nothing happens, reward stays zero
-            if not self.you:
+            # Pick the highest of the tiles smaller than the unavailable tile
+            if False:  # TODO
                 pass
-            # You have at least one Tile and put it back to the Table
+            # Also no smaller tiles available -> have to return players showing tile if there is one.
             else:
-                moved_key = self.you.pop()
-                self._tile_table[moved_key] = True
-                return_value = -self.get_worms(moved_key)
-                # Moved Tile is highest
-                if moved_key == max(self._tile_table):
-                    pass
-                # Tile not available to taken for the rest of the Game
-                else:
-                    self._tile_table[moved_key] = False
+                if self.you:
+                    tile_to_return: int = self.you.pop()  # Remove the tile from the player.
+                    self._tile_table[tile_to_return] = True  # Return the tile to the table.
+                    return_value = -self.get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
+
+            # TODO: remove old stuff
+            # # Empty nothing happens, reward stays zero
+            # if not self.you:
+            #     pass
+            # # You have at least one Tile and put it back to the Table
+            # else:
+            #     moved_key = self.you.pop()
+            #     self._tile_table[moved_key] = True
+            #     return_value = -self.get_worms(moved_key)
+            #     # Moved Tile is highest
+            #     if moved_key == max(self._tile_table):
+            #         pass
+            #     # Tile not available to taken for the rest of the Game
+            #     else:
+            #         self._tile_table[moved_key] = False
+
         return return_value
 
     def step(self, action: tuple[int, int]):
@@ -323,14 +342,15 @@ def print_roll(observation, total) -> None:
 
 
 if __name__ == "__main__":
-    NUMBER_OF_DICE: int = 8
-    NUMBER_OF_PLAYERS: int = 2
-    env = PickominoEnv()
     """Interactive test."""
+    # TODO: not yet used.
+    # NUMBER_OF_DICE: int = 8
+    # NUMBER_OF_PLAYERS: int = 2
+    env = PickominoEnv()
     observation, info = env.reset()
-    for key, value in info.items():
-        print(key, value)
-    total = info["self._get_sum()"]
+    # for key, value in info.items():
+    #     print(key, value)
+    total: int = info["self._get_sum()"]
     dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
     print("Reset")
     for step in range(6):
@@ -339,14 +359,14 @@ if __name__ == "__main__":
         # print(f"act: {action}")
 
         # print("--------------------")
-        selection: int = int(input("Which dice do you want to collect? (1..5 or worm =6) or -1 to stop: "))
+        selection: int = int(input("Which dice do you want to collect? (1..5 or worm =6): "))
+        stop: int = int(input("Keep rolling? (0 = ROLL,  1 = STOP: "))
         # print("step:", step, "    selection:", selection)
-        if selection == -1:
-            break
         if selection == 6:
-            selection = 0  # Collecting a worm is the action (0, 1).
-        action: tuple[int, int] = (selection, 0)
+            selection = 0  # Collecting a worm internally has index 0.
+        action: tuple[int, int] = (selection, stop)
         observation, reward, terminated, truncated, info = env.step(action)
         dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
+        total: int = info["self._get_sum()"]
         player_tiles = observation["tiles_player"]
-        print(player_tiles)
+        print("player_tiles: ", player_tiles)
