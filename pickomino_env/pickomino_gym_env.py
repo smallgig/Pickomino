@@ -254,8 +254,18 @@ class PickominoEnv(gym.Env):
         # Tile is not available on the table
         else:
             # Pick the highest of the tiles smaller than the unavailable tile
-            if False:  # TODO
-                pass
+            # Find the highest tile smaller than the dice sum.
+            highest = 0
+            for tile in range(21, dice_sum):
+                if self._tile_table[tile]:
+                    highest = tile
+            if highest:  # Found the highest tile to pick from the table.
+                self.you.append(highest)  # Add the tile to the player.
+                self._tile_table[highest] = False  # Mark the tile as no longer on the table.
+                print("Your tiles:", self.you)
+                return_value = self.get_worms(highest)
+                self._truncated = True
+                self._soft_reset()
             # Also no smaller tiles available -> have to return players showing tile if there is one.
             else:
                 if self.you:
