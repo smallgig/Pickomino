@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-pickomino_env/__init__.py
-pickomino_env/pickomino_gym_env.py
-pickomino_env.egg-info/PKG-INFO
-pickomino_env.egg-info/SOURCES.txt
-pickomino_env.egg-info/dependency_links.txt
-pickomino_env.egg-info/requires.txt
-pickomino_env.egg-info/top_level.txt

@@ -32,6 +32,7 @@ def test_multiple_actions():
             observation, reward, terminated, truncated, info = env.step(selection)
 
     assert
+
 def test__init__():
     """Test init function."""
 
