@@ -21,8 +21,8 @@ class PickominoEnv(gym.Env):
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
-        self._dice_collected: list[int] = [0, 0, 0, 0, 0, 0]
-        self._dice_rolled: list[int] = [0, 0, 0, 0, 0, 0]
+        self._dice_collected: list[int] = [0, 0, 0, 0, 0, 0] # gesammelte Würfel  bis zu 8 pro Seite
+        self._dice_rolled: list[int] = [0, 0, 0, 0, 0, 0] # letzer Wurf
         self.roll_counter: int = 0
         self.tile_table = {
             21: 1,
@@ -46,10 +46,11 @@ class PickominoEnv(gym.Env):
 
         self.observation_space = gym.spaces.Dict(
             {
-                "dice_collected": gym.spaces.Box(low=0, high=6, shape=(6,), dtype=np.int64),
+                "dice_collected": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64), # 6 * 8
                 "dice_rolled": gym.spaces.Box(low=0, high=6, shape=(6,), dtype=np.int64),
+	              # "available_tiles": gym.spaces.Box(low=0, high=1, shape=(37,), dtype=np.int64),
                 "tiles_table": gym.spaces.Dict(
-                    {i: gym.spaces.Discrete(5) for i in range(21, 37)}
+                    {i: gym.spaces.Discrete(5) for i in range(21, 37)} # Wert auf 0/1 setzen wenn genommen
                 ),
                 "tiles_player": gym.spaces.Dict(
                     {i: gym.spaces.Discrete(5) for i in range(21, 37)}
