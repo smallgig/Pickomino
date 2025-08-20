@@ -4,7 +4,6 @@ import random as rand
 from typing import Optional
 import numpy as np
 import gymnasium as gym
-from prompt_toolkit.key_binding.bindings.named_commands import self_insert
 
 
 class PickominoEnv(gym.Env):
