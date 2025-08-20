@@ -20,12 +20,12 @@ class PickominoEnv(gym.Env):
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
-        # TODO: Jarl: do they have to be np.arrays? What about Python lists for simplicity? Are we using np array
-        # compare?
-        self._dice_collected = np.array([0, 0, 0, 0, 0, 0])
-        self._dice_rolled = np.array([0, 0, 0, 0, 0, 0])
+        self._dice_collected: list[int] = [0, 0, 0, 0, 0, 0]
+        self._dice_rolled: list[int] = [0, 0, 0, 0, 0, 0]
         self.roll_counter: int = 0
         self.tile_table: list[int] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+        self.player1: list[int] = []
+        self.player2: list[int] = []
 
         self.observation_space = gym.spaces.Dict(
             {
@@ -65,6 +65,8 @@ class PickominoEnv(gym.Env):
         Returns:
             dict: Tiles distribution
         """
+        # self.player1.append()
+        # self.player2.append()
         # TODO: implement correct return value
         return self.observation_space
 
@@ -140,29 +142,20 @@ class PickominoEnv(gym.Env):
         # Dice already collected cannot be taken again.
         elif self.roll_counter >= 2:
             self.terminated = True
-            # TODO: Jarl: still think this is not right. It compares all combinations = 36 checks. But only 6 checks
-            # are needed. Consider:
-            # for index in range(len(self._dice_rolled)):
-            # #### if dice_rolled[index] > 0 and die_collected[index] == 0:
-            # #### ##### self.terminated = False
-            for die_collected in self._dice_collected:
-                for die_rolled in self._dice_rolled:
-                    if die_rolled > 0 and die_collected == 0:
-                        self.terminated = False
-        # TODO: Jarl: think it should be ... and self._get_sum() < 21  <- strictly less than 21 NOT less than or equal
-        # as the 'smallest' tile is 21 and hence can be taken if the sum is equal (==) to 21
-        if self.remaining_dice == 0 and self._get_sum() <= 21:
+            for index in range(len(self._dice_rolled)):
+                if self._dice_rolled[index] > 0 and self._dice_collected[index] == 0:
+                    self.terminated = False
+
+            # for die_collected in self._dice_collected:
+            #     for die_rolled in self._dice_rolled:
+            #         if die_rolled > 0 and die_collected == 0:
+            #             self.terminated = False
+
+        if self.remaining_dice == 0 and self._get_sum() < 21:
             self.terminated = True
 
         if self.remaining_dice == 0 and self._dice_collected[0] == 0:
             self.terminated = True
-
-            # TODO: Jarl: can this commented out code be deleted now?
-            # terminated = True
-            # for die in self._dice_rolled:
-            #     if die not in self._dice_collected:
-            #         terminated = False
-            #         break
 
         return terminated, truncated
 
@@ -175,7 +168,6 @@ class PickominoEnv(gym.Env):
 
         if self.terminated or self.truncated:
             self._soft_reset()
-            # TODO: Check: if terminated or truncated should we not stop updating dice values completely??
         else:
             self._dice_collected[action[0]] = self._dice_rolled[action[0]]
             # Reduce the remaining number of dice by the number collected.
@@ -205,7 +197,6 @@ class PickominoEnv(gym.Env):
             self.truncated = False
 
     def step(self, action: tuple[int, int]):
-
         self.step_dice(action)
         self.step_tiles()
 
@@ -267,8 +258,8 @@ if __name__ == "__main__":
         print_roll(observation, reward)
         # action = (0, 1)  # dummy
         # print(f"act: {action}")
-        # for key, value in info.items():
-        #    print(key, value)
+        for key, value in info.items():
+            print(key, value)
         # print("--------------------")
         selection: int = int(input("Which dice do you want to collect? (1..5 or worm =6) or -1 to stop: "))
         # print("step:", step, "    selection:", selection)
