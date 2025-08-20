@@ -202,10 +202,11 @@ class PickominoEnv(gym.Env):
         :param: action: The action to take: which dice to collect.
         """
         self._dice_collected[action[self.action_index_dice]] = self._dice_rolled[action[self.action_index_dice]]
+        self._dice_rolled.remove(self._dice_rolled[action[self.action_index_dice]])
+        self._legal_move(action)  # Check before reset and after removing the collected dice
         # Reduce the remaining number of dice by the number collected.
         self.remaining_dice -= self._dice_collected[action[self.action_index_dice]]
         self._dice_rolled: list[int] = [0, 0, 0, 0, 0, 0]
-        self._legal_move(action)
 
         if self.terminated or self.truncated:
             return
