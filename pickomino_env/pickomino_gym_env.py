@@ -46,11 +46,14 @@ class PickominoEnv(gym.Env):
 
         self.observation_space = gym.spaces.Dict(
             {
-                "dice_collected": gym.spaces.Discrete(n=6),
-                "dice_rolled": gym.spaces.Discrete(n=6),
-                # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
-                "tiles_table": gym.spaces.Discrete(n=16, start=21),  # Tiles that can be taken.
-                "tiles_player": gym.spaces.Discrete(n=16),
+                "dice_collected": gym.spaces.Box(low=0, high=6, shape=(6,), dtype=np.int64),
+                "dice_rolled": gym.spaces.Box(low=0, high=6, shape=(6,), dtype=np.int64),
+                "tiles_table": gym.spaces.Dict(
+                    {i: gym.spaces.Discrete(5) for i in range(21, 37)}
+                ),
+                "tiles_player": gym.spaces.Dict(
+                    {i: gym.spaces.Discrete(5) for i in range(21, 37)}
+                ),
             }
         )
         # Action space is a tuple. First action: which dice you take. Second action: roll again or not.
@@ -152,8 +155,8 @@ class PickominoEnv(gym.Env):
         self.terminated = False
         self.truncated = False
         return_obs = {
-            "dice_collected": self._dice_collected,
-            "dice_rolled": self._dice_rolled,
+            "dice_collected": np.array(self._dice_collected),
+            "dice_rolled": np.array(self._dice_rolled),
             # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
             "tiles_table": self.tile_table,  # Tiles that can be taken.
             "tiles_player": self.you,
