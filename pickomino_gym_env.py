@@ -224,8 +224,9 @@ class PickominoEnv(gym.Env):
         """Internal step for picking or returning a tile."""
         return_value = 0
         dice_sum: int = self._get_dice_sum()
+
         # Environment takes the highest tile on the table.
-        if self.tile_table[dice_sum]:
+        if dice_sum >= 21 and self.tile_table[dice_sum]:
             self.you[dice_sum] = self.tile_table[dice_sum]
             del self.tile_table[dice_sum]
             print("Your tiles:", self.you)
@@ -252,7 +253,8 @@ class PickominoEnv(gym.Env):
     def step(self, action: tuple[int, int]):
         self.terminated, self.truncated = self._legal_move(action)
         self._step_dice(action)
-        self._step_tiles()
+        if self.remaining_dice == 0 or action[self.action_roll] == 1:
+            self._step_tiles()
 
         return_obs = {
             "dice_collected": self._dice_collected,
@@ -311,6 +313,7 @@ if __name__ == "__main__":
     env = PickominoEnv(NUMBER_OF_PLAYERS)
     """Interactive test."""
     observation, info = env.reset()
+    observation = observation["dice_collected"], observation["dice_rolled"]
     reward: int = 0
     print("Reset")
     print()
@@ -318,8 +321,8 @@ if __name__ == "__main__":
         print_roll(observation, reward)
         # action = (0, 1)  # dummy
         # print(f"act: {action}")
-        for key, value in info.items():
-            print(key, value)
+        # for key, value in info.items():
+        #     print(key, value)
         # print("--------------------")
         selection: int = int(input("Which dice do you want to collect? (1..5 or worm =6) or -1 to stop: "))
         # print("step:", step, "    selection:", selection)
@@ -327,5 +330,5 @@ if __name__ == "__main__":
             break
         if selection == 6:
             selection = 0  # Collecting a worm is the action (0, 1).
-        action: tuple[int, int] = (selection, 1)
+        action: tuple[int, int] = (selection, 0)
         observation, reward, terminated, truncated, info = env.step(action)
