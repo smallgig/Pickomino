@@ -266,11 +266,12 @@ class PickominoEnv(gym.Env):
         """Internal step for picking or returning a tile."""
         dice_sum: int = self._get_dice_sum()
         # Environment takes the highest tile on the table.
-        if dice_sum >= 21 and self._tile_table[dice_sum]:
-            self.you[dice_sum] = self._tile_table[dice_sum]
+        # TODO Tile wird hinzugefügt zur Liste des Spielers, aufrufen der get_worms Methode gibt Fehler (missing 1 required argument: ´moved_key´.
+        if self._tile_table[dice_sum]:
+            self.you.append(dice_sum)
             self._tile_table[dice_sum] = False
             print("Your tiles:", self.you)
-            return_value = self.you[dice_sum]
+            return_value = self._get_worms(dice_sum)
             self._truncated = True
             self._soft_reset()
         # Environment takes no Tile
@@ -282,7 +283,10 @@ class PickominoEnv(gym.Env):
     def step(self, action: tuple[int, int]):
         reward = 0
         self._step_dice(action)  # legal_move in step_dice
-        if self._remaining_dice == 0 or action[self._action_index_roll] == self._action_stop:
+        # if self._remaining_dice == 0 or action[self._action_index_roll] == self._action_stop:
+        #     reward = self._step_tiles()
+        # Besser?
+        if self._get_dice_sum() >= 21:
             reward = self._step_tiles()
 
         if not self.you:
