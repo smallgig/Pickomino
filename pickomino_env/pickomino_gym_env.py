@@ -4,6 +4,7 @@ import random as rand
 from typing import Optional
 import numpy as np
 import gymnasium as gym
+from gymnasium.spaces import MultiDiscrete
 
 
 class PickominoEnv(gym.Env):
@@ -122,7 +123,7 @@ class PickominoEnv(gym.Env):
         self._roll_counter = 0
         self._remaining_dice = 8
         self._no_throw = False
-        print(f"PRINT DEBUGGING - rolling {self._num_dice} dice.")
+        # print(f"PRINT DEBUGGING - rolling {self._num_dice} dice.")
         for _ in range(self._num_dice):
             self._dice_rolled[rand.randint(0, 5)] += 1
 
@@ -183,7 +184,7 @@ class PickominoEnv(gym.Env):
         self._terminated = False
         self._truncated = False
 
-        print(f"PRINT DEBUGGING - rolling {self._num_dice} dice.")
+        # print(f"PRINT DEBUGGING - rolling {self._num_dice} dice.")
         for _ in range(self._num_dice):
             self._dice_rolled[rand.randint(0, 5)] += 1
 
@@ -263,7 +264,7 @@ class PickominoEnv(gym.Env):
             # TODO: Jarl: we have updated self._remaining_dice, why do we need to do this?
             max_dice: int = self._num_dice - np.sum(self._dice_collected)
             dices_to_roll: int = min(self._remaining_dice, max_dice)
-            print(f"PRINT DEBUGGING - rolling {dices_to_roll} dice.")
+            # print(f"PRINT DEBUGGING - rolling {dices_to_roll} dice.")
             for _ in range(dices_to_roll):
                 self._dice_rolled[rand.randint(0, 5)] += 1
             # Check for no-throw
@@ -271,8 +272,8 @@ class PickominoEnv(gym.Env):
             for index in range(len(self._dice_rolled)):
                 if self._dice_rolled[index] > 0 and self._dice_collected[index] == 0:
                     self._no_throw = False
-            if self._no_throw:
-                print(f"PRINT DEBUGGING - no-throw.")
+            # if self._no_throw:
+            #     # print(f"PRINT DEBUGGING - no-throw.")
             self._roll_counter += 1
             self._truncated = False
 
@@ -299,7 +300,7 @@ class PickominoEnv(gym.Env):
         # TODO: if terminated due to illegal move, should we set reward to a large negative number?
         return_value = 0  # No tile is moved.
         dice_sum: int = self._get_dice_sum()
-        print("PRINT DEBUGGING - dice_sum: ", dice_sum)
+        # print("PRINT DEBUGGING - dice_sum: ", dice_sum)
 
         # Using dice_sum as an index in [21..36] below, hence for dice_sum < 21 need to return early.
         # No throw or 21 not reached -> return tile
@@ -307,7 +308,7 @@ class PickominoEnv(gym.Env):
             # TODO: refactor this to a function as the same code is used below as well.
             if self.you:
                 tile_to_return: int = self.you.pop()  # Remove the tile from the player.
-                print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
+                # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
                 self._tile_table[tile_to_return] = True  # Return the tile to the table.
                 return_value = -self._get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
                 # If the returned tile is not the highest, turn the highest tile around (set to False)
@@ -319,8 +320,8 @@ class PickominoEnv(gym.Env):
                 # Turn the highest tile if there is one.
                 if highest:
                     self._tile_table[highest] = False
-                    print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
-            print("PRINT DEBUGGING - Your tiles:", self.you)
+                    # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
+            # print("PRINT DEBUGGING - Your tiles:", self.you)
             self._soft_reset()
             return return_value
 
@@ -331,7 +332,7 @@ class PickominoEnv(gym.Env):
         # Environment takes the highest tile on the table.
         # Only pick a tile if it is on the table.
         if self._tile_table[dice_sum]:
-            print("PRINT DEBUGGING - Picking tile:", dice_sum)
+            # print("PRINT DEBUGGING - Picking tile:", dice_sum)
             self.you.append(dice_sum)  # Add the tile to the player.
             self._tile_table[dice_sum] = False  # Mark the tile as no longer on the table.
             return_value = self._get_worms(dice_sum)
@@ -345,7 +346,7 @@ class PickominoEnv(gym.Env):
                 if self._tile_table[tile]:
                     highest = tile
             if highest:  # Found the highest tile to pick from the table.
-                print("PRINT DEBUGGING - Picking tile:", highest)
+                # print("PRINT DEBUGGING - Picking tile:", highest)
                 self.you.append(highest)  # Add the tile to the player.
                 self._tile_table[highest] = False  # Mark the tile as no longer on the table.
                 return_value = self._get_worms(highest)
@@ -354,7 +355,7 @@ class PickominoEnv(gym.Env):
             else:
                 if self.you:
                     tile_to_return: int = self.you.pop()  # Remove the tile from the player.
-                    print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
+                    # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
                     self._tile_table[tile_to_return] = True  # Return the tile to the table.
                     return_value = -self._get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
                     # If the returned tile is not the highest, turn the highest tile around (set to False)
@@ -366,9 +367,9 @@ class PickominoEnv(gym.Env):
                     # Turn the highest tile if there is one.
                     if highest:
                         self._tile_table[highest] = False
-                        print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
+                        # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
 
-        print("PRINT DEBUGGING - Your tiles:", self.you)
+        # print("PRINT DEBUGGING - Your tiles:", self.you)
         self._soft_reset()
         return return_value
 
@@ -457,9 +458,9 @@ if __name__ == "__main__":
     dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
     print("Reset")
     for step in range(MAX_TURNS):
-        print("Step:", step)
-        print("Your showing tile: ", observation["tile_player"], "(your reward = ", reward, ")")
-        print_roll(dices_rolled_coll, total)
+        # print("Step:", step)
+        # print("Your showing tile: ", observation["tile_player"], "(your reward = ", reward, ")")
+        # print_roll(dices_rolled_coll, total)
         print("Tiles on table:", end=" ")
         for tile in observation["tiles_table"]:
             if observation["tiles_table"][tile]:
@@ -473,5 +474,5 @@ if __name__ == "__main__":
         action: tuple[int, int] = (selection, stop)
         observation, reward, terminated, truncated, info = env.step(action)
         dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
-        total = info["self._sum"]
+        # total = info["self._sum"]
         print(terminated)
