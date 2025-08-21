@@ -9,7 +9,7 @@ import gymnasium as gym
 class PickominoEnv(gym.Env):
     """The environment class."""
 
-    def __init__(self) -> None:
+    def __init__(self, sparse_rewards=False) -> None:
         """Constructor."""
         self._action_index_dice: int = 0
         self._action_index_roll: int = 1
@@ -54,7 +54,7 @@ class PickominoEnv(gym.Env):
                 "tiles_table": gym.spaces.Dict(
                     {i: gym.spaces.Discrete(5) for i in range(21, 37)}  # Set the value to False/True when collected.
                 ),
-                "tiles_player": gym.spaces.Discrete(1),
+                "tile_player": gym.spaces.Discrete(1),
             }
         )
         # Action space is a tuple. First action: which dice you take. Second action: roll again or not.
@@ -107,6 +107,7 @@ class PickominoEnv(gym.Env):
             "self.observation_space": self.observation_space,
             "self.action_space": self.action_space,
             "self._sum": self._get_dice_sum(),
+            "terminated": self._terminated,
             "self._get_obs_dice()": self._get_obs_dice(),
             "self._get_obs_tiles()": self._get_obs_tiles(),
             # "self.legal_move(action)": self._legal_move(action),
@@ -189,7 +190,7 @@ class PickominoEnv(gym.Env):
             "dice_rolled": list(self._dice_rolled),
             # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
             "tiles_table": self._tile_table,  # Tiles that can be taken.
-            "tiles_player": self.you,
+            "tile_player": (self.you[-1] if self.you else 0),
         }
 
         info = self._get_info((0, 1))  # Arbitrary action in reset only for debugging
@@ -242,7 +243,6 @@ class PickominoEnv(gym.Env):
         if self._legal_move(action):
             self._dice_collected[action[self._action_index_dice]] = self._dice_rolled[action[self._action_index_dice]]
         else:
-            self._terminated = False
             return
         # Reduce the remaining number of dice by the number collected.
         self._remaining_dice -= self._dice_collected[action[self._action_index_dice]]
@@ -373,16 +373,20 @@ class PickominoEnv(gym.Env):
         if self._remaining_dice == 0 or action[self._action_index_roll] == self._action_stop or self._no_throw:
             reward = self._step_tiles()
 
-        if not self.you:
-            self.you.append(0)
+        if self._terminated:
+            return self.observation_space, reward, self._terminated, self._truncated, self._get_info(action)
+
+        # if not self.you:
+        #     self.you.append(0)
 
         return_obs = {
             "dice_collected": self._dice_collected,
             "dice_rolled": self._dice_rolled,
             # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
             "tiles_table": self._tile_table,  # Tiles that can be taken.
-            "tiles_player": self.you[-1],
+            "tile_player": (self.you[-1] if self.you else 0),  # immer int
         }
+
         info = self._get_info(action)
 
         return return_obs, reward, self._terminated, self._truncated, info
@@ -442,7 +446,7 @@ if __name__ == "__main__":
     print("Reset")
     for step in range(MAX_TURNS):
         print("Step:", step)
-        print("Your showing tile: ", observation["tiles_player"], "(your reward = ", reward, ")")
+        print("Your showing tile: ", observation["tile_player"], "(your reward = ", reward, ")")
         print_roll(dices_rolled_coll, total)
         print("Tiles on table:", end=" ")
         for tile in observation["tiles_table"]:
@@ -458,3 +462,5 @@ if __name__ == "__main__":
         observation, reward, terminated, truncated, info = env.step(action)
         dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
         total = info["self._sum"]
+        terminated = info["terminated"]
+        print(terminated)

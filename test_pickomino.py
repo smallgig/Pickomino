@@ -1,4 +1,5 @@
 """Test Pickomino."""
+
 import pickomino_gym_env
 import numpy as np
 
@@ -31,7 +32,6 @@ def test_multiple_actions():
             selection = int(np.argmax(observation[1]))
             observation, reward, terminated, truncated, info = env.step(selection)
 
-    assert
 
 def test__init__():
     """Test init function."""
@@ -40,6 +40,7 @@ def test__init__():
 def run_all_test():
     """Run all tests."""
     test__init__()
+
 
 if __name__ == "__main__":
     env = pickomino_gym_env.PickominoEnv(2)
