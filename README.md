@@ -70,24 +70,6 @@ print("Init ok. Beispiel-Observation:", obs)
 
 ---
 
-## Q-Learning Training (Beispiel)
-
-Starte das mitgelieferte Trainingsskript:
-
-```bash
-python rl_pickomino_qlearning.py
-```
-
-Das Skript:
-
-* encodiert Zustände `(dice_collected, dice_rolled)` als hashbare Schlüssel,
-* nutzt **Aktionsmasken** (nur geworfene Gesichter + eine STOP-Aktion),
-* trainiert mit ε-greedy, α, γ,
-* speichert Checkpoints `qtable_pickomino.pkl` und `qtable_pickomino_final.pkl`,
-* druckt periodisch Durchschnitts-Return & greedy-Evaluation.
-
----
-
 ## Regeln (Kurzfassung)
 
 * 8 Würfel: `1..5` & **Wurm** (W). Wurm zählt **5** zur Summe.
