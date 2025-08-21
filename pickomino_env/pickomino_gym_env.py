@@ -19,6 +19,7 @@ class PickominoEnv(gym.Env):
         self._remaining_dice: int = self._num_dice
         self._terminated: bool = False
         self._truncated: bool = False
+        self._no_throw = False
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
@@ -117,6 +118,7 @@ class PickominoEnv(gym.Env):
         self._dice_rolled = [0, 0, 0, 0, 0, 0]
         self._roll_counter = 0
         self._remaining_dice = 8
+        self._no_throw = False
         print(f"PRINT DEBUGGING - rolling {self._num_dice} dice.")
         for _ in range(self._num_dice):
             self._dice_rolled[rand.randint(0, 5)] += 1
@@ -137,6 +139,7 @@ class PickominoEnv(gym.Env):
         self._dice_rolled: list[int] = [0, 0, 0, 0, 0, 0]
         self._roll_counter = 0
         self._remaining_dice = 8
+        self._no_throw = False
         self._tile_table = {
             21: True,
             22: True,
@@ -169,7 +172,6 @@ class PickominoEnv(gym.Env):
             "tiles_table": self._tile_table,  # Tiles that can be taken.
             "tiles_player": self.you,
         }
-        # self._dice_rolled = np.array([0, 2, 1, 4, 1, 0])
 
         info = self._get_info((0, 1))  # Arbitrary action in reset only for debugging
 
@@ -181,17 +183,16 @@ class PickominoEnv(gym.Env):
         self._truncated: bool = False
 
         # TODO prove illegal moves
+        # Action is to try to collect dice already collected.
+        # if self._dice_collected[action[self._action_index_dice]]:
+        #    self._terminated = True
+
         # Dice already collected cannot be taken again.
         if self._roll_counter >= 2:
             self._terminated = True
             for index in range(len(self._dice_rolled)):
                 if self._dice_rolled[index] > 0 and self._dice_collected[index] == 0:
                     self._terminated = False
-
-            # for die_collected in self._dice_collected:
-            #     for die_rolled in self._dice_rolled:
-            #         if die_rolled > 0 and die_collected == 0:
-            #             self.terminated = False
 
         # No dice left and 21 not reached.
         if self._remaining_dice == 0 and self._get_dice_sum() < 21:
@@ -206,6 +207,9 @@ class PickominoEnv(gym.Env):
 
         :param: action: The action to take: which dice to collect.
         """
+        # TODO: have to check for terminated or truncated before doing step.
+        # TODO: legal move will set terminated if the move was not legal
+
         # Collect the dice according to the action.
         self._dice_collected[action[self._action_index_dice]] = self._dice_rolled[action[self._action_index_dice]]
         # TODO: Jarl: why do we need to do this? Does not make the list self._dice_rolled shorter??
@@ -230,10 +234,16 @@ class PickominoEnv(gym.Env):
             print(f"PRINT DEBUGGING - rolling {dices_to_roll} dice.")
             for _ in range(dices_to_roll):
                 self._dice_rolled[rand.randint(0, 5)] += 1
-            # TODO: Jarl: recognise a misthrow here when rolled dices have all been collected already
-            # TODO: and do somthing appropriate. Instead of asking the user to make an illegal move.
+            # Check for no-throw
+            self._no_throw = True
+            for index in range(len(self._dice_rolled)):
+                if self._dice_rolled[index] > 0 and self._dice_collected[index] == 0:
+                    self._no_throw = False
+            if self._no_throw:
+                print(f"PRINT DEBUGGING - no-throw.")
             self._roll_counter += 1
             self._truncated = False
+
         # Action is to stop rolling.
         else:
             self._truncated = True
@@ -256,9 +266,37 @@ class PickominoEnv(gym.Env):
 
         :return: Value of moving the tile [-4 ... +4]
         """
+        # TODO: if terminated due to illegal move, should we set reward to a large negative number?
         return_value = 0  # No tile is moved.
         dice_sum: int = self._get_dice_sum()
         print("PRINT DEBUGGING - dice_sum: ", dice_sum)
+
+        # Using dice_sum as an index in [21..36] below, hence for dice_sum < 21 need to return early.
+        # No throw or 21 not reached -> return tile
+        if self._no_throw or dice_sum < 21:
+            # TODO: refactor this to a function as the same code is used below as well.
+            if self.you:
+                tile_to_return: int = self.you.pop()  # Remove the tile from the player.
+                print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
+                self._tile_table[tile_to_return] = True  # Return the tile to the table.
+                return_value = -self.get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
+                # If the returned tile is not the highest, turn the highest tile around (set to False)
+                # Search for the highest tile to turn.
+                highest = 0
+                for tile in range(tile_to_return + 1, 37):
+                    if self._tile_table[tile]:
+                        highest = tile
+                # Turn the highest tile if there is one.
+                if highest:
+                    self._tile_table[highest] = False
+                    print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
+            print("PRINT DEBUGGING - Your tiles:", self.you)
+            self._soft_reset()
+            return return_value
+
+        # Using dice_sum as an index in [21..36], higher rolls can only pick 36 or lower
+        if dice_sum > 36:
+            dice_sum = 36
 
         # Environment takes the highest tile on the table.
         # Only pick a tile if it is on the table.
@@ -300,21 +338,6 @@ class PickominoEnv(gym.Env):
                         self._tile_table[highest] = False
                         print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
 
-            # TODO: remove old stuff
-            # # Empty nothing happens, reward stays zero
-            # if not self.you:
-            #     pass
-            # # You have at least one Tile and put it back to the Table
-            # else:
-            #     moved_key = self.you.pop()
-            #     self._tile_table[moved_key] = True
-            #     return_value = -self.get_worms(moved_key)
-            #     # Moved Tile is highest
-            #     if moved_key == max(self._tile_table):
-            #         pass
-            #     # Tile not available to taken for the rest of the Game
-            #     else:
-            #         self._tile_table[moved_key] = False
         print("PRINT DEBUGGING - Your tiles:", self.you)
         self._soft_reset()
         return return_value
@@ -323,7 +346,7 @@ class PickominoEnv(gym.Env):
         reward = 0
         self._legal_move()
         self._step_dice(action)
-        if self._remaining_dice == 0 or action[self._action_index_roll] == self._action_stop:
+        if self._remaining_dice == 0 or action[self._action_index_roll] == self._action_stop or self._no_throw:
             reward = self._step_tiles()
 
         if not self.you:
