@@ -3,7 +3,7 @@ Implements the game [Pickomino](https://www.maartenpoirot.com/pickomino/play_pic
 
 # Pickomino Gymnasium Environment 🐛🎲
 
-Ein **Gymnasium**-kompatibles Environment für das Würfelspiel **Pickomino (Heckmeck am Bratwurmeck)** inklusive Beispiel-**Q-Learning**-Agent.
+Ein **Gymnasium**-kompatibles Environment für das Würfelspiel **Pickomino (Heckmeck am Bratwurmeck)**
 Ziel: Einen Agenten trainieren, der in diesem MDP optimale Entscheidungen trifft (Sorte wählen / stoppen).
 
 ## Inhalte
@@ -11,8 +11,6 @@ Ziel: Einen Agenten trainieren, der in diesem MDP optimale Entscheidungen trifft
 * `pickomino_env/pickomino_gym_env.py` – deine `PickominoEnv` Klasse
 * `pickomino_env/__init__.py` – **automatische Registrierung** des Environments als `Pickomino-v0`
 * `pyproject.toml` – Paket-Metadaten & Abhängigkeiten
-* `rl_pickomino_qlearning.py` – tabellarischer Q-Learning Agent (Beispiel-Training)
-
 ---
 
 ## Installation (Entwicklungsmodus)
@@ -69,24 +67,6 @@ print("Init ok. Beispiel-Observation:", obs)
   * `roll_again ∈ {0,1}` → 0 = **stoppen**, 1 = **weiter würfeln**
 
 > Hinweis: In der gelieferten Env sind die `observation_space`-Deklarationen noch `Discrete(6)`. Für algorithmische Stabilität empfiehlt sich **`Box(shape=(6,), dtype=int)`** o. **`MultiDiscrete([9]*6)`**. Das Beispiel-Training codiert die Observation intern selbst, daher läuft es auch so.
-
----
-
-## Q-Learning Training (Beispiel)
-
-Starte das mitgelieferte Trainingsskript:
-
-```bash
-python rl_pickomino_qlearning.py
-```
-
-Das Skript:
-
-* encodiert Zustände `(dice_collected, dice_rolled)` als hashbare Schlüssel,
-* nutzt **Aktionsmasken** (nur geworfene Gesichter + eine STOP-Aktion),
-* trainiert mit ε-greedy, α, γ,
-* speichert Checkpoints `qtable_pickomino.pkl` und `qtable_pickomino_final.pkl`,
-* druckt periodisch Durchschnitts-Return & greedy-Evaluation.
 
 ---
 
