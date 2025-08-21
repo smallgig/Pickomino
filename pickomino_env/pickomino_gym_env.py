@@ -129,20 +129,20 @@ class PickominoEnv(gym.Env):
 
     def _remove_tile_from_player(self) -> int:
         return_value = 0
-        # Empty nothing happens, reward stays zero
-        if not self.you:
-            pass
-        # You have at least one Tile and put it back to the Table
-        else:
-            moved_key = self.you.pop()
-            self._tile_table[moved_key] = True
-            return_value = -self._get_worms(moved_key)
-            # Moved Tile is highest
-            if moved_key == max(self._tile_table):
-                pass
-            # Tile not available to taken for the rest of the Game
-            else:
-                self._tile_table[moved_key] = False
+        if self.you:
+            tile_to_return: int = self.you.pop()  # Remove the tile from the player.
+            # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
+            self._tile_table[tile_to_return] = True  # Return the tile to the table.
+            return_value = -self._get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
+            # If the returned tile is not the highest, turn the highest tile around (set to False)
+            # Search for the highest tile to turn.
+            highest = 0
+            for tile in range(tile_to_return + 1, 37):
+                if self._tile_table[tile]:
+                    highest = tile
+            # Turn the highest tile if there is one.
+            if highest:
+                self._tile_table[highest] = False
 
         return return_value
 
@@ -298,6 +298,10 @@ class PickominoEnv(gym.Env):
 
         :return: Value of moving the tile [-4 ... +4]
         """
+
+        # if self._dice_collected[0] == 0:
+        #     self._terminated = True
+        #     return self._remove_tile_from_player()
         # TODO: if terminated due to illegal move, should we set reward to a large negative number?
         return_value = 0  # No tile is moved.
         dice_sum: int = self._get_dice_sum()
@@ -307,21 +311,8 @@ class PickominoEnv(gym.Env):
         # No throw or 21 not reached -> return tile
         if self._no_throw or dice_sum < 21:
             # TODO: refactor this to a function as the same code is used below as well.
-            if self.you:
-                tile_to_return: int = self.you.pop()  # Remove the tile from the player.
-                # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
-                self._tile_table[tile_to_return] = True  # Return the tile to the table.
-                return_value = -self._get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
-                # If the returned tile is not the highest, turn the highest tile around (set to False)
-                # Search for the highest tile to turn.
-                highest = 0
-                for tile in range(tile_to_return + 1, 37):
-                    if self._tile_table[tile]:
-                        highest = tile
-                # Turn the highest tile if there is one.
-                if highest:
-                    self._tile_table[highest] = False
-                    # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
+            return_value = self._remove_tile_from_player()
+            # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
             # print("PRINT DEBUGGING - Your tiles:", self.you)
             self._soft_reset()
             return return_value
@@ -329,7 +320,6 @@ class PickominoEnv(gym.Env):
         # Using dice_sum as an index in [21..36], higher rolls can only pick 36 or lower
         if dice_sum > 36:
             dice_sum = 36
-
         # Environment takes the highest tile on the table.
         # Only pick a tile if it is on the table.
         if self._tile_table[dice_sum]:
@@ -354,21 +344,8 @@ class PickominoEnv(gym.Env):
                 self._truncated = True
             # Also no smaller tiles available -> have to return players showing tile if there is one.
             else:
-                if self.you:
-                    tile_to_return: int = self.you.pop()  # Remove the tile from the player.
-                    # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
-                    self._tile_table[tile_to_return] = True  # Return the tile to the table.
-                    return_value = -self._get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
-                    # If the returned tile is not the highest, turn the highest tile around (set to False)
-                    # Search for the highest tile to turn.
-                    highest = 0
-                    for tile in range(tile_to_return + 1, 37):
-                        if self._tile_table[tile]:
-                            highest = tile
-                    # Turn the highest tile if there is one.
-                    if highest:
-                        self._tile_table[highest] = False
-                        # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
+                return_value = self._remove_tile_from_player()
+                # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
 
         # print("PRINT DEBUGGING - Your tiles:", self.you)
         self._soft_reset()
@@ -459,9 +436,9 @@ if __name__ == "__main__":
     dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
     print("Reset")
     for step in range(MAX_TURNS):
-        # print("Step:", step)
-        # print("Your showing tile: ", observation["tile_player"], "(your reward = ", reward, ")")
-        # print_roll(dices_rolled_coll, total)
+        print("Step:", step)
+        print("Your showing tile: ", observation["tile_player"], "(your reward = ", reward, ")")
+        print_roll(dices_rolled_coll, total)
         print("Tiles on table:", end=" ")
         for tile in observation["tiles_table"]:
             if observation["tiles_table"][tile]:
@@ -475,5 +452,5 @@ if __name__ == "__main__":
         action: tuple[int, int] = (selection, stop)
         observation, reward, terminated, truncated, info = env.step(action)
         dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
-        # total = info["self._sum"]
+        total = info["self._sum"]
         print(terminated)
