@@ -4,7 +4,6 @@ import random as rand
 from typing import Optional
 import numpy as np
 import gymnasium as gym
-from pettingzoo.classic.chess.chess_utils import actions_to_moves
 
 
 class PickominoEnv(gym.Env):
