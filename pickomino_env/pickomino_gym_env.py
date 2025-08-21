@@ -186,8 +186,8 @@ class PickominoEnv(gym.Env):
             self._dice_rolled[rand.randint(0, 5)] += 1
 
         return_obs = {
-            "dice_collected": list(self._dice_collected),
-            "dice_rolled": list(self._dice_rolled),
+            "dice_collected": np.array(self._dice_collected),
+            "dice_rolled": np.array(self._dice_rolled),
             # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
             "tiles_table": self._tile_table,  # Tiles that can be taken.
             "tile_player": (self.you[-1] if self.you else 0),
@@ -390,8 +390,8 @@ class PickominoEnv(gym.Env):
         #     self.you.append(0)
 
         return_obs = {
-            "dice_collected": self._dice_collected,
-            "dice_rolled": self._dice_rolled,
+            "dice_collected": np.array(self._dice_collected),
+            "dice_rolled": np.array(self._dice_rolled),
             # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
             "tiles_table": self._tile_table,  # Tiles that can be taken.
             "tile_player": (self.you[-1] if self.you else 0),  # immer int
