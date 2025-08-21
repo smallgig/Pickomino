@@ -163,6 +163,7 @@ class PickominoEnv(gym.Env):
         self._roll_counter = 0
         self._remaining_dice = 8
         self._no_throw = False
+        self.you = []
         self._tile_table = {
             21: True,
             22: True,
