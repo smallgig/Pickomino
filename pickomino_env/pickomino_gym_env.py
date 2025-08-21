@@ -281,6 +281,9 @@ class PickominoEnv(gym.Env):
         # Action is to stop rolling.
         else:
             self._truncated = True
+            if self._dice_collected[0] == 0:
+                self._terminated = True
+                self._no_throw = True
 
     def _get_worms(self, moved_key: int) -> int:
         """Give back the number of worms (1..4) for given the dice sum (21..36).
@@ -298,10 +301,6 @@ class PickominoEnv(gym.Env):
 
         :return: Value of moving the tile [-4 ... +4]
         """
-
-        # if self._dice_collected[0] == 0:
-        #     self._terminated = True
-        #     return self._remove_tile_from_player()
         # TODO: if terminated due to illegal move, should we set reward to a large negative number?
         return_value = 0  # No tile is moved.
         dice_sum: int = self._get_dice_sum()
