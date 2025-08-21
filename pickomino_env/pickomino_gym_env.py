@@ -213,6 +213,10 @@ class PickominoEnv(gym.Env):
         #         if self._dice_rolled[index] > 0 and self._dice_collected[index] == 0:
         #             self._terminated = False
 
+        # Action if no dice is available in rolled_dice
+        if not self._dice_rolled[action[self._action_index_dice]]:
+            self._terminated = True
+
         # No dice left and 21 not reached
         if self._remaining_dice == 0 and self._get_dice_sum() < 21:
             self._terminated = True
@@ -373,6 +377,12 @@ class PickominoEnv(gym.Env):
         if self._remaining_dice == 0 or action[self._action_index_roll] == self._action_stop or self._no_throw:
             reward = self._step_tiles()
 
+            # Game Over if no Tile is on the table anymore.
+            self._terminated = True
+            for tile, value in self._tile_table.items():
+                if value:
+                    self._terminated = False
+
         if self._terminated:
             return self.observation_space, reward, self._terminated, self._truncated, self._get_info(action)
 
@@ -462,5 +472,4 @@ if __name__ == "__main__":
         observation, reward, terminated, truncated, info = env.step(action)
         dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
         total = info["self._sum"]
-        terminated = info["terminated"]
         print(terminated)
