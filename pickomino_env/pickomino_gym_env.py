@@ -106,22 +106,41 @@ class PickominoEnv(gym.Env):
             "self.roll_counter": self._roll_counter,
             "self.observation_space": self.observation_space,
             "self.action_space": self.action_space,
-            "self._get_sum()": self._get_dice_sum(),
+            "self._sum": self._get_dice_sum(),
             "self._get_obs_dice()": self._get_obs_dice(),
             "self._get_obs_tiles()": self._get_obs_tiles(),
-            "self.legal_move(action)": self._legal_move(),
+            # "self.legal_move(action)": self._legal_move(action),
         }
         return return_value
 
     def _soft_reset(self) -> None:
-        self._dice_collected = [0, 0, 0, 0, 0, 0]
-        self._dice_rolled = [0, 0, 0, 0, 0, 0]
+        self._dice_collected: list[int] = [0, 0, 0, 0, 0, 0]
+        self._dice_rolled: list[int] = [0, 0, 0, 0, 0, 0]
         self._roll_counter = 0
         self._remaining_dice = 8
         self._no_throw = False
         print(f"PRINT DEBUGGING - rolling {self._num_dice} dice.")
         for _ in range(self._num_dice):
             self._dice_rolled[rand.randint(0, 5)] += 1
+
+    def _remove_tile_from_player(self) -> int:
+        return_value = 0
+        # Empty nothing happens, reward stays zero
+        if not self.you:
+            pass
+        # You have at least one Tile and put it back to the Table
+        else:
+            moved_key = self.you.pop()
+            self._tile_table[moved_key] = True
+            return_value = -self._get_worms(moved_key)
+            # Moved Tile is highest
+            if moved_key == max(self._tile_table):
+                pass
+            # Tile not available to taken for the rest of the Game
+            else:
+                self._tile_table[moved_key] = False
+
+        return return_value
 
     def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         """Start a new episode.
@@ -166,8 +185,8 @@ class PickominoEnv(gym.Env):
             self._dice_rolled[rand.randint(0, 5)] += 1
 
         return_obs = {
-            "dice_collected": np.array(self._dice_collected),
-            "dice_rolled": np.array(self._dice_rolled),
+            "dice_collected": list(self._dice_collected),
+            "dice_rolled": list(self._dice_rolled),
             # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
             "tiles_table": self._tile_table,  # Tiles that can be taken.
             "tiles_player": self.you,
@@ -177,24 +196,23 @@ class PickominoEnv(gym.Env):
 
         return return_obs, info
 
-    def _legal_move(self):
+    def _legal_move(self, action: tuple[int, int]):
         """Check if action is allowed."""
         self._terminated: bool = False
         self._truncated: bool = False
-
-        # TODO prove illegal moves
-        # Action is to try to collect dice already collected.
-        # if self._dice_collected[action[self._action_index_dice]]:
-        #    self._terminated = True
-
+        return_value: bool = True
         # Dice already collected cannot be taken again.
-        if self._roll_counter >= 2:
-            self._terminated = True
-            for index in range(len(self._dice_rolled)):
-                if self._dice_rolled[index] > 0 and self._dice_collected[index] == 0:
-                    self._terminated = False
+        if not self._dice_collected[action[self._action_index_dice]] == 0:
+            if not self._dice_rolled[action[self._action_index_dice]] == 0:
+                self._terminated = True
 
-        # No dice left and 21 not reached.
+        # if self._roll_counter >= 2:
+        #     self._terminated = True
+        #     for index in range(len(self._dice_rolled)):
+        #         if self._dice_rolled[index] > 0 and self._dice_collected[index] == 0:
+        #             self._terminated = False
+
+        # No dice left and 21 not reached
         if self._remaining_dice == 0 and self._get_dice_sum() < 21:
             self._terminated = True
 
@@ -202,28 +220,36 @@ class PickominoEnv(gym.Env):
         if self._remaining_dice == 0 and self._dice_collected[0] == 0:
             self._terminated = True
 
+        if self._terminated:
+            return_value = False
+
+        return return_value
+
+    def _roll(self) -> None:
+        max_dice: int = self._num_dice - np.sum(self._dice_collected)
+        dices_to_roll: int = min(self._remaining_dice, max_dice)
+        for _ in range(dices_to_roll):
+            self._dice_rolled[rand.randint(0, 5)] += 1
+        self._roll_counter += 1
+        self._truncated = False
+
     def _step_dice(self, action: tuple[int, int]) -> None:
         """Execute one roll of the dice and picking or returning a tile.
 
         :param: action: The action to take: which dice to collect.
         """
-        # TODO: have to check for terminated or truncated before doing step.
-        # TODO: legal move will set terminated if the move was not legal
-
-        # Collect the dice according to the action.
-        self._dice_collected[action[self._action_index_dice]] = self._dice_rolled[action[self._action_index_dice]]
-        # TODO: Jarl: why do we need to do this? Does not make the list self._dice_rolled shorter??
-        # TODO: we reset it in line 218
-        self._dice_rolled.remove(self._dice_rolled[action[self._action_index_dice]])
-        self._legal_move()  # Check before reset and after removing the collected dice
+        # Check legal move before adding selected dice to collected.
+        if self._legal_move(action):
+            self._dice_collected[action[self._action_index_dice]] = self._dice_rolled[action[self._action_index_dice]]
+        else:
+            self._terminated = False
+            return
         # Reduce the remaining number of dice by the number collected.
         self._remaining_dice -= self._dice_collected[action[self._action_index_dice]]
         # Reset diced rolled before rolling again below.
         self._dice_rolled = [0, 0, 0, 0, 0, 0]
 
-        # TODO: if terminated or truncated, we never roll again after resting diced rolled.
-        # TODO: Suspect terminated or truncated is set wrongly some where!
-        if self._terminated or self._truncated:
+        if self._truncated:
             return
 
         # Action is to roll
@@ -254,7 +280,6 @@ class PickominoEnv(gym.Env):
         Mapping:
         21–24 -> 1, 25–28 -> 2, 29–32 -> 3, 33–36 -> 4
         """
-
         if not 21 <= moved_key <= 36:
             raise ValueError("dice_sum must be between 21 and 36.")
         return (moved_key - 21) // 4 + 1
