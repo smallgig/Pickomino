@@ -4,6 +4,7 @@ import random as rand
 from typing import Optional
 import numpy as np
 import gymnasium as gym
+from pettingzoo.classic.chess.chess_utils import actions_to_moves
 
 
 class PickominoEnv(gym.Env):
@@ -57,8 +58,10 @@ class PickominoEnv(gym.Env):
                 "tile_player": gym.spaces.Discrete(1),
             }
         )
+
         # Action space is a tuple. First action: which dice you take. Second action: roll again or not.
-        self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(6), gym.spaces.Discrete(2)))
+
+        self.action_space = gym.spaces.MultiDiscrete((6, 2))
 
     def _get_dice_sum(self) -> int:
         """Return the sum of the collected dices."""
