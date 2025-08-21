@@ -238,7 +238,7 @@ class PickominoEnv(gym.Env):
 
         :param: action: The action to take: which dice to collect.
         """
-        # Check legal move before adding selected dice to collected.
+        # Check legal move before adding selected dice to be collected.
         if self._legal_move(action):
             self._dice_collected[action[self._action_index_dice]] = self._dice_rolled[action[self._action_index_dice]]
         else:
@@ -274,8 +274,7 @@ class PickominoEnv(gym.Env):
         else:
             self._truncated = True
 
-    @staticmethod
-    def get_worms(moved_key: int) -> int:
+    def _get_worms(self, moved_key: int) -> int:
         """Give back the number of worms (1..4) for given the dice sum (21..36).
         Mapping:
         21–24 -> 1, 25–28 -> 2, 29–32 -> 3, 33–36 -> 4
@@ -304,7 +303,7 @@ class PickominoEnv(gym.Env):
                 tile_to_return: int = self.you.pop()  # Remove the tile from the player.
                 print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
                 self._tile_table[tile_to_return] = True  # Return the tile to the table.
-                return_value = -self.get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
+                return_value = -self._get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
                 # If the returned tile is not the highest, turn the highest tile around (set to False)
                 # Search for the highest tile to turn.
                 highest = 0
@@ -329,7 +328,7 @@ class PickominoEnv(gym.Env):
             print("PRINT DEBUGGING - Picking tile:", dice_sum)
             self.you.append(dice_sum)  # Add the tile to the player.
             self._tile_table[dice_sum] = False  # Mark the tile as no longer on the table.
-            return_value = self.get_worms(dice_sum)
+            return_value = self._get_worms(dice_sum)
             self._truncated = True
         # Tile is not available on the table
         else:
@@ -343,7 +342,7 @@ class PickominoEnv(gym.Env):
                 print("PRINT DEBUGGING - Picking tile:", highest)
                 self.you.append(highest)  # Add the tile to the player.
                 self._tile_table[highest] = False  # Mark the tile as no longer on the table.
-                return_value = self.get_worms(highest)
+                return_value = self._get_worms(highest)
                 self._truncated = True
             # Also no smaller tiles available -> have to return players showing tile if there is one.
             else:
@@ -351,7 +350,7 @@ class PickominoEnv(gym.Env):
                     tile_to_return: int = self.you.pop()  # Remove the tile from the player.
                     print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
                     self._tile_table[tile_to_return] = True  # Return the tile to the table.
-                    return_value = -self.get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
+                    return_value = -self._get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
                     # If the returned tile is not the highest, turn the highest tile around (set to False)
                     # Search for the highest tile to turn.
                     highest = 0
@@ -369,7 +368,7 @@ class PickominoEnv(gym.Env):
 
     def step(self, action: tuple[int, int]):
         reward = 0
-        self._legal_move()
+        self._legal_move(action)
         self._step_dice(action)
         if self._remaining_dice == 0 or action[self._action_index_roll] == self._action_stop or self._no_throw:
             reward = self._step_tiles()
@@ -438,7 +437,7 @@ if __name__ == "__main__":
     reward: int = 0
     # for key, value in info.items():
     #     print(key, value)
-    total: int = info["self._get_sum()"]
+    total: int = info["self._sum"]
     dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
     print("Reset")
     for step in range(MAX_TURNS):
@@ -458,4 +457,4 @@ if __name__ == "__main__":
         action: tuple[int, int] = (selection, stop)
         observation, reward, terminated, truncated, info = env.step(action)
         dices_rolled_coll = observation["dice_collected"], observation["dice_rolled"]
-        total = info["self._get_sum()"]
+        total = info["self._sum"]
