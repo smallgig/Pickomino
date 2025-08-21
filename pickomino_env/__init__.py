@@ -6,7 +6,7 @@ try:
     register(
         id="Pickomino-v0",
         entry_point="pickomino_env.pickomino_gym_env:PickominoEnv",
-        kwargs={"num_players": 2},
+        # kwargs={"num_players": 2},
         max_episode_steps=200,
     )
 except Exception:
