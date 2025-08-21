@@ -4,13 +4,12 @@ import random as rand
 from typing import Optional
 import numpy as np
 import gymnasium as gym
-from gymnasium.spaces import MultiDiscrete
 
 
 class PickominoEnv(gym.Env):
     """The environment class."""
 
-    def __init__(self, sparse_rewards=False) -> None:
+    def __init__(self) -> None:
         """Constructor."""
         self._action_index_dice: int = 0
         self._action_index_roll: int = 1
@@ -60,7 +59,6 @@ class PickominoEnv(gym.Env):
         )
 
         # Action space is a tuple. First action: which dice you take. Second action: roll again or not.
-
         self.action_space = gym.spaces.MultiDiscrete((6, 2))
 
     def _get_dice_sum(self) -> int:
@@ -211,12 +209,6 @@ class PickominoEnv(gym.Env):
             if not self._dice_rolled[action[self._action_index_dice]] == 0:
                 self._terminated = True
 
-        # if self._roll_counter >= 2:
-        #     self._terminated = True
-        #     for index in range(len(self._dice_rolled)):
-        #         if self._dice_rolled[index] > 0 and self._dice_collected[index] == 0:
-        #             self._terminated = False
-
         # Action if no dice is available in rolled_dice
         if not self._dice_rolled[action[self._action_index_dice]]:
             self._terminated = True
@@ -278,7 +270,7 @@ class PickominoEnv(gym.Env):
             self._roll_counter += 1
             self._truncated = False
 
-        # Action is to stop rolling.
+        # Action is to stop rolling dice and pick a tile.
         else:
             self._truncated = True
             if self._dice_collected[0] == 0:
@@ -301,15 +293,12 @@ class PickominoEnv(gym.Env):
 
         :return: Value of moving the tile [-4 ... +4]
         """
-        # TODO: if terminated due to illegal move, should we set reward to a large negative number?
-        return_value = 0  # No tile is moved.
         dice_sum: int = self._get_dice_sum()
         # print("PRINT DEBUGGING - dice_sum: ", dice_sum)
 
         # Using dice_sum as an index in [21..36] below, hence for dice_sum < 21 need to return early.
         # No throw or 21 not reached -> return tile
         if self._no_throw or dice_sum < 21:
-            # TODO: refactor this to a function as the same code is used below as well.
             return_value = self._remove_tile_from_player()
             # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
             # print("PRINT DEBUGGING - Your tiles:", self.you)
@@ -359,15 +348,12 @@ class PickominoEnv(gym.Env):
 
             # Game Over if no Tile is on the table anymore.
             self._terminated = True
-            for tile, value in self._tile_table.items():
+            for _, value in self._tile_table.items():
                 if value:
                     self._terminated = False
 
         if self._terminated:
             return self.observation_space, reward, self._terminated, self._truncated, self._get_info(action)
-
-        # if not self.you:
-        #     self.you.append(0)
 
         return_obs = {
             "dice_collected": np.array(self._dice_collected),
