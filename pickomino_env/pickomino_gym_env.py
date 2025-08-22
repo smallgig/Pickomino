@@ -49,13 +49,12 @@ class PickominoEnv(gym.Env):
 
         self.observation_space = gym.spaces.Dict(
             {
-                "dice_collected": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),  # 6 * 8
+                "dice_collected": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
                 "dice_rolled": gym.spaces.Box(low=0, high=6, shape=(6,), dtype=np.int64),
-                # "available_tiles": gym.spaces.Box(low=0, high=1, shape=(37,), dtype=np.int64),
-                "tiles_table": gym.spaces.Dict(
-                    {i: gym.spaces.Discrete(1) for i in range(21, 37)}  # Set the value to False/True when collected.
-                ),
-                "tile_player": gym.spaces.Discrete(1),
+                # Flatten tiles into a 16-length binary vector for SB3 compatibility (no nested Dict)
+                "tiles_table": gym.spaces.Box(low=0, high=1, shape=(16,), dtype=np.int8),
+                # 0 means no tile; 21..36 are valid tile ids
+                "tile_player": gym.spaces.Discrete(37),
             }
         )
 
@@ -93,6 +92,18 @@ class PickominoEnv(gym.Env):
         observation_tiles = (self._you, self._tile_table)
         return observation_tiles
 
+    def _tiles_vector(self) -> np.ndarray:
+        """Return tiles_table as a flat binary vector of length 16 for indices 21..36."""
+        return np.array([1 if self._tile_table[i] else 0 for i in range(21, 37)], dtype=np.int8)
+
+    def _current_obs(self):
+        return {
+            "dice_collected": np.array(self._dice_collected),
+            "dice_rolled": np.array(self._dice_rolled),
+            "tiles_table": self._tiles_vector(),
+            "tile_player": (self._you[-1] if self._you else 0),
+        }
+
     def _get_info(self, action):
         """Compute auxiliary information for debugging.
 
@@ -112,6 +123,7 @@ class PickominoEnv(gym.Env):
             "terminated": self._terminated,
             "get_obs_dice()": self._get_obs_dice(),
             "get_obs_tiles()": self._get_obs_tiles(),
+            "tiles_table_vec": self._tiles_vector(),
             # "self.legal_move(action)": self._legal_move(action),
         }
         return return_value
@@ -188,13 +200,7 @@ class PickominoEnv(gym.Env):
         for _ in range(self._num_dice):
             self._dice_rolled[rand.randint(0, 5)] += 1
 
-        return_obs = {
-            "dice_collected": np.array(self._dice_collected),
-            "dice_rolled": np.array(self._dice_rolled),
-            # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
-            "tiles_table": self._tile_table,  # Tiles that can be taken.
-            "tile_player": (self._you[-1] if self._you else 0),
-        }
+        return_obs = self._current_obs()
 
         info = self._get_info((0, 1))  # Arbitrary action in reset only for debugging
 
@@ -354,15 +360,9 @@ class PickominoEnv(gym.Env):
                     self._terminated = False
 
         if self._terminated:
-            return self.observation_space, reward, self._terminated, self._truncated, self._get_info(action)
+            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info(action)
 
-        return_obs = {
-            "dice_collected": np.array(self._dice_collected),
-            "dice_rolled": np.array(self._dice_rolled),
-            # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
-            "tiles_table": self._tile_table,  # Tiles that can be taken.
-            "tile_player": (self._you[-1] if self._you else 0),  # immer int
-        }
+        return_obs = self._current_obs()
 
         info = self._get_info(action)
 

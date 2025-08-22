@@ -13,8 +13,7 @@ render_mode = None
 # render_mode = "human"  # Set to None for no rendering, or "human" for rendering
 # env = Monitor(gym.make("Pickomino-v0"), log_dir)
 env = gym.make("Pickomino-v0")
-print("Sorry, not working yet")
-algo = PPO("MlpPolicy", env)
+algo = PPO("MultiInputPolicy", env)
 algo.learn(total_timesteps=100000) # 1 step = one action! (not episode!)
 
 # plotting
