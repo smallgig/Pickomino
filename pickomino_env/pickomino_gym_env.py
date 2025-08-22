@@ -16,16 +16,18 @@ class PickominoEnv(gym.Env):
         self._action_roll: int = 0
         self._action_stop: int = 1
         self._num_dice: int = 8
+        self._roll_counter: int = 0
         self._remaining_dice: int = self._num_dice
         self._terminated: bool = False
         self._truncated: bool = False
         self._no_throw = False
+        self._you: list[int] = []
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
         self._dice_collected: list[int] = [0, 0, 0, 0, 0, 0]  # Collected dice, up to 8 per side.
         self._dice_rolled: list[int] = [0, 0, 0, 0, 0, 0]  # Last roll.
-        self._roll_counter: int = 0
+
         self._tile_table: dict[int, bool] = {
             21: True,
             22: True,
@@ -44,7 +46,6 @@ class PickominoEnv(gym.Env):
             35: True,
             36: True,
         }
-        self.you: list[int] = []
 
         self.observation_space = gym.spaces.Dict(
             {
@@ -52,7 +53,7 @@ class PickominoEnv(gym.Env):
                 "dice_rolled": gym.spaces.Box(low=0, high=6, shape=(6,), dtype=np.int64),
                 # "available_tiles": gym.spaces.Box(low=0, high=1, shape=(37,), dtype=np.int64),
                 "tiles_table": gym.spaces.Dict(
-                    {i: gym.spaces.Discrete(5) for i in range(21, 37)}  # Set the value to False/True when collected.
+                    {i: gym.spaces.Discrete(1) for i in range(21, 37)}  # Set the value to False/True when collected.
                 ),
                 "tile_player": gym.spaces.Discrete(1),
             }
@@ -89,7 +90,7 @@ class PickominoEnv(gym.Env):
         Returns:
             dict: Tiles distribution
         """
-        observation_tiles = (self.you, self._tile_table)
+        observation_tiles = (self._you, self._tile_table)
         return observation_tiles
 
     def _get_info(self, action):
@@ -100,17 +101,17 @@ class PickominoEnv(gym.Env):
         """
         return_value = {
             "action": action,
-            "self.num_dice": self._num_dice,
-            "self.remaining_dice": self._remaining_dice,
-            "self._dice_collected": self._dice_collected,
-            "self._dice_rolled": self._dice_rolled,
-            "self.roll_counter": self._roll_counter,
-            "self.observation_space": self.observation_space,
-            "self.action_space": self.action_space,
-            "self._sum": self._get_dice_sum(),
+            "num_dice": self._num_dice,
+            "remaining_dice": self._remaining_dice,
+            "dice_collected": self._dice_collected,
+            "dice_rolled": self._dice_rolled,
+            "roll_counter": self._roll_counter,
+            "observation_space": self.observation_space,
+            "action_space": self.action_space,
+            "sum": self._get_dice_sum(),
             "terminated": self._terminated,
-            "self._get_obs_dice()": self._get_obs_dice(),
-            "self._get_obs_tiles()": self._get_obs_tiles(),
+            "get_obs_dice()": self._get_obs_dice(),
+            "get_obs_tiles()": self._get_obs_tiles(),
             # "self.legal_move(action)": self._legal_move(action),
         }
         return return_value
@@ -127,8 +128,8 @@ class PickominoEnv(gym.Env):
 
     def _remove_tile_from_player(self) -> int:
         return_value = 0
-        if self.you:
-            tile_to_return: int = self.you.pop()  # Remove the tile from the player.
+        if self._you:
+            tile_to_return: int = self._you.pop()  # Remove the tile from the player.
             # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
             self._tile_table[tile_to_return] = True  # Return the tile to the table.
             return_value = -self._get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
@@ -161,7 +162,7 @@ class PickominoEnv(gym.Env):
         self._roll_counter = 0
         self._remaining_dice = 8
         self._no_throw = False
-        self.you = []
+        self._you = []
         self._tile_table = {
             21: True,
             22: True,
@@ -192,7 +193,7 @@ class PickominoEnv(gym.Env):
             "dice_rolled": np.array(self._dice_rolled),
             # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
             "tiles_table": self._tile_table,  # Tiles that can be taken.
-            "tile_player": (self.you[-1] if self.you else 0),
+            "tile_player": (self._you[-1] if self._you else 0),
         }
 
         info = self._get_info((0, 1))  # Arbitrary action in reset only for debugging
@@ -312,7 +313,7 @@ class PickominoEnv(gym.Env):
         # Only pick a tile if it is on the table.
         if self._tile_table[dice_sum]:
             # print("PRINT DEBUGGING - Picking tile:", dice_sum)
-            self.you.append(dice_sum)  # Add the tile to the player.
+            self._you.append(dice_sum)  # Add the tile to the player.
             self._tile_table[dice_sum] = False  # Mark the tile as no longer on the table.
             return_value = self._get_worms(dice_sum)
             self._truncated = True
@@ -326,7 +327,7 @@ class PickominoEnv(gym.Env):
                     highest = tile
             if highest:  # Found the highest tile to pick from the table.
                 # print("PRINT DEBUGGING - Picking tile:", highest)
-                self.you.append(highest)  # Add the tile to the player.
+                self._you.append(highest)  # Add the tile to the player.
                 self._tile_table[highest] = False  # Mark the tile as no longer on the table.
                 return_value = self._get_worms(highest)
                 self._truncated = True
@@ -360,7 +361,7 @@ class PickominoEnv(gym.Env):
             "dice_rolled": np.array(self._dice_rolled),
             # "player": gym.spaces.Discrete(num_players),  # Number of players in the game.
             "tiles_table": self._tile_table,  # Tiles that can be taken.
-            "tile_player": (self.you[-1] if self.you else 0),  # immer int
+            "tile_player": (self._you[-1] if self._you else 0),  # immer int
         }
 
         info = self._get_info(action)
