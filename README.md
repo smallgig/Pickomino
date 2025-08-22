@@ -52,7 +52,7 @@ Die Registrierung passiert automatisch beim Import von `pickomino_env`.
 import gymnasium as gym
 import pickomino_env  # ⚠️ wichtig: löst die Registrierung aus
 
-env = gym.make("Pickomino-v0", num_players=2)  # kwargs überschreiben Defaults
+env = gym.make("Pickomino-v0")  # kwargs überschreiben Defaults
 obs, info = env.reset(seed=42)
 print("Init ok. Beispiel-Observation:", obs)
 ```
