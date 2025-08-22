@@ -177,3 +177,11 @@ check_env(env, warn=True)
 
 model = PPO("MlpPolicy", env, tensorboard_log="runs", verbose=1)
 model.learn(10_000, tb_log_name="PickominoPPO")
+from stable_baselines3.common.callbacks import EvalCallback
+
+eval_env = make_env(seed=123)
+eval_cb = EvalCallback(
+    eval_env, eval_freq=5000, n_eval_episodes=20,
+    deterministic=True, best_model_save_path="models", log_path="eval"
+)
+model.learn(200_000, tb_log_name="PickominoPPO", callback=[TBCallback(), eval_cb])
