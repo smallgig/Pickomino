@@ -31,6 +31,7 @@ class PickominoEnv(gym.Env):
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
         self._dice = Dice()
 
+        # TODO Values from 0-16 for discrete Environment.
         self._tile_table: dict[int, bool] = {
             21: True,
             22: True,
@@ -124,6 +125,7 @@ class PickominoEnv(gym.Env):
             "get_obs_dice()": self._get_obs_dice(),
             "get_obs_tiles()": self._get_obs_tiles(),
             "tiles_table_vec": self._tiles_vector(),
+            "dice": self._dice,
             # "self.legal_move(action)": self._legal_move(action),
         }
         return return_value
@@ -348,7 +350,7 @@ class Dice:
     This example means that three threes, four fours and one worm die face have been collected."""
 
     def __init__(self) -> None:
-        self._values: list[int] = [1, 2, 3, 4, 5, 5]
+        self._values: list[int] = [1, 2, 3, 4, 5, 5]  # Worm has the value 5.
         self._n_dice: int = 8
         self._collected: list[int] = [0, 0, 0, 0, 0, 0]  # Collected dice, up to 8 per side.
         self._rolled: list[int] = [0, 0, 0, 0, 0, 0]  # Last roll.
@@ -384,28 +386,76 @@ class Dice:
 
         return current_score, has_worms
 
+    def __str__(self) -> str:
+        die_faces: list[str] = [
+            "",  # index = 0 doesn't have a face
+            "[     ]\n[  0  ]\n[     ]",  # index 1
+            "[0    ]\n[     ]\n[    0]",  # index 2
+            "[0    ]\n[  0  ]\n[    0]",  # index 3
+            "[0   0]\n[     ]\n[0   0]",  # index 4
+            "[0   0]\n[  0  ]\n[0   0]",  # index 5
+            "[0   0]\n[0   0]\n[0   0]",  # index 6
+        ]
+        # Print one dice.
+        show_values = [1, 2, 3, 4, 5, 6]
+        faces = [die_faces[v].splitlines() for v in show_values]
+        return_value = ""
+        for line in zip(*faces):
+            return_value += " ".join(line) + "\n"
+        return return_value
 
-die_faces: list[str] = [
-    "",  # index = 0 doesn't have a face
-    "[     ]\n[  0  ]\n[     ]",  # index 1
-    "[0    ]\n[     ]\n[    0]",  # index 2
-    "[0    ]\n[  0  ]\n[    0]",  # index 3
-    "[0   0]\n[     ]\n[0   0]",  # index 4
-    "[0   0]\n[  0  ]\n[0   0]",  # index 5
-    "[0   0]\n[0   0]\n[0   0]",  # index 6
-]
+
+class TableTiles:
+    """Define the Tiles on the Table"""
+
+    def __init__(self) -> None:
+        """Constructor"""
+        self._tile_table: dict[int, bool] = {
+            21: True,
+            22: True,
+            23: True,
+            24: True,
+            25: True,
+            26: True,
+            27: True,
+            28: True,
+            29: True,
+            30: True,
+            31: True,
+            32: True,
+            33: True,
+            34: True,
+            35: True,
+            36: True,
+        }
+
+    def set_tile(self, tile_number, truth_value) -> None:
+        """Set one Tile."""
+        self._tile_table[tile_number] = truth_value
+
+    def get_table(self) -> dict[int, bool]:
+        """Get whole table."""
+        return self._tile_table
+
+    def is_empty(self) -> bool:
+        """Check if the table is empty"""
+        if self._tile_table.values():
+            return False
+        return True
+
+    def highest(self) -> int:
+        """Get highest tile on table"""
+        highest = 0
+        if not self.is_empty():
+            for key, value in self._tile_table.items():
+                if value:
+                    highest = key
+        return highest
 
 
-def print_dice(values: list[int]) -> None:
-    """Print one dice."""
-    faces = [die_faces[v].splitlines() for v in values]
-    for line in zip(*faces):
-        print(*line)
-
-
-def print_roll(observation, total) -> None:
+def print_roll(observation, total, dice) -> None:
     """Print one roll."""
-    print_dice([1, 2, 3, 4, 5, 6])
+    print(dice)
     # Print line of collected dice.
     for collected in range(len(observation[0])):
         print(f"   {observation[0][collected]}    ", end="")
@@ -435,7 +485,7 @@ if __name__ == "__main__":
     for step in range(MAX_TURNS):
         print("Step:", step)
         print("Your showing tile: ", game_observation["tile_player"], "(your reward = ", game_reward, ")")
-        print_roll(dices_rolled_coll, game_total)
+        print_roll(dices_rolled_coll, game_total, game_info["dice"])
         print("Tiles on table:", end=" ")
         for i, game_tile in enumerate(game_observation["tiles_table"]):
             if game_tile:
