@@ -65,18 +65,6 @@ class PickominoEnv(gym.Env):
 
         self.action_space = gym.spaces.MultiDiscrete([6, 2])
 
-    # def _get_dice_sum(self) -> int:
-    #     """Return the sum of the collected dices."""
-    #     return_value = 0
-    #     # Dice with eyes = number of eyes per die times the number of dice.
-    #     for ind, die in enumerate(self._dice_collected):
-    #         return_value += ind * die  # Worms have ind = 0 and hence are not counted here.
-    #
-    #     # Worms have value five.
-    #     return_value += self._dice_collected[0] * 5
-    #
-    #     return return_value
-
     def _get_obs_dice(self):  # -> tuple[list[int], list[int]] or npt arrays if we keep them
         """Convert internal state to observation format.
 
@@ -92,9 +80,9 @@ class PickominoEnv(gym.Env):
         Mapping:
         21–24 -> 1, 25–28 -> 2, 29–32 -> 3, 33–36 -> 4
         """
-        if not 21 <= moved_key <= 36:
+        if not PickominoEnv.SMALLEST_TILE <= moved_key <= PickominoEnv.LARGEST_TILE:
             raise ValueError("dice_sum must be between 21 and 36.")
-        return (moved_key - 21) // 4 + 1
+        return (moved_key - PickominoEnv.SMALLEST_TILE) // 4 + 1
 
     def _get_obs_tiles(self):
         """Convert internal state to observation format.
@@ -210,7 +198,7 @@ class PickominoEnv(gym.Env):
 
         return return_obs, self._get_info()
 
-    def _legal_move(self):
+    def _legal_move(self) -> bool:
         """Check if action is allowed."""
         self._terminated = False
         self._truncated = False
@@ -238,14 +226,6 @@ class PickominoEnv(gym.Env):
 
         return return_value
 
-    # def _roll(self) -> None:
-    #     max_dice: int = self._num_dice - np.sum(self._dice_collected)
-    #     dices_to_roll: int = min(self._remaining_dice, max_dice)
-    #     for _ in range(dices_to_roll):
-    #         self._dice_rolled[rand.randint(0, 5)] += 1
-    #
-    #     self._truncated = False
-
     def _step_dice(self) -> None:
         """Execute one roll of the dice and picking or returning a tile.
 
@@ -262,7 +242,6 @@ class PickominoEnv(gym.Env):
 
         # Action is to roll
         if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_ROLL:
-            # TODO: Jarl: we have updated self._remaining_dice, why do we need to do this?
             self._dice.roll()
             # Check for no-throw
             self._no_throw = True
@@ -364,41 +343,31 @@ class PickominoEnv(gym.Env):
 
 
 class Dice:
-    """
-    Represents a collection of die face frequencies.
+    """Represents a collection of die face frequencies.
     An example for eight dice with six faces is: (0, 0, 3, 4, 0, 1)
-    This example means that three threes, four fours and one worm die face have been collected.
-    """
+    This example means that three threes, four fours and one worm die face have been collected."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._values: list[int] = [1, 2, 3, 4, 5, 5]
         self._n_dice: int = 8
         self._collected: list[int] = [0, 0, 0, 0, 0, 0]  # Collected dice, up to 8 per side.
         self._rolled: list[int] = [0, 0, 0, 0, 0, 0]  # Last roll.
 
-    def collect(self, action_face):
-        """
-        Insert chosen face to collected list.
-        """
+    def collect(self, action_face) -> list[int]:
+        """Insert chosen face to collected list."""
         self._collected[action_face] = self._rolled[action_face]
         return self._collected
 
     def get_collected(self) -> list[int]:
-        """
-        getter
-        """
+        """Getter."""
         return self._collected
 
     def get_rolled(self) -> list[int]:
-        """
-        getter
-        """
+        """Getter."""
         return self._rolled
 
     def roll(self) -> list[int]:
-        """
-        Roll remaining dice.
-        """
+        """Roll remaining dice."""
         self._rolled = [0, 0, 0, 0, 0, 0]
 
         for _ in range(self._n_dice - sum(self._collected)):
@@ -407,9 +376,7 @@ class Dice:
         return self._rolled
 
     def score(self) -> tuple[int, bool]:
-        """
-        Count the score based on an array of die face frequencies.
-        """
+        """Count the score based on an array of die face frequencies."""
         # Check if there is at least one worm
         has_worms = self._collected[-1] > 0
         # Multiply the frequency of each die face with its value
@@ -470,8 +437,8 @@ if __name__ == "__main__":
         print("Your showing tile: ", game_observation["tile_player"], "(your reward = ", game_reward, ")")
         print_roll(dices_rolled_coll, game_total)
         print("Tiles on table:", end=" ")
-        for i, tile in enumerate(game_observation["tiles_table"]):
-            if tile:
+        for i, game_tile in enumerate(game_observation["tiles_table"]):
+            if game_tile:
                 print(i + 21, end=" ")
         print()
         SELECTION: int = int(input("Which dice do you want to collect? (1..5 or worm =6): ")) - 1
