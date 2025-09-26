@@ -444,7 +444,7 @@ class TableTiles:
         return True
 
     def highest(self) -> int:
-        """Get highest tile on table"""
+        """Get the highest tile on table"""
         highest = 0
         if not self.is_empty():
             for key, value in self._tile_table.items():
@@ -487,9 +487,9 @@ if __name__ == "__main__":
         print("Your showing tile: ", game_observation["tile_player"], "(your reward = ", game_reward, ")")
         print_roll(dices_rolled_coll, game_total, game_info["dice"])
         print("Tiles on table:", end=" ")
-        for i, game_tile in enumerate(game_observation["tiles_table"]):
+        for ind, game_tile in enumerate(game_observation["tiles_table"]):
             if game_tile:
-                print(i + 21, end=" ")
+                print(ind + 21, end=" ")
         print()
         SELECTION: int = int(input("Which dice do you want to collect? (1..5 or worm =6): ")) - 1
         stop: int = int(input("Keep rolling? (0 = ROLL,  1 = STOP: "))
