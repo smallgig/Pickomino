@@ -31,26 +31,9 @@ class PickominoEnv(gym.Env):
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
         self._dice = Dice()
 
-        # TODO Values from 0-16 for discrete Environment.
-        self._tile_table: dict[int, bool] = {
-            21: True,
-            22: True,
-            23: True,
-            24: True,
-            25: True,
-            26: True,
-            27: True,
-            28: True,
-            29: True,
-            30: True,
-            31: True,
-            32: True,
-            33: True,
-            34: True,
-            35: True,
-            36: True,
-        }
+        # TODO you liste 0-16
 
+        self._table_tiles = TableTiles()
         self.observation_space = gym.spaces.Dict(
             {
                 "dice_collected": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
@@ -91,12 +74,12 @@ class PickominoEnv(gym.Env):
         Returns:
             dict: Tiles distribution
         """
-        observation_tiles = (self._you, self._tile_table)
+        observation_tiles = (self._you, self._table_tiles.get_table())
         return observation_tiles
 
     def _tiles_vector(self) -> np.ndarray:
         """Return tiles_table as a flat binary vector of length 16 for indices 21..36."""
-        return np.array([1 if self._tile_table[i] else 0 for i in range(21, 37)], dtype=np.int8)
+        return np.array([1 if self._table_tiles.get_table()[i] else 0 for i in range(21, 37)], dtype=np.int8)
 
     def _current_obs(self):
         return {
@@ -141,17 +124,14 @@ class PickominoEnv(gym.Env):
         if self._you:
             tile_to_return: int = self._you.pop()  # Remove the tile from the player.
             # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
-            self._tile_table[tile_to_return] = True  # Return the tile to the table.
+            self._table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
             return_value = -self._get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
             # If the returned tile is not the highest, turn the highest tile around (set to False)
             # Search for the highest tile to turn.
-            highest = 0
-            for t in range(tile_to_return + 1, 37):
-                if self._tile_table[t]:
-                    highest = t
+            highest = self._table_tiles.highest()
             # Turn the highest tile if there is one.
             if highest:
-                self._tile_table[highest] = False
+                self._table_tiles.set_tile(highest, False)
 
         return return_value
 
@@ -172,24 +152,7 @@ class PickominoEnv(gym.Env):
         self._dice = Dice()
         self._no_throw = False
         self._you = []
-        self._tile_table = {
-            21: True,
-            22: True,
-            23: True,
-            24: True,
-            25: True,
-            26: True,
-            27: True,
-            28: True,
-            29: True,
-            30: True,
-            31: True,
-            32: True,
-            33: True,
-            34: True,
-            35: True,
-            36: True,
-        }
+        self._table_tiles = TableTiles()
         self._terminated = False
         self._truncated = False
 
@@ -206,22 +169,25 @@ class PickominoEnv(gym.Env):
         self._truncated = False
         return_value: bool = True
 
-        # Dice already collected cannot be taken again.
-        if self._dice.get_collected()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
-            if self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
+        if self._action[PickominoEnv.ACTION_INDEX_DICE] not in range(1, 6):
+            self._terminated = True
+        else:
+            # Dice already collected cannot be taken again.
+            if self._dice.get_collected()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
+                if self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
+                    self._terminated = True
+
+            # Action if no dice is available in rolled_dice
+            if not self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]]:
                 self._terminated = True
 
-        # Action if no dice is available in rolled_dice
-        if not self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]]:
-            self._terminated = True
+            # No dice left and 21 not reached
+            if self._remaining_dice == 0 and self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
+                self._terminated = True
 
-        # No dice left and 21 not reached
-        if self._remaining_dice == 0 and self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
-            self._terminated = True
-
-        # No worm collected
-        if self._remaining_dice == 0 and not self._dice.score()[1]:
-            self._terminated = True
+            # No worm collected
+            if self._remaining_dice == 0 and not self._dice.score()[1]:
+                self._terminated = True
 
         if self._terminated:
             return_value = False
@@ -284,24 +250,21 @@ class PickominoEnv(gym.Env):
         dice_sum = min(dice_sum, PickominoEnv.LARGEST_TILE)
         # Environment takes the highest tile on the table.
         # Only pick a tile if it is on the table.
-        if self._tile_table[dice_sum]:
+        if self._table_tiles.get_table()[dice_sum]:
             # print("PRINT DEBUGGING - Picking tile:", dice_sum)
             self._you.append(dice_sum)  # Add the tile to the player.
-            self._tile_table[dice_sum] = False  # Mark the tile as no longer on the table.
+            self._table_tiles.set_tile(dice_sum, False)  # Mark the tile as no longer on the table.
             return_value = self._get_worms(dice_sum)
             self._truncated = True
         # Tile is not available on the table
         else:
             # Pick the highest of the tiles smaller than the unavailable tile
             # Find the highest tile smaller than the dice sum.
-            highest = 0
-            for tile in range(21, dice_sum):
-                if self._tile_table[tile]:
-                    highest = tile
+            highest = self._table_tiles.highest()
             if highest:  # Found the highest tile to pick from the table.
                 # print("PRINT DEBUGGING - Picking tile:", highest)
                 self._you.append(highest)  # Add the tile to the player.
-                self._tile_table[highest] = False  # Mark the tile as no longer on the table.
+                self._table_tiles.set_tile(highest, False)  # Mark the tile as no longer on the table.
                 return_value = self._get_worms(highest)
                 self._truncated = True
             # Also no smaller tiles available -> have to return players showing tile if there is one.
@@ -326,10 +289,8 @@ class PickominoEnv(gym.Env):
             reward = self._step_tiles()
 
             # Game Over if no Tile is on the table anymore.
-            self._terminated = True
-            for _, value in self._tile_table.items():
-                if value:
-                    self._terminated = False
+            if not self._table_tiles.highest():
+                self._terminated = True
 
         if self._terminated:
             return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
