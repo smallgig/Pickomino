@@ -3,7 +3,11 @@
 from typing import Any
 import numpy as np
 import gymnasium as gym
+from mypy.modulefinder import highest_init_level
 from numpy import ndarray, dtype
+from numpy.ma.core import argmax
+from tensorflow.compiler.tf2xla.python.xla import shift_left
+
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.table_tiles import TableTiles
 from pickomino_env.src.player import Player
@@ -251,9 +255,6 @@ class PickominoEnv(gym.Env):
             # print("PRINT DEBUGGING - Your tiles:", self.you)
             self._soft_reset()
             return return_value
-
-        # Using dice_sum as an index in [21..36], higher rolls can only pick 36 or lower
-        dice_sum = min(dice_sum, PickominoEnv.LARGEST_TILE)
         # Environment takes the highest tile on the table.
         # Only pick a tile if it is on the table.
         if self._table_tiles.get_table()[dice_sum]:
@@ -281,6 +282,51 @@ class PickominoEnv(gym.Env):
         # print("PRINT DEBUGGING - Your tiles:", self.you)
         self._soft_reset()
         return return_value
+
+    def _step_dice_bot(self, take_worm: bool) -> bool:
+        """Execute one roll of the dice and picking or returning a tile.
+
+        :param: action: The action to take: which dice to collect.
+        """
+        # Dice already collected cannot be taken again.
+        worm_prio = self._dice.values
+        allowed = self._dice.get_rolled()
+        if not allowed:
+            return False
+        for ind, die in enumerate(self._dice.get_collected()):
+            if die:
+                allowed[ind] = 0
+        if take_worm:
+            worm_prio[5] = 100
+        contribution = np.dot(allowed, worm_prio)
+        highest = argmax(contribution)
+        self._dice.collect(highest)
+        return True
+
+    def _step_tile_bot(self):
+        pass
+
+    def _step_bot(self):
+        """https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/
+        Heuristic Strategy:
+        - On or after the third roll, take worms if you can.
+        - Otherwise, take the die side that contributes the most points.
+        - Quit as soon as you can take a tile."""
+        bots = self._players[1:]  # First player is you
+        for bot in bots:
+            self._soft_reset()
+            while sum(self._dice.get_collected()) < 8:
+                if self._roll_counter < 3:
+                    self._roll_counter += 1
+                    if self._step_dice_bot(False):
+                        self._dice.roll()
+                    else:
+                        self._no_throw = True
+                # After three throws
+                else:
+                    self._step_dice_bot(True)
+                    if self._dice.score()[1] and self._table_tiles.get_table()[self._dice.score()[0]]:
+                        self._step_tile_bot()
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         self._action = action

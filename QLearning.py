@@ -6,28 +6,31 @@ from collections import defaultdict, deque
 from typing import Dict, Tuple, List
 
 import gymnasium as gym
-from tensorboardX import SummaryWriter    # leichtgewichtig, kein PyTorch nötig
+from tensorboardX import SummaryWriter  # leichtgewichtig, kein PyTorch nötig
 import matplotlib.pyplot as plt
-import 
 
 # ------------------------ Hilfsfunktionen ------------------------
 
 TILES = list(range(21, 37))  # 21..36
+
 
 def worms_for_tile(v: int) -> int:
     if 21 <= v <= 36:
         return (v - 21) // 4 + 1
     return 0
 
+
 def score_of(dc: List[int]) -> int:
     # Wurm (Index 0) zählt 5, Augen i zählen i
-    return int(dc[0]*5 + sum(i*dc[i] for i in range(1, 6)))
+    return int(dc[0] * 5 + sum(i * dc[i] for i in range(1, 6)))
+
 
 def tiles_mask(tt: Dict[int, bool | int]) -> int:
     """Kompakte Bitmaske (16 Bits) aus tiles_table. True oder int>0 = liegt auf dem Tisch."""
     m = 0
     if not isinstance(tt, dict):
-        for v in TILES: m |= 1 << (v - 21)
+        for v in TILES:
+            m |= 1 << (v - 21)
         return m
     for v in TILES:
         val = tt.get(v, False)
@@ -36,10 +39,11 @@ def tiles_mask(tt: Dict[int, bool | int]) -> int:
             m |= 1 << (v - 21)
     return m
 
+
 def obs_to_state_key(obs: dict) -> tuple:
     """Robuste, hashbare Zustandsrepräsentation für die Q-Table."""
     dc = tuple(int(x) for x in obs.get("dice_collected", [0, 0, 0, 0, 0, 0]))
-    dr = tuple(int(x) for x in obs.get("dice_rolled",    [0, 0, 0, 0, 0, 0]))
+    dr = tuple(int(x) for x in obs.get("dice_rolled", [0, 0, 0, 0, 0, 0]))
     mask = tiles_mask(obs.get("tiles_table", {}))
 
     # tiles_player kann fehlen/ein int/eine Liste sein
@@ -54,6 +58,7 @@ def obs_to_state_key(obs: dict) -> tuple:
     topW = worms_for_tile(top_tile)
     return (dc, dr, mask, topW)
 
+
 def legal_actions(obs: Dict) -> List[Tuple[int, int]]:
     """
     Erzeuge legale Aktionen (face, roll_or_stop).
@@ -62,8 +67,8 @@ def legal_actions(obs: Dict) -> List[Tuple[int, int]]:
     - (f,1) = STOP nur, wenn nach dem Pick Wurm vorhanden und Summe >= 21.
     Wenn kein Gesicht legal (no-throw), fallback [(0,1)] – Env behandelt Bust.
     """
-    dc = [int(x) for x in obs.get("dice_collected", [0]*6)]
-    dr = [int(x) for x in obs.get("dice_rolled",    [0]*6)]
+    dc = [int(x) for x in obs.get("dice_collected", [0] * 6)]
+    dr = [int(x) for x in obs.get("dice_rolled", [0] * 6)]
     faces = [i for i in range(6) if dr[i] > 0 and dc[i] == 0]
     if not faces:
         return [(0, 1)]
@@ -74,10 +79,11 @@ def legal_actions(obs: Dict) -> List[Tuple[int, int]]:
         dc_new = dc.copy()
         dc_new[f] += dr[f]
         s_new = score_of(dc_new)
-        stop_ok = (dc_new[0] > 0 and s_new >= 21)
+        stop_ok = dc_new[0] > 0 and s_new >= 21
         if stop_ok:
             acts.append((f, 1))
     return acts
+
 
 def epsilon_greedy(Qs: Dict[Tuple, float], actions: List[Tuple[int, int]], eps: float) -> Tuple[int, int]:
     if not actions:
@@ -86,6 +92,7 @@ def epsilon_greedy(Qs: Dict[Tuple, float], actions: List[Tuple[int, int]], eps: 
         return random.choice(actions)
     best_a = max(actions, key=lambda a: Qs.get(a, 0.0))
     return best_a
+
 
 def moving_average(values: List[float], window: int = 100) -> List[float]:
     if window <= 1:
@@ -97,7 +104,9 @@ def moving_average(values: List[float], window: int = 100) -> List[float]:
         out.append(sum(q) / len(q))
     return out
 
+
 # ------------------------ Q-Learning ------------------------
+
 
 def train_qlearning(
     env_id: str = "Pickomino-v0",
@@ -120,7 +129,7 @@ def train_qlearning(
         obs, info = env.reset()
 
     # Q: dict[state_key][action] = value
-    Q: Dict[Tuple, Dict[Tuple[int,int], float]] = defaultdict(dict)
+    Q: Dict[Tuple, Dict[Tuple[int, int], float]] = defaultdict(dict)
 
     writer = SummaryWriter(log_dir=log_dir)
     eps = eps_start
@@ -194,8 +203,8 @@ def train_qlearning(
     # Lernkurven-Plot
     ma = moving_average(episode_returns, ma_window)
     plt.figure()
-    plt.plot(range(1, len(episode_returns)+1), episode_returns, label="Return/Episode")
-    plt.plot(range(1, len(ma)+1), ma, label=f"Moving Avg (window={ma_window})")
+    plt.plot(range(1, len(episode_returns) + 1), episode_returns, label="Return/Episode")
+    plt.plot(range(1, len(ma) + 1), ma, label=f"Moving Avg (window={ma_window})")
     plt.xlabel("Episode")
     plt.ylabel("Return")
     plt.title("Q-Learning Pickomino-v0")
@@ -208,7 +217,9 @@ def train_qlearning(
     env.close()
     return Q, episode_returns
 
+
 # ------------------------ Auswertung (greedy) ------------------------
+
 
 def run_greedy_episode(env_id: str, Q: Dict, render: bool = False, seed: int | None = None) -> float:
     env = gym.make(env_id)
@@ -228,10 +239,13 @@ def run_greedy_episode(env_id: str, Q: Dict, render: bool = False, seed: int | N
         ret += reward
         steps += 1
         if render:
-            print(f"[{steps:03d}] a={a}  r={reward:+.1f}  sum={info.get('self._sum')}  term={terminated} trunc={truncated}")
+            print(
+                f"[{steps:03d}] a={a}  r={reward:+.1f}  sum={info.get('self._sum')}  term={terminated} trunc={truncated}"
+            )
         done = bool(terminated or truncated)
     env.close()
     return ret
+
 
 # ------------------------ Main ------------------------
 
@@ -239,7 +253,7 @@ if __name__ == "__main__":
     print("Training Q-Learning auf Pickomino-v0 (mit TensorBoard & Lernkurven-Plot) ...")
     Q, rets = train_qlearning(
         env_id="Pickomino-v0",
-        episodes=10000,      # je nach Geduld erhöhen
+        episodes=10000,  # je nach Geduld erhöhen
         alpha=0.15,
         gamma=0.99,
         eps_start=1.0,
