@@ -1,10 +1,13 @@
 """Pickomino game with gymnasium API."""
 
-import random as rand
 from typing import Any
 import numpy as np
 import gymnasium as gym
 from numpy import ndarray, dtype
+from pickomino_env.src.dice import Dice
+from pickomino_env.src.table_tiles import TableTiles
+from pickomino_env.src.player import Player
+from pickomino_env.src import utils
 
 
 class PickominoEnv(gym.Env):
@@ -68,23 +71,13 @@ class PickominoEnv(gym.Env):
 
         return self._dice.get_collected(), self._dice.get_rolled()
 
-    @staticmethod
-    def get_worms(moved_key: int) -> int:
-        """Give back the number of worms (1..4) for given the dice sum (21..36).
-        Mapping:
-        21–24 -> 1, 25–28 -> 2, 29–32 -> 3, 33–36 -> 4
-        """
-        if not PickominoEnv.SMALLEST_TILE <= moved_key <= PickominoEnv.LARGEST_TILE:
-            raise ValueError("dice_sum must be between 21 and 36.")
-        return (moved_key - PickominoEnv.SMALLEST_TILE) // 4 + 1
-
     def _get_obs_tiles(self) -> tuple[int, dict[int, bool]]:
         """Convert internal state to observation format.
 
         Returns:
             dict: Tiles distribution
         """
-        return self._you.show(), self._table_tiles.get_table()
+        return self._players[0].show(), self._table_tiles.get_table()
 
     def _tiles_vector(self) -> ndarray[Any, dtype[Any]]:
         """Return tiles_table as a flat binary vector of length 16 for indices 21..36."""
@@ -133,11 +126,11 @@ class PickominoEnv(gym.Env):
     def _remove_tile_from_player(self) -> int:
         return_value = 0
 
-        if self._you.show():
-            tile_to_return: int = self._you.remove_tile()  # Remove the tile from the player.
+        if self._players[0].show():
+            tile_to_return: int = self._players[0].remove_tile()  # Remove the tile from the player.
             # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
             self._table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
-            return_value = -self.get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
+            return_value = -utils.get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
             # If the returned tile is not the highest, turn the highest tile around (set to False)
             # Search for the highest tile to turn.
             highest = self._table_tiles.highest()
@@ -265,9 +258,9 @@ class PickominoEnv(gym.Env):
         # Only pick a tile if it is on the table.
         if self._table_tiles.get_table()[dice_sum]:
             # print("PRINT DEBUGGING - Picking tile:", dice_sum)
-            self._you.add_tile(dice_sum)  # Add the tile to the player.
+            self._players[0].add_tile(dice_sum)  # Add the tile to the player.
             self._table_tiles.set_tile(dice_sum, False)  # Mark the tile as no longer on the table.
-            return_value = self.get_worms(dice_sum)
+            return_value = utils.get_worms(dice_sum)
             self._truncated = True
         # Tile is not available on the table
         else:
@@ -276,9 +269,9 @@ class PickominoEnv(gym.Env):
             highest = self._table_tiles.highest()
             if highest:  # Found the highest tile to pick from the table.
                 # print("PRINT DEBUGGING - Picking tile:", highest)
-                self._you.add_tile(highest)  # Add the tile to the player.
+                self._players[0].add_tile(highest)  # Add the tile to the player.
                 self._table_tiles.set_tile(highest, False)  # Mark the tile as no longer on the table.
-                return_value = self.get_worms(highest)
+                return_value = utils.get_worms(highest)
                 self._truncated = True
             # Also no smaller tiles available -> have to return players showing tile if there is one.
             else:
@@ -313,150 +306,6 @@ class PickominoEnv(gym.Env):
         info = self._get_info()
 
         return return_obs, reward, self._terminated, self._truncated, info
-
-
-# The next 18 lines, until 'print(*line)', were copied from Stack Overflow
-
-
-class Dice:
-    """Represents a collection of die face frequencies.
-    An example for eight dice with six faces is: (0, 0, 3, 4, 0, 1)
-    This example means that three threes, four fours and one worm die face have been collected."""
-
-    def __init__(self) -> None:
-        self._values: list[int] = [1, 2, 3, 4, 5, 5]  # Worm has the value 5.
-        self._n_dice: int = 8
-        self._collected: list[int] = [0, 0, 0, 0, 0, 0]  # Collected dice, up to 8 per side.
-        self._rolled: list[int] = [0, 0, 0, 0, 0, 0]  # Last roll.
-
-    def collect(self, action_face: int) -> list[int]:
-        """Insert chosen face to collected list."""
-        self._collected[action_face] = self._rolled[action_face]
-        return self._collected
-
-    def get_collected(self) -> list[int]:
-        """Getter."""
-        return self._collected
-
-    def get_rolled(self) -> list[int]:
-        """Getter."""
-        return self._rolled
-
-    def roll(self) -> list[int]:
-        """Roll remaining dice."""
-        self._rolled = [0, 0, 0, 0, 0, 0]
-
-        for _ in range(self._n_dice - sum(self._collected)):
-            self._rolled[rand.randint(0, 5)] += 1
-
-        return self._rolled
-
-    def score(self) -> tuple[int, bool]:
-        """Count the score based on an array of die face frequencies."""
-        # Check if there is at least one worm
-        has_worms = self._collected[-1] > 0
-        # Multiply the frequency of each die face with its value
-
-        current_score = int(np.dot(self._values, self._collected) if self._collected else 0)
-
-        return current_score, has_worms
-
-    def __str__(self) -> str:
-        die_faces: list[str] = [
-            "",  # index = 0 doesn't have a face
-            "[     ]\n[  0  ]\n[     ]",  # index 1
-            "[0    ]\n[     ]\n[    0]",  # index 2
-            "[0    ]\n[  0  ]\n[    0]",  # index 3
-            "[0   0]\n[     ]\n[0   0]",  # index 4
-            "[0   0]\n[  0  ]\n[0   0]",  # index 5
-            "[0   0]\n[0   0]\n[0   0]",  # index 6
-        ]
-        # Print one dice.
-        show_values = [1, 2, 3, 4, 5, 6]
-        faces = [die_faces[v].splitlines() for v in show_values]
-        return_value = ""
-        for line in zip(*faces):
-            return_value += " ".join(line) + "\n"
-        return return_value
-
-
-class TableTiles:
-    """Define the Tiles on the Table"""
-
-    def __init__(self) -> None:
-        """Constructor"""
-        self._tile_table: dict[int, bool] = {
-            21: True,
-            22: True,
-            23: True,
-            24: True,
-            25: True,
-            26: True,
-            27: True,
-            28: True,
-            29: True,
-            30: True,
-            31: True,
-            32: True,
-            33: True,
-            34: True,
-            35: True,
-            36: True,
-        }
-
-    def set_tile(self, tile_number: int, truth_value: bool) -> None:
-        """Set one Tile."""
-        self._tile_table[tile_number] = truth_value
-
-    def get_table(self) -> dict[int, bool]:
-        """Get whole table."""
-        return self._tile_table
-
-    def is_empty(self) -> bool:
-        """Check if the table is empty"""
-        if self._tile_table.values():
-            return False
-        return True
-
-    def highest(self) -> int:
-        """Get the highest tile on table"""
-        highest = 0
-        if not self.is_empty():
-            for key, value in self._tile_table.items():
-                if value:
-                    highest = key
-        return highest
-
-
-class Player:
-    """Player class with his tiles and name."""
-
-    def __init__(self, bot: bool, name: str) -> None:
-        """Constructor for a player"""
-        self.name: str = name
-        self.tile_stack: list[int] = []
-        self.bot: bool = bot
-
-    def show(self) -> int:
-        """Show the tile from the player stack."""
-        if self.tile_stack:
-            return self.tile_stack[-1]
-        return 0
-
-    def add_tile(self, tile: int) -> None:
-        """Add tile to the player stack"""
-        self.tile_stack.append(tile)
-
-    def remove_tile(self) -> int:
-        """Remove the top tile from the player stack."""
-        return self.tile_stack.pop()
-
-    def score(self) -> int:
-        """Return player score at the end of game"""
-        score: int = 0
-        for tile in self.tile_stack:
-            score += PickominoEnv.get_worms(tile)
-        return score
 
 
 def print_roll(observation: tuple[list[int], list[int]], total: int, dice: object) -> None:
