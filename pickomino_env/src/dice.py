@@ -3,8 +3,6 @@
 import random as rand
 import numpy as np
 
-from probe_pickomino import dice_sum
-
 
 class Dice:
     """Represents a collection of die face frequencies.

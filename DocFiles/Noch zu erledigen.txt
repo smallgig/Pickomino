@@ -1,5 +1,3 @@
 Noch zu erledigen:
 
-- Klassen von Dice, Player, Players, Tile
-- Rendermode von Gym hinzufügen
-- Discrete für StableBaseline3 richtig deklarieren
+- Terminated,

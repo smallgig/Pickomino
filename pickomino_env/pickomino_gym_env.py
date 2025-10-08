@@ -1,12 +1,11 @@
 """Pickomino game with gymnasium API."""
 
+import random
 from typing import Any
 import numpy as np
 import gymnasium as gym
-from mypy.modulefinder import highest_init_level
+from fontTools.misc.cython import returns
 from numpy import ndarray, dtype
-from numpy.ma.core import argmax
-from tensorflow.compiler.tf2xla.python.xla import shift_left
 
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.table_tiles import TableTiles
@@ -35,7 +34,8 @@ class PickominoEnv(gym.Env):
         self._remaining_dice: int = self._num_dice
         self._terminated: bool = False
         self._truncated: bool = False
-        self._no_throw = False
+        self._failed_attempt: bool = False
+        self._explanation: str = "Constructor"  # Reason for terminated, truncated or failed attempt.
 
         self._dice = Dice()
         self._table_tiles = TableTiles()
@@ -114,7 +114,9 @@ class PickominoEnv(gym.Env):
             "get_obs_dice()": self._get_obs_dice(),
             "get_obs_tiles()": self._get_obs_tiles(),
             "tiles_table_vec": self._tiles_vector(),
+            "terminated_reason": self._explanation,
             "dice": self._dice,
+            "explanation": self._explanation,
             # "self.legal_move(action)": self._legal_move(action),
         }
         return return_value
@@ -123,7 +125,8 @@ class PickominoEnv(gym.Env):
         """Clear collected and rolled and roll again"""
 
         self._dice = Dice()
-        self._no_throw = False
+        self._failed_attempt = False
+        self._roll_counter = 0
         # print(f"PRINT DEBUGGING - rolling {self._num_dice} dice.")
         self._dice.roll()
 
@@ -161,7 +164,7 @@ class PickominoEnv(gym.Env):
         self._dice = Dice()
         self._you = Player(bot=False, name="You")
         self._table_tiles = TableTiles()
-        self._no_throw = False
+        self._failed_attempt = False
         self._terminated = False
         self._truncated = False
 
@@ -172,70 +175,48 @@ class PickominoEnv(gym.Env):
 
         return return_obs, self._get_info()
 
-    def _legal_move(self) -> bool:
+    def _action_is_allowed(self) -> bool:
         """Check if action is allowed."""
         self._terminated = False
         self._truncated = False
-        return_value: bool = True
+        self._failed_attempt = False
 
-        if self._action[PickominoEnv.ACTION_INDEX_DICE] not in range(1, 6):
+        # Check action values are within range
+        if self._action[PickominoEnv.ACTION_INDEX_DICE] not in range(0, 6) or self._action[
+            PickominoEnv.ACTION_INDEX_ROLL
+        ] not in range(0, 2):
             self._terminated = True
-        else:
-            # Dice already collected cannot be taken again.
-            if self._dice.get_collected()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
-                if self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
-                    self._terminated = True
+            self._explanation = "Action index not in range"
+            return False
 
-            # Action if no dice is available in rolled_dice
-            if not self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]]:
-                self._terminated = True
+        # Selected Face value not rolled.
+        if self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]] == 0:
+            self._truncated = True
+            self._explanation = "Selected Face value not rolled"
+            return False
 
-            # No dice left and 21 not reached
-            if self._remaining_dice == 0 and self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
-                self._terminated = True
+        # Dice already collected cannot be taken again.
+        if self._dice.get_collected()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
+            self._truncated = True
+            self._explanation = "Dice already collected cannot be taken again"
+            return False
 
-            # No worm collected
-            if self._remaining_dice == 0 and not self._dice.score()[1]:
-                self._terminated = True
-
-        if self._terminated:
-            return_value = False
-
-        return return_value
+        # No Dice left to roll and roll action selected.
+        # Roll Action ignored
+        # Action allowed
+        return True
 
     def _step_dice(self) -> None:
         """Execute one roll of the dice and picking or returning a tile.
 
         :param: action: The action to take: which dice to collect.
         """
-        # Check legal move before adding selected dice to be collected.
-        if self._legal_move():
-            self._dice.collect(self._action[PickominoEnv.ACTION_INDEX_DICE])
-        else:
-            return
 
-        if self._truncated:
-            return
-
+        self._dice.collect(self._action[PickominoEnv.ACTION_INDEX_DICE])
+        self._set_failed_attempt()
         # Action is to roll
         if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_ROLL:
             self._dice.roll()
-            # Check for no-throw
-            # TODO Check the no throw concept.
-            self._no_throw = True
-            for index in range(len(self._dice.get_rolled())):
-                if self._dice.get_rolled()[index] > 0 and self._dice.get_collected()[index] == 0:
-                    self._no_throw = False
-            # if self._no_throw:
-            #     # print(f"PRINT DEBUGGING - no-throw.")
-            self._truncated = False
-
-        # Action is to stop rolling dice and pick a tile.
-        else:
-            self._truncated = True
-            if self._dice.get_collected()[5] == 0:
-                self._terminated = True
-                self._no_throw = True
 
     def _step_tiles(self) -> int:
         """Pick or return a tile.
@@ -249,7 +230,7 @@ class PickominoEnv(gym.Env):
 
         # Using dice_sum as an index in [21..36] below, hence for dice_sum < 21 need to return early.
         # No throw or 21 not reached -> return tile
-        if self._no_throw or dice_sum < PickominoEnv.SMALLEST_TILE:
+        if self._failed_attempt:
             return_value = self._remove_tile_from_player()
             # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
             # print("PRINT DEBUGGING - Your tiles:", self.you)
@@ -262,96 +243,138 @@ class PickominoEnv(gym.Env):
             self._players[0].add_tile(dice_sum)  # Add the tile to the player.
             self._table_tiles.set_tile(dice_sum, False)  # Mark the tile as no longer on the table.
             return_value = utils.get_worms(dice_sum)
-            self._truncated = True
         # Tile is not available on the table
         else:
             # Pick the highest of the tiles smaller than the unavailable tile
             # Find the highest tile smaller than the dice sum.
-            highest = self._table_tiles.highest()
+            highest: int = self._table_tiles.find_next_lower_tile(dice_sum)
             if highest:  # Found the highest tile to pick from the table.
                 # print("PRINT DEBUGGING - Picking tile:", highest)
                 self._players[0].add_tile(highest)  # Add the tile to the player.
                 self._table_tiles.set_tile(highest, False)  # Mark the tile as no longer on the table.
                 return_value = utils.get_worms(highest)
-                self._truncated = True
             # Also no smaller tiles available -> have to return players showing tile if there is one.
             else:
                 return_value = self._remove_tile_from_player()
+                self._explanation = "No available tile on the table to take"
                 # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
 
         # print("PRINT DEBUGGING - Your tiles:", self.you)
         self._soft_reset()
         return return_value
 
-    def _step_dice_bot(self, take_worm: bool) -> bool:
-        """Execute one roll of the dice and picking or returning a tile.
+    # def _step_dice_bot(self, take_worm: bool) -> bool:
+    #     """Execute one roll of the dice and picking or returning a tile.
+    #
+    #     :param: action: The action to take: which dice to collect.
+    #     """
+    #     # Dice already collected cannot be taken again.
+    #     worm_prio = self._dice.values
+    #     allowed = self._dice.get_rolled()
+    #     if not allowed:
+    #         return False
+    #     for ind, die in enumerate(self._dice.get_collected()):
+    #         if die:
+    #             allowed[ind] = 0
+    #     if take_worm:
+    #         worm_prio[5] = 100
+    #     contribution = np.dot(allowed, worm_prio)
+    #     highest = argmax(contribution)
+    #     self._dice.collect(highest)
+    #     return True
+    #
+    # def _step_tile_bot(self):
+    #     pass
+    #
+    # def _step_bot(self):
+    #     """https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/
+    #     Heuristic Strategy:
+    #     - On or after the third roll, take worms if you can.
+    #     - Otherwise, take the die side that contributes the most points.
+    #     - Quit as soon as you can take a tile."""
+    #     bots = self._players[1:]  # First player is you
+    #     for bot in bots:
+    #         self._soft_reset()
+    #         while sum(self._dice.get_collected()) < 8:
+    #             if self._roll_counter < 3:
+    #                 self._roll_counter += 1
+    #                 if self._step_dice_bot(False):
+    #                     self._dice.roll()
+    #                 else:
+    #                     self._no_throw = True
+    #             # After three throws
+    #             else:
+    #                 self._step_dice_bot(True)
+    #                 if self._dice.score()[1] and self._table_tiles.get_table()[self._dice.score()[0]]:
+    #                     self._step_tile_bot()
 
-        :param: action: The action to take: which dice to collect.
-        """
-        # Dice already collected cannot be taken again.
-        worm_prio = self._dice.values
-        allowed = self._dice.get_rolled()
-        if not allowed:
-            return False
-        for ind, die in enumerate(self._dice.get_collected()):
-            if die:
-                allowed[ind] = 0
-        if take_worm:
-            worm_prio[5] = 100
-        contribution = np.dot(allowed, worm_prio)
-        highest = argmax(contribution)
-        self._dice.collect(highest)
-        return True
+    def _set_failed_attempt(self):
 
-    def _step_tile_bot(self):
-        pass
+        # If no possible rolled dice can be taken, cause its already collected.
 
-    def _step_bot(self):
-        """https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/
-        Heuristic Strategy:
-        - On or after the third roll, take worms if you can.
-        - Otherwise, take the die side that contributes the most points.
-        - Quit as soon as you can take a tile."""
-        bots = self._players[1:]  # First player is you
-        for bot in bots:
-            self._soft_reset()
-            while sum(self._dice.get_collected()) < 8:
-                if self._roll_counter < 3:
-                    self._roll_counter += 1
-                    if self._step_dice_bot(False):
-                        self._dice.roll()
-                    else:
-                        self._no_throw = True
-                # After three throws
-                else:
-                    self._step_dice_bot(True)
-                    if self._dice.score()[1] and self._table_tiles.get_table()[self._dice.score()[0]]:
-                        self._step_tile_bot()
+        # # TODO Change not working perfectly when taking some tiles.
+        # self._failed_attempt = True
+        # self._explanation = "If no possible rolled dice can be taken, cause its already collected."
+        # for ind, die in enumerate(self._dice.get_collected()):
+        #     if die == 0:
+        #         if self._dice.get_rolled()[ind] > 0:
+        #             self._failed_attempt = False
+        #             self._explanation = "Good case"
+
+        can_take = any(
+            rolled > 0 and collected == 0
+            for rolled, collected in zip(self._dice.get_rolled(), self._dice.get_collected())
+        )
+
+        self._failed_attempt = not can_take
+        self._explanation = "Good case" if can_take else "No possible rolled dice can be taken."
+
+        if self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
+            if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
+                self._failed_attempt = True
+                self._explanation = "21 not reached and action stop"
+
+            if sum(self._dice.get_collected()) == 8:
+                self._failed_attempt = True
+                self._explanation = "No dice left and 21 not reached"
+
+        # No worm collected
+        if not self._dice.score()[1]:
+            self._failed_attempt = True
+            self._explanation = "No worm collected"
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         self._action = action
         reward = 0
-        self._legal_move()
-        self._step_dice()
-        if (
-            self._remaining_dice == 0
-            or self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP
-            or self._no_throw
-        ):
-            reward = self._step_tiles()
-
-            # Game Over if no Tile is on the table anymore.
-            if not self._table_tiles.highest():
-                self._terminated = True
-
+        # Check legal move before doing a step.
+        if not self._action_is_allowed():
+            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
         if self._terminated:
+            obs, reward, terminated, truncated, info = (
+                self._current_obs(),
+                reward,
+                self._terminated,
+                self._truncated,
+                self._get_info(),
+            )
+            self.reset()
+            return obs, reward, terminated, truncated, info
+        if self._truncated:
             return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
 
-        return_obs = self._current_obs()
+        self._step_dice()
 
-        info = self._get_info()
+        # Action is to stop or failed attempt, get reward from step tiles.
+        if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
+            # self._set_failed_attempt()
+            reward = self._step_tiles()
 
-        return return_obs, reward, self._terminated, self._truncated, info
+        # Game Over if no Tile is on the table anymore.
+        if not self._table_tiles.highest():
+            self._terminated = True
+            self._explanation = "No Tile on the table, game over."
+
+        return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
 
 
 def print_roll(observation: tuple[list[int], list[int]], total: int, dice: object) -> None:
@@ -399,4 +422,7 @@ if __name__ == "__main__":
         game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
         dice_rolled_coll = game_observation["dice_collected"], game_observation["dice_rolled"]
         GAME_TOTAL = game_info["sum"]
-        print(game_terminated, game_truncated)
+        explanation = game_info["explanation"]
+        print(f"Terminated: {game_terminated} Truncated:{game_truncated} \nExplanation: {explanation}")
+        if game_terminated:
+            game_observation, game_info = env.reset()
