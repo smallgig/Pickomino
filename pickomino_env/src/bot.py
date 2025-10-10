@@ -1,27 +1,56 @@
 from time import sleep
 
 from numpy.ma.core import argmax
+import numpy as np
 
 from pickomino_env import pickomino_gym_env
-from pickomino_env.src.dice import Dice
-from random import randint
 
 
 class Bot:
     def __init__(self):
-        pass
+        self.roll_counter: int = 0
 
-    def run(self):
-        max_turns: int = 3000
+    def heuristic_policy(self, rolled, collected) -> tuple[int, int]:
+        #     Heuristic Strategy:
+        #     - On or after the third roll, take worms if you can.
+        #     - Otherwise, take the die side that contributes the most points.
+        #     - Quit as soon as you can take a tile."""
+        action_roll = 0
+        self.roll_counter += 1
+
+        if sum(collected):
+            self.roll_counter: int = 0
+        values = [1, 2, 3, 4, 5, 5]
+
+        # Set rolled[ind] to 0 if alreaddy collected
+        for ind, die in enumerate(collected):
+            if die:
+                rolled[ind] = 0
+        contribution = rolled * values
+        action_dice = argmax(contribution)
+
+        if self.roll_counter >= 3 and not collected[5] and rolled[5]:
+            action_dice = 5
+
+        # Quit as soon as you can take a tile.
+        if sum(collected * values) + contribution[action_dice] > 20:
+            action_roll = 1
+
+        return action_dice, action_roll
+
+    def run(self, policy: str):
+        max_turns: int = 300000
         env = pickomino_gym_env.PickominoEnv(2)
         game_observation, game_info = env.reset()
         game_reward: int = 0
         game_total = 0
         game_terminated: bool = False
+        game_truncated: bool = False
         dice_coll_rolled = game_observation["dice_collected"], game_observation["dice_rolled"]
         print("Reset")
+        total_reward: int = 0
         for step in range(max_turns):
-            sleep(1)
+            sleep(0.1)
             print("Step:", step)
             print("Your showing tile: ", game_observation["tile_players"], "(your reward = ", game_reward, ")")
             print_roll(dice_coll_rolled, game_total, game_info["dice"])
@@ -33,23 +62,22 @@ class Bot:
             # if self._dice.get_collected()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
             #     if self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
             #         self._terminated = True
-            if game_terminated:
-                print(game_info["terminated_reason"])
-
-                selection: int = randint(0, 5)
-            else:
-                selection: int = argmax(dice_coll_rolled[1])
-            stop: int = 0
-            if game_total > 20:
-                stop = 1
+            print(game_info["explanation"])
+            selection, stop = self.heuristic_policy(game_observation["dice_rolled"], game_observation["dice_collected"])
 
             print(selection, stop)
             print()
             game_action = (selection, stop)
             game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
+            total_reward += game_reward
+
             dice_coll_rolled = game_observation["dice_collected"], game_observation["dice_rolled"]
             game_total = game_info["sum"]
-            print(game_terminated, game_truncated)
+            print(
+                f"Terminated: {game_terminated}, Truncated: {game_truncated}, Failed attempt: {game_info['failed_attempt']}"
+            )
+            print(f"Player Stack: {game_info["player_stack"]}")
+            print(total_reward)
 
 
 def print_roll(observation: tuple[list[int], list[int]], total: int, dice: object) -> None:
@@ -69,4 +97,4 @@ def print_roll(observation: tuple[list[int], list[int]], total: int, dice: objec
 
 if __name__ == "__main__":
     bot = Bot()
-    bot.run()
+    bot.run("heuristic")

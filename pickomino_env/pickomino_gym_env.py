@@ -5,6 +5,7 @@ from typing import Any
 import numpy as np
 import gymnasium as gym
 from fontTools.misc.cython import returns
+from markdown.extensions.smarty import remainingDoubleQuotesRegex
 from numpy import ndarray, dtype
 
 from pickomino_env.src.dice import Dice
@@ -117,6 +118,8 @@ class PickominoEnv(gym.Env):
             "terminated_reason": self._explanation,
             "dice": self._dice,
             "explanation": self._explanation,
+            "failed_attempt": self._failed_attempt,
+            "player_stack": self._players[0].show_all(),
             # "self.legal_move(action)": self._legal_move(action),
         }
         return return_value
@@ -175,7 +178,7 @@ class PickominoEnv(gym.Env):
 
         return return_obs, self._get_info()
 
-    def _action_is_allowed(self) -> bool:
+    def _action_is_allowed(self) -> None:
         """Check if action is allowed."""
         self._terminated = False
         self._truncated = False
@@ -186,37 +189,45 @@ class PickominoEnv(gym.Env):
             PickominoEnv.ACTION_INDEX_ROLL
         ] not in range(0, 2):
             self._terminated = True
-            self._explanation = "Action index not in range"
-            return False
+            self._explanation = "Terminated: Action index not in range"
 
         # Selected Face value not rolled.
         if self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]] == 0:
             self._truncated = True
-            self._explanation = "Selected Face value not rolled"
-            return False
+            self._explanation = "Truncated: Selected Face value not rolled"
 
         # Dice already collected cannot be taken again.
         if self._dice.get_collected()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
             self._truncated = True
-            self._explanation = "Dice already collected cannot be taken again"
-            return False
+            self._explanation = "Truncated: Dice already collected cannot be taken again"
 
-        # No Dice left to roll and roll action selected.
-        # Roll Action ignored
-        # Action allowed
-        return True
+        remaining_dice = self._dice.get_rolled().copy()
+        remaining_dice[self._action[PickominoEnv.ACTION_INDEX_DICE]] = 0
+
+        if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_ROLL and not remaining_dice:
+            self._truncated = True
+            self._explanation = "Truncated: No Dice left to roll and roll action selected."
+
+        # Action allowed tryed to take tile
 
     def _step_dice(self) -> None:
         """Execute one roll of the dice and picking or returning a tile.
 
         :param: action: The action to take: which dice to collect.
         """
+        self._set_failed_already_collected()
 
         self._dice.collect(self._action[PickominoEnv.ACTION_INDEX_DICE])
-        self._set_failed_attempt()
+
+        self._set_failed_to_low()
+        self._set_failed_no_worms()
+
         # Action is to roll
         if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_ROLL:
             self._dice.roll()
+            self._set_failed_already_collected()
+            self._set_failed_to_low()
+            self._set_failed_no_worms()
 
     def _step_tiles(self) -> int:
         """Pick or return a tile.
@@ -308,47 +319,39 @@ class PickominoEnv(gym.Env):
     #                 if self._dice.score()[1] and self._table_tiles.get_table()[self._dice.score()[0]]:
     #                     self._step_tile_bot()
 
-    def _set_failed_attempt(self):
-
-        # If no possible rolled dice can be taken, cause its already collected.
-
-        # # TODO Change not working perfectly when taking some tiles.
-        # self._failed_attempt = True
-        # self._explanation = "If no possible rolled dice can be taken, cause its already collected."
-        # for ind, die in enumerate(self._dice.get_collected()):
-        #     if die == 0:
-        #         if self._dice.get_rolled()[ind] > 0:
-        #             self._failed_attempt = False
-        #             self._explanation = "Good case"
-
+    def _set_failed_already_collected(self):
+        """Check if a dice is available to take"""
         can_take = any(
             rolled > 0 and collected == 0
             for rolled, collected in zip(self._dice.get_rolled(), self._dice.get_collected())
         )
 
         self._failed_attempt = not can_take
-        self._explanation = "Good case" if can_take else "No possible rolled dice can be taken."
+        self._explanation = "Good case" if can_take else "Failed: No possible rolled dice can be taken."
 
+    def _set_failed_to_low(self):
+        """Failed: 21 not reached and action stop or no dice left"""
         if self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
             if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
                 self._failed_attempt = True
-                self._explanation = "21 not reached and action stop"
+                self._explanation = "Failed: 21 not reached and action stop"
 
-            if sum(self._dice.get_collected()) == 8:
+            if sum(self._dice.get_collected()) == 8 and self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
                 self._failed_attempt = True
-                self._explanation = "No dice left and 21 not reached"
+                self._explanation = "Failed: 21 not reached and no dice left"
 
-        # No worm collected
-        if not self._dice.score()[1]:
+    def _set_failed_no_worms(self):
+        """No worm collected and action stop"""
+        if not self._dice.score()[1] and self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
             self._failed_attempt = True
-            self._explanation = "No worm collected"
+            self._explanation = "Failed: No worm collected"
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         self._action = action
         reward = 0
         # Check legal move before doing a step.
-        if not self._action_is_allowed():
-            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+        self._action_is_allowed()
+
         if self._terminated:
             obs, reward, terminated, truncated, info = (
                 self._current_obs(),
@@ -362,10 +365,11 @@ class PickominoEnv(gym.Env):
         if self._truncated:
             return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
 
+        # Collect and roll the dice
         self._step_dice()
 
         # Action is to stop or failed attempt, get reward from step tiles.
-        if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
+        if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP or self._failed_attempt:
             # self._set_failed_attempt()
             reward = self._step_tiles()
 
@@ -424,5 +428,6 @@ if __name__ == "__main__":
         GAME_TOTAL = game_info["sum"]
         explanation = game_info["explanation"]
         print(f"Terminated: {game_terminated} Truncated:{game_truncated} \nExplanation: {explanation}")
+        print(f"Rolled: {game_observation["dice_rolled"]}")
         if game_terminated:
             game_observation, game_info = env.reset()
