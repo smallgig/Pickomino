@@ -52,17 +52,17 @@ class Dice:
     def __str__(self) -> str:
         die_faces: list[str] = [
             "",  # index = 0 doesn't have a face
-            "[     ]\n[  0  ]\n[     ]",  # index 1
-            "[0    ]\n[     ]\n[    0]",  # index 2
-            "[0    ]\n[  0  ]\n[    0]",  # index 3
-            "[0   0]\n[     ]\n[0   0]",  # index 4
-            "[0   0]\n[  0  ]\n[0   0]",  # index 5
-            "[0   0]\n[0   0]\n[0   0]",  # index 6
+            "[     ]\n[  @  ]\n[     ]",  # index 1
+            "[@    ]\n[     ]\n[    @]",  # index 2
+            "[@    ]\n[  @  ]\n[    @]",  # index 3
+            "[@   @]\n[     ]\n[@   @]",  # index 4
+            "[@   @]\n[  @  ]\n[@   @]",  # index 5
+            "\033[31m[oo@@@]\033[0m\n\033[31m[WORM!]\033[0m\n\033[31m[@@@@@]\033[0m",  # index 6
         ]
         # Print one dice.
         show_values = [1, 2, 3, 4, 5, 6]
         faces = [die_faces[v].splitlines() for v in show_values]
         return_value = ""
         for line in zip(*faces):
-            return_value += " ".join(line) + "\n"
+            return_value += "   ".join(line) + "\n"
         return return_value

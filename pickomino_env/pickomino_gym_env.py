@@ -1,17 +1,19 @@
 """Pickomino game with gymnasium API."""
 
-import random
 from typing import Any
 import numpy as np
 import gymnasium as gym
-from fontTools.misc.cython import returns
-from markdown.extensions.smarty import remainingDoubleQuotesRegex
 from numpy import ndarray, dtype
 
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.table_tiles import TableTiles
 from pickomino_env.src.player import Player
 from pickomino_env.src import utils
+
+RED = "\033[31m"
+NO_RED = "\033[0m"
+GREEN = "\033[32m"
+NO_GREEN = "\033[0m"
 
 
 class PickominoEnv(gym.Env):
@@ -190,24 +192,23 @@ class PickominoEnv(gym.Env):
             PickominoEnv.ACTION_INDEX_ROLL
         ] not in range(0, 2):
             self._terminated = True
-            self._explanation = "Terminated: Action index not in range"
-
+            self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value not rolled.
         if self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]] == 0:
             self._truncated = True
-            self._explanation = "Truncated: Selected Face value not rolled"
+            self._explanation = RED + "Truncated: Selected Face value not rolled" + NO_RED
 
         # Dice already collected cannot be taken again.
         if self._dice.get_collected()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
             self._truncated = True
-            self._explanation = "Truncated: Dice already collected cannot be taken again"
+            self._explanation = RED + "Truncated: Dice already collected cannot be taken again" + NO_RED
 
         remaining_dice = self._dice.get_rolled().copy()
         remaining_dice[self._action[PickominoEnv.ACTION_INDEX_DICE]] = 0
 
         if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_ROLL and not remaining_dice:
             self._truncated = True
-            self._explanation = "Truncated: No Dice left to roll and roll action selected."
+            self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
 
         # Action allowed tryed to take tile
 
@@ -226,7 +227,7 @@ class PickominoEnv(gym.Env):
         # Action is to roll
         if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_ROLL:
             self._dice.roll()
-            self._set_failed_already_collected()
+            self._set_failed_already_collected()  # TODO: Is this needed?
             self._set_failed_to_low()
             self._set_failed_no_worms()
 
@@ -268,7 +269,7 @@ class PickominoEnv(gym.Env):
             # Also no smaller tiles available -> have to return players showing tile if there is one.
             else:
                 return_value = self._remove_tile_from_player()
-                self._explanation = "No available tile on the table to take"
+                self._explanation = RED + "No available tile on the table to take" + NO_RED
                 # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
 
         # print("PRINT DEBUGGING - Your tiles:", self.you)
@@ -283,24 +284,29 @@ class PickominoEnv(gym.Env):
         )
 
         self._failed_attempt = not can_take
-        self._explanation = "Good case" if can_take else "Failed: No possible rolled dice can be taken."
+        self._explanation = (
+            GREEN + "Good case" + NO_GREEN
+            if can_take
+            else RED + f"Failed: Collected was {self._dice.get_collected()}\n"
+            f"No possible rolled dice to taken in {self._dice.get_rolled()}" + NO_RED
+        )
 
     def _set_failed_to_low(self):
         """Failed: 21 not reached and action stop or no dice left"""
         if self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
             if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
                 self._failed_attempt = True
-                self._explanation = "Failed: 21 not reached and action stop"
+                self._explanation = RED + "Failed: 21 not reached and action stop" + NO_RED
 
             if sum(self._dice.get_collected()) == 8 and self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
                 self._failed_attempt = True
-                self._explanation = "Failed: 21 not reached and no dice left"
+                self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
 
     def _set_failed_no_worms(self):
         """No worm collected and action stop"""
         if not self._dice.score()[1] and self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
             self._failed_attempt = True
-            self._explanation = "Failed: No worm collected"
+            self._explanation = RED + "Failed: No worm collected" + NO_RED
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         self._action = action
@@ -308,6 +314,7 @@ class PickominoEnv(gym.Env):
         # Check legal move before doing a step.
         self._action_is_allowed()
 
+        # TODO in one line like truncated
         if self._terminated:
             obs, reward, terminated, truncated, info = (
                 self._current_obs(),
@@ -332,7 +339,7 @@ class PickominoEnv(gym.Env):
         # Game Over if no Tile is on the table anymore.
         if not self._table_tiles.highest():
             self._terminated = True
-            self._explanation = "No Tile on the table, game over."
+            self._explanation = GREEN + "No Tile on the table, GAME OVER!" + NO_GREEN
 
         return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
 
@@ -342,12 +349,12 @@ def print_roll(observation: tuple[list[int], list[int]], total: int, dice: objec
     print(dice)
     # Print line of collected dice.
     for collected in range(len(observation[0])):
-        print(f"   {observation[0][collected]}    ", end="")
+        print(f"   {observation[0][collected]}      ", end="")
     # Print sum at the end of the collected dice line
     print(f" collected   sum = {total}")
     # Print line of rolled dice.
     for rolled in range(len(observation[1])):
-        print(f"   {observation[1][rolled]}    ", end="")
+        print(f"   {observation[1][rolled]}      ", end="")
     print(" rolled")
     print("----------------------------------------------------------")
 
@@ -384,6 +391,6 @@ if __name__ == "__main__":
         GAME_TOTAL = game_info["sum"]
         explanation = game_info["explanation"]
         print(f"Terminated: {game_terminated} Truncated:{game_truncated} \nExplanation: {explanation}")
-        print(f"Rolled: {game_observation["dice_rolled"]}")
+        print(f"Rolled: {game_observation['dice_rolled']}")
         if game_terminated:
             game_observation, game_info = env.reset()
