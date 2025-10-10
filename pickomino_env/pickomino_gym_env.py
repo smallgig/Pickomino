@@ -120,6 +120,7 @@ class PickominoEnv(gym.Env):
             "explanation": self._explanation,
             "failed_attempt": self._failed_attempt,
             "player_stack": self._players[0].show_all(),
+            "smallest_tile": self._table_tiles.smallest(),
             # "self.legal_move(action)": self._legal_move(action),
         }
         return return_value
@@ -273,51 +274,6 @@ class PickominoEnv(gym.Env):
         # print("PRINT DEBUGGING - Your tiles:", self.you)
         self._soft_reset()
         return return_value
-
-    # def _step_dice_bot(self, take_worm: bool) -> bool:
-    #     """Execute one roll of the dice and picking or returning a tile.
-    #
-    #     :param: action: The action to take: which dice to collect.
-    #     """
-    #     # Dice already collected cannot be taken again.
-    #     worm_prio = self._dice.values
-    #     allowed = self._dice.get_rolled()
-    #     if not allowed:
-    #         return False
-    #     for ind, die in enumerate(self._dice.get_collected()):
-    #         if die:
-    #             allowed[ind] = 0
-    #     if take_worm:
-    #         worm_prio[5] = 100
-    #     contribution = np.dot(allowed, worm_prio)
-    #     highest = argmax(contribution)
-    #     self._dice.collect(highest)
-    #     return True
-    #
-    # def _step_tile_bot(self):
-    #     pass
-    #
-    # def _step_bot(self):
-    #     """https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/
-    #     Heuristic Strategy:
-    #     - On or after the third roll, take worms if you can.
-    #     - Otherwise, take the die side that contributes the most points.
-    #     - Quit as soon as you can take a tile."""
-    #     bots = self._players[1:]  # First player is you
-    #     for bot in bots:
-    #         self._soft_reset()
-    #         while sum(self._dice.get_collected()) < 8:
-    #             if self._roll_counter < 3:
-    #                 self._roll_counter += 1
-    #                 if self._step_dice_bot(False):
-    #                     self._dice.roll()
-    #                 else:
-    #                     self._no_throw = True
-    #             # After three throws
-    #             else:
-    #                 self._step_dice_bot(True)
-    #                 if self._dice.score()[1] and self._table_tiles.get_table()[self._dice.score()[0]]:
-    #                     self._step_tile_bot()
 
     def _set_failed_already_collected(self):
         """Check if a dice is available to take"""

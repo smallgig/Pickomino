@@ -10,7 +10,7 @@ class Bot:
     def __init__(self):
         self.roll_counter: int = 0
 
-    def heuristic_policy(self, rolled, collected) -> tuple[int, int]:
+    def heuristic_policy(self, rolled, collected, smallest) -> tuple[int, int]:
         #     Heuristic Strategy:
         #     - On or after the third roll, take worms if you can.
         #     - Otherwise, take the die side that contributes the most points.
@@ -33,7 +33,7 @@ class Bot:
             action_dice = 5
 
         # Quit as soon as you can take a tile.
-        if sum(collected * values) + contribution[action_dice] > 20:
+        if sum(collected * values) + contribution[action_dice] >= smallest:
             action_roll = 1
 
         return action_dice, action_roll
@@ -63,7 +63,9 @@ class Bot:
             #     if self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
             #         self._terminated = True
             print(game_info["explanation"])
-            selection, stop = self.heuristic_policy(game_observation["dice_rolled"], game_observation["dice_collected"])
+            selection, stop = self.heuristic_policy(
+                game_observation["dice_rolled"], game_observation["dice_collected"], game_info["smallest_tile"]
+            )
 
             print(selection, stop)
             print()
