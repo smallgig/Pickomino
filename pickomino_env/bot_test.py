@@ -63,9 +63,10 @@ for step in range(max_turns):
     print("Action:")
     print(
         "     Selection (1-6):",
-        selection + 1,
-        f"   (Sum after collecting = {game_info['sum']} ",
-        f"{game_observation['dice_rolled'][selection]} * {values[selection]})",
+        selection + 1,  # Player starts with 1.
+        "   (Sum after collecting = ",
+        game_info["sum"] + game_observation["dice_rolled"][selection] * values[selection],
+        ")",
     )
     print("     Finish?:", "Stop" if stop else "Roll")
     game_action = (selection, stop)
