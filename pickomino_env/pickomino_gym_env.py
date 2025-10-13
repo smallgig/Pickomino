@@ -35,6 +35,7 @@ class PickominoEnv(gym.Env):
         self._number_of_bots: int = number_of_bots
         self._you: Player = Player(bot=False, name="You")
         self._players: list[Player] = []
+        self._create_players()
         self._remaining_dice: int = self._num_dice
         self._terminated: bool = False
         self._truncated: bool = False
@@ -44,6 +45,7 @@ class PickominoEnv(gym.Env):
 
         self._dice = Dice()
         self._table_tiles = TableTiles()
+
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
@@ -55,19 +57,17 @@ class PickominoEnv(gym.Env):
                 # Flatten tiles into a 16-length binary vector for SB3 compatibility (no nested Dict)
                 "tiles_table": gym.spaces.Box(low=0, high=1, shape=(16,), dtype=np.int8),
                 # 0 means no tile; 21..36 are valid tile ids
-                "tile_players": gym.spaces.Discrete(self._create_players()),
+                "tile_players": gym.spaces.Discrete(len(self._players)),
             }
         )
         # Action space is a tuple. First action: which dice you take. Second action: roll again or not.
         self.action_space = gym.spaces.MultiDiscrete([6, 2])
 
-    def _create_players(self) -> int:
+    def _create_players(self):
         names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         self._players.append(self._you)
         for i in range(self._number_of_bots):
             self._players.append(Player(bot=True, name=names[i]))
-
-        return len(self._players)
 
     def _get_obs_dice(
         self,
@@ -173,6 +173,8 @@ class PickominoEnv(gym.Env):
         super().reset(seed=seed)
         self._dice = Dice()
         self._you = Player(bot=False, name="You")
+        self._players: list[Player] = []
+        self._create_players()
         self._table_tiles = TableTiles()
         self._failed_attempt = False
         self._terminated = False
@@ -312,17 +314,18 @@ class PickominoEnv(gym.Env):
             self._failed_attempt = True
             self._explanation = RED + "Failed: No worm collected" + NO_RED
 
-    def _play_bot(self) -> bool:
+    def _play_bot(self):
         bot = Bot()
+        bot_action: tuple[int, int] = 0, 0
         for player in self._players[1:]:
             if player.bot:
-                bot_action = bot.heuristic_policy(
-                    self._dice.get_rolled(), self._dice.get_collected(), self._table_tiles.smallest()
-                )
-                self._step_bot(bot_action)
+                while bot_action[1] == 0 and not self._terminated and not self._failed_attempt:
+                    bot_action = bot.heuristic_policy(
+                        self._dice.get_rolled(), self._dice.get_collected(), self._table_tiles.smallest()
+                    )
+                    self._step_bot(bot_action)
+            bot_action = 0, 0
             self._current_player_index += 1
-
-        return True
 
     def _step_bot(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         self._action = action
@@ -364,6 +367,11 @@ class PickominoEnv(gym.Env):
         # Check legal move before doing a step.
         self._action_is_allowed()
 
+        # Game Over if no Tile is on the table anymore.
+        if not self._table_tiles.highest():
+            self._terminated = True
+            self._explanation = GREEN + "No Tile on the table, GAME OVER!" + NO_GREEN
+
         # TODO in one line like truncated
         if self._terminated:
             obs, reward, terminated, truncated, info = (
@@ -387,14 +395,8 @@ class PickominoEnv(gym.Env):
             reward = self._step_tiles()
             self._current_player_index = 1
             self._play_bot()
-            self._soft_reset()
             self._current_player_index = 0
             return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
-
-        # Game Over if no Tile is on the table anymore.
-        if not self._table_tiles.highest():
-            self._terminated = True
-            self._explanation = GREEN + "No Tile on the table, GAME OVER!" + NO_GREEN
 
         return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
 
@@ -420,7 +422,7 @@ if __name__ == "__main__":
     # NUMBER_OF_DICE: int = 8
     # NUMBER_OF_PLAYERS: int = 2
     MAX_TURNS: int = 300
-    env = PickominoEnv(2)
+    env = PickominoEnv(5)
     game_observation, game_info = env.reset()
     game_reward: int = 0
     # for key, value in info.items():

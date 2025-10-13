@@ -1,16 +1,16 @@
 from time import sleep
-
 import numpy as np
 from numpy.ma.core import argmax
-from pickomino_env import pickomino_gym_env
+
+import pickomino_env.pickomino_gym_env
 
 RED = "\033[31m"
 NO_RED = "\033[0m"
 
 
-
-
 class Bot:
+    values = [1, 2, 3, 4, 5, 5]
+
     def __init__(self):
         self.roll_counter: int = 0
 
@@ -26,7 +26,6 @@ class Bot:
 
         if sum(collected):
             self.roll_counter: int = 0
-
 
         # Set rolled[ind] to 0 if already collected
         for ind, die in enumerate(collected):
@@ -45,8 +44,8 @@ class Bot:
         return action_dice, action_roll
 
     def run(self, policy: str):
-        max_turns: int = 300000
-        env = pickomino_gym_env.PickominoEnv(2)
+        max_turns: int = 100000
+        env = pickomino_env.pickomino_gym_env.PickominoEnv(0)
         game_observation, game_info = env.reset()
         game_reward: int = 0
         game_total = 0
