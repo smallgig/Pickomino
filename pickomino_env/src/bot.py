@@ -10,7 +10,7 @@ class Bot:
     def __init__(self) -> None:
         self.roll_counter: int = 0
 
-    def heuristic_policy(self, rolled, collected, smallest) -> tuple[int, int]:
+    def heuristic_policy(self, rolled: list[int], collected: list[int], smallest: int) -> tuple[int, int]:
         """Heuristic Strategy.
         1. On or after the third roll, take worms if you can.
         2. Otherwise, take the die side that contributes the most points.
@@ -18,8 +18,7 @@ class Bot:
         """
         action_roll = 0
         self.roll_counter += 1
-        rolled = np.array(rolled)
-        values = np.array([1, 2, 3, 4, 5, 5], int)
+        values = [1, 2, 3, 4, 5, 5]
 
         if sum(collected):
             self.roll_counter = 0
@@ -29,7 +28,8 @@ class Bot:
             if die:
                 rolled[ind] = 0
         # 2. Otherwise, take the die side that contributes the most points.
-        contribution = rolled * values
+        # Elegant using NumPy but with mypy issues: contribution = rolled * values
+        contribution = np.multiply(rolled, values)
         action_dice = int(argmax(contribution))
 
         # 1. On or after the third roll, take worms if you can.
@@ -37,7 +37,7 @@ class Bot:
             action_dice = 5
 
         # 3. Quit as soon as you can take a tile.
-        if sum(collected * values) + contribution[action_dice] >= smallest:
+        if sum(np.multiply(collected, values)) + contribution[action_dice] >= smallest:
             action_roll = 1
 
         return action_dice, action_roll

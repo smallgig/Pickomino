@@ -17,7 +17,7 @@ GREEN = "\033[32m"
 NO_GREEN = "\033[0m"
 
 
-class PickominoEnv(gym.Env):
+class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     """The environment class."""
 
     SMALLEST_TILE = 21
@@ -64,7 +64,7 @@ class PickominoEnv(gym.Env):
         # Action space is a tuple. First action: which dice to take. Second action: roll again or not.
         self.action_space = gym.spaces.MultiDiscrete([6, 2])
 
-    def _create_players(self):
+    def _create_players(self) -> None:
         names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         self._players.append(self._you)
         for i in range(self._number_of_bots):
@@ -283,7 +283,7 @@ class PickominoEnv(gym.Env):
         self._soft_reset()
         return return_value
 
-    def _set_failed_already_collected(self):
+    def _set_failed_already_collected(self) -> None:
         """Check if a die is available to take"""
         can_take = any(
             rolled > 0 and collected == 0
@@ -298,7 +298,7 @@ class PickominoEnv(gym.Env):
             f"No possible rolled dice to taken in {self._dice.get_rolled()}" + NO_RED
         )
 
-    def _set_failed_to_low(self):
+    def _set_failed_to_low(self) -> None:
         """Failed: 21 not reached and action stop or no dice left."""
         if self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
             if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
@@ -309,7 +309,7 @@ class PickominoEnv(gym.Env):
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
 
-    def _set_failed_no_worms(self):
+    def _set_failed_no_worms(self) -> None:
         """No worm collected and action stop"""
         if not self._dice.score()[1] and self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
             self._failed_attempt = True

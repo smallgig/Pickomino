@@ -48,7 +48,7 @@ class TableTiles:
                     highest = key
         return highest
 
-    def smallest(self):
+    def smallest(self) -> int:
         """Get the smallest tile on the table."""
         smallest = 0
         if not self.is_empty():
@@ -57,7 +57,7 @@ class TableTiles:
                     smallest = key
         return smallest
 
-    def find_next_lower_tile(self, dice_sum) -> int:
+    def find_next_lower_tile(self, dice_sum: int) -> int:
         """Find the next lower tile than the dice sum."""
         lowest = 0
         for key, value in self._tile_table.items():

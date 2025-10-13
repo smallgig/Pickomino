@@ -18,11 +18,11 @@ class Player:
             return self.tile_stack[-1]
         return 0
 
-    def show_all(self):
+    def show_all(self) -> list[int]:
         """Show all tiles on the player stack."""
         if self.tile_stack:
             return self.tile_stack
-        return 42
+        return [42]
 
     def add_tile(self, tile: int) -> None:
         """Add a tile to the player stack"""
