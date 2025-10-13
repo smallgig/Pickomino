@@ -46,7 +46,7 @@ class Dice:
         # Multiply the frequency of each die face with its value
         current_score = int(np.dot(self.values, self._collected) if self._collected else 0)
         # Using dice_sum as an index in [21..36], higher rolls can only pick 36 or lower
-        current_score = min(current_score, Dice.LARGEST_TILE)
+        current_score = int(min(current_score, Dice.LARGEST_TILE))
         return current_score, has_worms
 
     def __str__(self) -> str:

@@ -1,8 +1,5 @@
 """Class table_tiles"""
 
-from mypy.modulefinder import highest_init_level
-from networkx.algorithms.lowest_common_ancestors import lowest_common_ancestor
-
 
 class TableTiles:
     """Define the Tiles on the Table"""
@@ -61,9 +58,10 @@ class TableTiles:
         return smallest
 
     def find_next_lower_tile(self, dice_sum) -> int:
-        highest = 0
+        """Find next lower tile than dice sum."""
+        lowest = 0
         for key, value in self._tile_table.items():
             if key < dice_sum and value:
-                highest = key
+                lowest = key
 
-        return highest
+        return lowest

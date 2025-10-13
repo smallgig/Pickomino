@@ -19,6 +19,7 @@ class Player:
         return 0
 
     def show_all(self):
+        """Show all tiles on player stack."""
         if self.tile_stack:
             return self.tile_stack
         return 42

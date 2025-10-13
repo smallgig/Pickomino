@@ -26,17 +26,17 @@ class PickominoEnv(gym.Env):
     ACTION_INDEX_ROLL = 1
     ACTION_ROLL = 0
     ACTION_STOP = 1
+    NUM_DICE = 8
 
     def __init__(self, number_of_bots: int) -> None:
         """Constructor."""
         self._action: tuple[int, int] = 0, 0
-        self._num_dice: int = 8
         self._roll_counter: int = 0
         self._number_of_bots: int = number_of_bots
         self._you: Player = Player(bot=False, name="You")
         self._players: list[Player] = []
         self._create_players()
-        self._remaining_dice: int = self._num_dice
+        self._remaining_dice: int = self.NUM_DICE
         self._terminated: bool = False
         self._truncated: bool = False
         self._failed_attempt: bool = False
@@ -108,7 +108,7 @@ class PickominoEnv(gym.Env):
         """
         return_value = {
             "action": self._action,
-            "num_dice": self._num_dice,
+            "num_dice": self.NUM_DICE,
             "remaining_dice": self._remaining_dice,
             "dice_collected": self._dice.get_collected(),
             "dice_rolled": self._dice.get_rolled(),
@@ -173,7 +173,7 @@ class PickominoEnv(gym.Env):
         super().reset(seed=seed)
         self._dice = Dice()
         self._you = Player(bot=False, name="You")
-        self._players: list[Player] = []
+        self._players = []
         self._create_players()
         self._table_tiles = TableTiles()
         self._failed_attempt = False
@@ -304,7 +304,7 @@ class PickominoEnv(gym.Env):
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and action stop" + NO_RED
 
-            if sum(self._dice.get_collected()) == 8 and self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
+            if sum(self._dice.get_collected()) == self.NUM_DICE and self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
 
@@ -314,7 +314,7 @@ class PickominoEnv(gym.Env):
             self._failed_attempt = True
             self._explanation = RED + "Failed: No worm collected" + NO_RED
 
-    def _play_bot(self):
+    def _play_bot(self) -> None:
         bot = Bot()
         bot_action: tuple[int, int] = 0, 0
         for player in self._players[1:]:
@@ -336,7 +336,7 @@ class PickominoEnv(gym.Env):
         if self._terminated:
             obs, reward, terminated, truncated, info = (
                 self._current_obs(),
-                reward,
+                0,
                 self._terminated,
                 self._truncated,
                 self._get_info(),
@@ -376,7 +376,7 @@ class PickominoEnv(gym.Env):
         if self._terminated:
             obs, reward, terminated, truncated, info = (
                 self._current_obs(),
-                reward,
+                0,
                 self._terminated,
                 self._truncated,
                 self._get_info(),
