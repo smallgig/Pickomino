@@ -3,6 +3,7 @@
 from typing import Any
 import numpy as np
 import gymnasium as gym
+from gymnasium.core import RenderFrame, ObsType
 from numpy import ndarray, dtype
 
 from pickomino_env.src.dice import Dice
@@ -48,8 +49,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
-        # 6 possible faces of the dice. Worm = index 0, Rest: index = faces value of die
-        # TODO you list 0-16
+        # 6 possible faces of the dice. Max 8 dice.
         self.observation_space = gym.spaces.Dict(
             {
                 "dice_collected": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
@@ -57,12 +57,15 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                 # Flatten the tiles into a 16-length binary vector. Needed for SB3 compatibility.
                 # Nested dicts are not supported by SB3.
                 "tiles_table": gym.spaces.Box(low=0, high=1, shape=(16,), dtype=np.int8),
-                # 0 means no tile. 21..36 are valid tile ids.
                 "tile_players": gym.spaces.Discrete(len(self._players)),
             }
         )
         # Action space is a tuple. First action: which dice to take. Second action: roll again or not.
         self.action_space = gym.spaces.MultiDiscrete([6, 2])
+
+    def render(self) -> RenderFrame | list[RenderFrame] | None:
+        """Render the environment."""
+        # pass
 
     def _create_players(self) -> None:
         names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
@@ -98,7 +101,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             "dice_collected": np.array(self._dice.get_collected()),
             "dice_rolled": np.array(self._dice.get_rolled()),
             "tiles_table": self._tiles_vector(),
-            "tile_players": list(map(lambda p: p.show(), self._players)),
+            "tile_players": list(map(lambda p: p.show(), self._players)),  # pylint: disable=bad-builtin
         }
 
     def _get_info(self) -> dict[str, object]:
@@ -158,9 +161,11 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
         return return_value
 
-    def reset(
-        self, seed: int | None = None, options: dict[str, Any] | None = None
-    ) -> tuple[dict[str, Any], dict[str, Any]]:
+    def reset(self, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
+        # def reset(
+        #         self, seed: int | None = None, options: dict[str, Any] | None = None
+        # ) -> tuple[dict[str, Any], dict[str, Any]]:
+
         """Start a new episode.
 
         Args:
@@ -234,7 +239,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         # Action is to roll
         if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_ROLL:
             self._dice.roll()
-            self._set_failed_already_collected()  # TODO: Is this needed?
+            self._set_failed_already_collected()
             self._set_failed_to_low()
             self._set_failed_no_worms()
 
@@ -320,6 +325,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         bot_action: tuple[int, int] = 0, 0
         for player in self._players[1:]:
             if player.bot:
+                # pylint: disable=while-used
                 while bot_action[1] == 0 and not self._terminated and not self._failed_attempt:
                     bot_action = bot.heuristic_policy(
                         self._dice.get_rolled(), self._dice.get_collected(), self._table_tiles.smallest()
@@ -374,7 +380,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self._terminated = True
             self._explanation = GREEN + "No Tile on the table, GAME OVER!" + NO_GREEN
 
-        # TODO in one line like truncated
+        # Have to keep the values to return after resetting.
         if self._terminated:
             obs, reward, terminated, truncated, info = (
                 self._current_obs(),
@@ -420,11 +426,9 @@ def print_roll(observation: tuple[list[int], list[int]], total: int, dice: objec
 
 if __name__ == "__main__":
     # Interactive test.
-    # TODO: not yet used.
-    # NUMBER_OF_DICE: int = 8
-    # NUMBER_OF_PLAYERS: int = 2
+    NUMBER_OF_PLAYERS: int = 5
     MAX_TURNS: int = 300
-    env = PickominoEnv(5)
+    env = PickominoEnv(NUMBER_OF_PLAYERS)
     game_observation, game_info = env.reset()
     game_reward: int = 0
     # for key, value in info.items():
@@ -450,6 +454,6 @@ if __name__ == "__main__":
         GAME_TOTAL = game_info["sum"]
         explanation = game_info["explanation"]
         print(f"Terminated: {game_terminated} Truncated:{game_truncated} \nExplanation: {explanation}")
-        print(f"Rolled: {game_observation['dice_rolled']}")
+        print("Rolled: ", game_observation["dice_rolled"])
         if game_terminated:
             game_observation, game_info = env.reset()
