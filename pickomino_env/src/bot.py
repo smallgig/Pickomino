@@ -1,5 +1,6 @@
 from time import sleep
 
+import numpy as np
 from numpy.ma.core import argmax
 from pickomino_env import pickomino_gym_env
 
@@ -7,9 +8,9 @@ RED = "\033[31m"
 NO_RED = "\033[0m"
 
 
-class Bot:
-    values = [1, 2, 3, 4, 5, 5]
 
+
+class Bot:
     def __init__(self):
         self.roll_counter: int = 0
 
@@ -20,22 +21,25 @@ class Bot:
         #     - Quit as soon as you can take a tile."""
         action_roll = 0
         self.roll_counter += 1
+        rolled = np.array(rolled)
+        values = np.array([1, 2, 3, 4, 5, 5], int)
 
         if sum(collected):
             self.roll_counter: int = 0
 
-        # Set rolled[ind] to 0 if alreaddy collected
+
+        # Set rolled[ind] to 0 if already collected
         for ind, die in enumerate(collected):
             if die:
                 rolled[ind] = 0
-        contribution = rolled * Bot.values
+        contribution = rolled * values
         action_dice = argmax(contribution)
 
         if self.roll_counter >= 3 and not collected[5] and rolled[5]:
             action_dice = 5
 
         # Quit as soon as you can take a tile.
-        if sum(collected * Bot.values) + contribution[action_dice] >= smallest:
+        if sum(collected * values) + contribution[action_dice] >= smallest:
             action_roll = 1
 
         return action_dice, action_roll
