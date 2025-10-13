@@ -36,6 +36,7 @@ values = np.array([1, 2, 3, 4, 5, 5], int)
 dice_coll_rolled = game_observation["dice_collected"], game_observation["dice_rolled"]
 print("Reset")
 total_reward: int = 0
+step: int = 0
 for step in range(max_turns):
     print()
     print("==================================================================")
