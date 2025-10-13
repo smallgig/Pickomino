@@ -33,7 +33,7 @@ class Bot:
         action_dice = int(argmax(contribution))
 
         # 1. On or after the third roll, take worms if you can.
-        if self.roll_counter >= 3 and not collected[5] and rolled[5]:
+        if self.roll_counter >= 3 and not collected[5] and rolled[5]:  # pylint: disable=magic-value-comparison
             action_dice = 5
 
         # 3. Quit as soon as you can take a tile.
@@ -41,3 +41,9 @@ class Bot:
             action_roll = 1
 
         return action_dice, action_roll
+
+
+if __name__ == "__main__":
+    print("This is the bot file.")
+    bot = Bot()  # Using the Bot class to avoid pylint messages.
+    print(bot.heuristic_policy([1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], 1))

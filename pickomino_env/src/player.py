@@ -38,3 +38,9 @@ class Player:
         for tile in self.tile_stack:
             score += utils.get_worms(tile)
         return score
+
+
+if __name__ == "__main__":
+    print("This is the player file.")
+    player = Player(True, "Dummy")  # Using the Player class to avoid pylint messages.
+    print(player.show())

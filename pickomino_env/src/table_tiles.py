@@ -63,5 +63,10 @@ class TableTiles:
         for key, value in self._tile_table.items():
             if key < dice_sum and value:
                 lowest = key
-
         return lowest
+
+
+if __name__ == "__main__":
+    print("This is the table tiles file.")
+    table = TableTiles()  # Using the TableTiles class to avoid pylint messages.
+    print(table.highest())
