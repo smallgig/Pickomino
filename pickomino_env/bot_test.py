@@ -82,9 +82,9 @@ for step in range(max_turns):
         "          Truncated:",
         game_truncated,
         "          Failed attempt:",
-        failed_attempt,  # TODO: consider removing as it is ALWAYS False!
+        failed_attempt,
     )
-    print(f"Player Stack: {game_info['player_stack']}")
+    print("Player Stack:", game_info["player_stack"])
     print("Total reward:", total_reward)
     print()
     if game_terminated:
@@ -96,7 +96,7 @@ print("===================================================================")
 print("Final state:")
 print("Step:", step)
 print("Explanation:", game_info["explanation"])
-print(f"Player Stack: {game_info['player_stack']}")
+print("Player Stack:", game_info["player_stack"])
 print("Total reward (Score):")
 print(RED + f"{total_reward}" + NO_RED)
 print(
@@ -108,4 +108,4 @@ print(
 )
 print(f"Terminated: {game_terminated}")
 print(f"Truncated: {game_truncated}")
-print(f"Failed attempt: {game_info['failed_attempt']}")
+print("Failed attempt:", game_info["failed_attempt"])
