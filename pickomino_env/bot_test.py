@@ -57,8 +57,9 @@ for step in range(max_turns):
             print("_", end=" ")
     print()
     print("Explanation: ", (game_info["explanation"]))
+    smallest_tile: int = int(str(game_info["smallest_tile"]))  # Hairy hack.
     selection, stop = bot.heuristic_policy(
-        game_observation["dice_rolled"], game_observation["dice_collected"], game_info["smallest_tile"]
+        game_observation["dice_rolled"], game_observation["dice_collected"], smallest_tile
     )
     print("Action:")
     print(

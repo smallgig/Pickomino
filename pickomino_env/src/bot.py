@@ -28,7 +28,7 @@ class Bot:
             if die:
                 rolled[ind] = 0
         # 2. Otherwise, take the die side that contributes the most points.
-        # Elegant using NumPy but with mypy issues: contribution = rolled * values
+        # Elegant using NumPy but with mypy issues: contribution = rolled * values.
         contribution = np.multiply(rolled, values)
         action_dice = int(argmax(contribution))
 

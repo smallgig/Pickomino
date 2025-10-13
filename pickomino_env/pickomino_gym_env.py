@@ -3,7 +3,7 @@
 from typing import Any
 import numpy as np
 import gymnasium as gym
-from gymnasium.core import RenderFrame, ObsType
+from gymnasium.core import RenderFrame
 from numpy import ndarray, dtype
 
 from pickomino_env.src.dice import Dice
@@ -161,11 +161,11 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
         return return_value
 
-    def reset(self, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
-        # def reset(
-        #         self, seed: int | None = None, options: dict[str, Any] | None = None
-        # ) -> tuple[dict[str, Any], dict[str, Any]]:
-
+    # Causes mypy issues.
+    # def reset(self, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
+    def reset(
+        self, seed: int | None = None, options: dict[str, Any] | None = None
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Start a new episode.
 
         Args:
