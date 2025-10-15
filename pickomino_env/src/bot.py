@@ -7,10 +7,30 @@ from numpy.ma.core import argmax
 class Bot:
     """Bot class"""
 
+    HEURISTIC = "heuristic"
+
     def __init__(self) -> None:
         self.roll_counter: int = 0
+        self.current_policy: str = self.HEURISTIC
 
-    def heuristic_policy(self, rolled: list[int], collected: list[int], smallest: int) -> tuple[int, int]:
+    def __str__(self) -> str:
+        return f"Bot policy: {self.current_policy}"
+
+    def set_policy(self, policy: str) -> None:
+        """Set the bot policy."""
+        self.current_policy = policy
+
+    def get_policy(self) -> str:
+        """Get the bot policy."""
+        return self.current_policy
+
+    def policy(self, rolled: list[int], collected: list[int], smallest: int) -> tuple[int, int]:
+        """Policy function."""
+        if self.current_policy == self.HEURISTIC:
+            return self._heuristic_policy(rolled, collected, smallest)
+        return 0, 0
+
+    def _heuristic_policy(self, rolled: list[int], collected: list[int], smallest: int) -> tuple[int, int]:
         """Heuristic Strategy.
         1. On or after the third roll, take worms if you can.
         2. Otherwise, take the die side that contributes the most points.
@@ -28,7 +48,6 @@ class Bot:
             if die:
                 rolled[ind] = 0
         # 2. Otherwise, take the die side that contributes the most points.
-        # Elegant using NumPy but with mypy issues: contribution = rolled * values.
         contribution = np.multiply(rolled, values)
         action_dice = int(argmax(contribution))
 
@@ -46,4 +65,12 @@ class Bot:
 if __name__ == "__main__":
     print("This is the bot file.")
     bot = Bot()  # Using the Bot class to avoid pylint messages.
-    print(bot.heuristic_policy([1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], 1))
+    print("bot", bot)
+    print(
+        "bot.policy([1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], 1)", bot.policy([1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], 1)
+    )
+    print("bot.get_policy()", bot.get_policy())
+    bot.set_policy("Test")
+    print("bot.set_policy('Test')")
+    print("bot.get_policy()", bot.get_policy())
+    print("bot", bot)
