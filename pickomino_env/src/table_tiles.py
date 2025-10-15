@@ -1,4 +1,4 @@
-"""Class table_tiles"""
+"""Class table tiles."""
 
 
 class TableTiles:
@@ -30,7 +30,7 @@ class TableTiles:
         self._tile_table[tile_number] = truth_value
 
     def get_table(self) -> dict[int, bool]:
-        """Get whole table."""
+        """Get the tile table."""
         return self._tile_table
 
     def is_empty(self) -> bool:
@@ -40,7 +40,7 @@ class TableTiles:
         return True
 
     def highest(self) -> int:
-        """Get the highest tile on table"""
+        """Get the highest tile on the table."""
         highest = 0
         if not self.is_empty():
             for key, value in self._tile_table.items():
@@ -48,8 +48,8 @@ class TableTiles:
                     highest = key
         return highest
 
-    def smallest(self):
-        """Get the smallest tile on table"""
+    def smallest(self) -> int:
+        """Get the smallest tile on the table."""
         smallest = 0
         if not self.is_empty():
             for key, value in reversed(self._tile_table.items()):
@@ -57,11 +57,16 @@ class TableTiles:
                     smallest = key
         return smallest
 
-    def find_next_lower_tile(self, dice_sum) -> int:
-        """Find next lower tile than dice sum."""
+    def find_next_lower_tile(self, dice_sum: int) -> int:
+        """Find the next lower tile than the dice sum."""
         lowest = 0
         for key, value in self._tile_table.items():
             if key < dice_sum and value:
                 lowest = key
-
         return lowest
+
+
+if __name__ == "__main__":
+    print("This is the table tiles file.")
+    table = TableTiles()  # Using the TableTiles class to avoid pylint messages.
+    print(table.highest())

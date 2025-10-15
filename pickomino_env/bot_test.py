@@ -36,6 +36,7 @@ values = np.array([1, 2, 3, 4, 5, 5], int)
 dice_coll_rolled = game_observation["dice_collected"], game_observation["dice_rolled"]
 print("Reset")
 total_reward: int = 0
+step: int = 0
 for step in range(max_turns):
     print()
     print("==================================================================")
@@ -56,15 +57,17 @@ for step in range(max_turns):
             print("_", end=" ")
     print()
     print("Explanation: ", (game_info["explanation"]))
+    smallest_tile: int = int(str(game_info["smallest_tile"]))  # Hairy hack.
     selection, stop = bot.heuristic_policy(
-        game_observation["dice_rolled"], game_observation["dice_collected"], game_info["smallest_tile"]
+        game_observation["dice_rolled"], game_observation["dice_collected"], smallest_tile
     )
     print("Action:")
     print(
         "     Selection (1-6):",
-        selection + 1,
-        f"   (Sum after collecting = {game_info['sum']} ",
-        f"{game_observation['dice_rolled'][selection]} * {values[selection]})",
+        selection + 1,  # Player starts with 1.
+        "   (Sum after collecting = ",
+        game_info["sum"] + game_observation["dice_rolled"][selection] * values[selection],
+        ")",
     )
     print("     Finish?:", "Stop" if stop else "Roll")
     game_action = (selection, stop)
@@ -80,9 +83,9 @@ for step in range(max_turns):
         "          Truncated:",
         game_truncated,
         "          Failed attempt:",
-        failed_attempt,  # TODO: consider removing as it is ALWAYS False!
+        failed_attempt,
     )
-    print(f"Player Stack: {game_info['player_stack']}")
+    print("Player Stack:", game_info["player_stack"])
     print("Total reward:", total_reward)
     print()
     if game_terminated:
@@ -94,7 +97,7 @@ print("===================================================================")
 print("Final state:")
 print("Step:", step)
 print("Explanation:", game_info["explanation"])
-print(f"Player Stack: {game_info['player_stack']}")
+print("Player Stack:", game_info["player_stack"])
 print("Total reward (Score):")
 print(RED + f"{total_reward}" + NO_RED)
 print(
@@ -106,4 +109,4 @@ print(
 )
 print(f"Terminated: {game_terminated}")
 print(f"Truncated: {game_truncated}")
-print(f"Failed attempt: {game_info['failed_attempt']}")
+print("Failed attempt:", game_info["failed_attempt"])

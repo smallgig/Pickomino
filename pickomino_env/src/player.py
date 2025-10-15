@@ -18,14 +18,14 @@ class Player:
             return self.tile_stack[-1]
         return 0
 
-    def show_all(self):
-        """Show all tiles on player stack."""
+    def show_all(self) -> list[int]:
+        """Show all tiles on the player stack."""
         if self.tile_stack:
             return self.tile_stack
-        return 42
+        return [42]
 
     def add_tile(self, tile: int) -> None:
-        """Add tile to the player stack"""
+        """Add a tile to the player stack"""
         self.tile_stack.append(tile)
 
     def remove_tile(self) -> int:
@@ -33,8 +33,14 @@ class Player:
         return self.tile_stack.pop()
 
     def score(self) -> int:
-        """Return player score at the end of game"""
+        """Return player score at the end of the game."""
         score: int = 0
         for tile in self.tile_stack:
             score += utils.get_worms(tile)
         return score
+
+
+if __name__ == "__main__":
+    print("This is the player file.")
+    player = Player(True, "Dummy")  # Using the Player class to avoid pylint messages.
+    print(player.show())
