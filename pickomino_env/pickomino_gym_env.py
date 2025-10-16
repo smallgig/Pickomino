@@ -3,7 +3,6 @@
 from typing import Any
 import numpy as np
 import gymnasium as gym
-import pylab as p
 from gymnasium.core import RenderFrame
 from numpy import ndarray, dtype
 
