@@ -233,14 +233,14 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
         self._dice.collect(self._action[PickominoEnv.ACTION_INDEX_DICE])
 
-        self._set_failed_to_low()
+        self._set_failed_too_low()
         self._set_failed_no_worms()
 
         # Action is to roll
         if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_ROLL:
             self._dice.roll()
             self._set_failed_already_collected()
-            self._set_failed_to_low()
+            self._set_failed_too_low()
             self._set_failed_no_worms()
 
     def _step_tiles(self) -> int:
@@ -303,7 +303,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             f"No possible rolled dice to taken in {self._dice.get_rolled()}" + NO_RED
         )
 
-    def _set_failed_to_low(self) -> None:
+    def _set_failed_too_low(self) -> None:
         """Failed: 21 not reached and action stop or no dice left."""
         if self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
             if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
