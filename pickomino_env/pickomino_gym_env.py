@@ -327,7 +327,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             if player.bot:
                 # pylint: disable=while-used
                 while bot_action[1] == 0 and not self._terminated and not self._failed_attempt:
-                    bot_action = bot.heuristic_policy(
+                    bot_action = bot.policy(
                         self._dice.get_rolled(), self._dice.get_collected(), self._table_tiles.smallest()
                     )
                     self._step_bot(bot_action)
