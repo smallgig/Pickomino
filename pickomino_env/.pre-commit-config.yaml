@@ -1,0 +1,41 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+  - repo: https://github.com/pycqa/pylint
+    rev: v3.2.0
+    hooks:
+      - id: pylint
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.18.2
+    hooks:
+      - id: mypy
+        args: [ "--strict" ]
+        additional_dependencies: [ "types-requests", "types-PyYAML" ]
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        args: [ "--docstring-convention=numpy" ]
+        additional_dependencies: [ "flake8-bugbear", "flake8-docstrings" ]
+
+  # We need to check these first! ruff would replace flake8-bugbear and might conflict with Black
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  #  rev: v0.6.5  # use latest stable
+  #  hooks:
+  #    - id: ruff
+  #      args: ["--fix"]
+  #    - id: ruff-format
+
