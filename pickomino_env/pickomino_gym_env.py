@@ -243,6 +243,14 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self._set_failed_too_low()
             self._set_failed_no_worms()
 
+    def _steal_from_bot(self, steal_index: int) -> int:
+        tile_to_return: int = self._players[steal_index].remove_tile()  # Remove the tile from the player.
+        self._players[self._current_player_index].add_tile(tile_to_return)
+        # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
+        return_value = utils.get_worms(tile_to_return)
+
+        return return_value
+
     def _step_tiles(self) -> int:
         """Pick or return a tile.
 
@@ -262,10 +270,23 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self._soft_reset()
             return return_value
         # Environment takes the highest tile on the table.
+        # Check if any tile can be picked from another player
+        # Index from player to steal
+        steal_index = next(
+            (
+                i
+                for i, player in enumerate(self._players)
+                if i != self._current_player_index and player.show() == dice_sum
+            ),
+            None,
+        )
+        if steal_index is not None:
+            return_value = self._steal_from_bot(steal_index)
+
         # Only pick a tile if it is on the table.
-        if self._table_tiles.get_table()[dice_sum]:
+        elif self._table_tiles.get_table()[dice_sum]:
             # print("PRINT DEBUGGING - Picking tile:", dice_sum)
-            self._players[self._current_player_index].add_tile(dice_sum)  # Add the tile to the player.
+            self._players[self._current_player_index].add_tile(dice_sum)  # Add the tile to the player or bot.
             self._table_tiles.set_tile(dice_sum, False)  # Mark the tile as no longer on the table.
             return_value = utils.get_worms(dice_sum)
         # Tile is not available on the table
