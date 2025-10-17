@@ -7,7 +7,7 @@ class Player:
     """Player class with his tiles and name."""
 
     def __init__(self, bot: bool, name: str) -> None:
-        """Constructor for a player"""
+        """Construct a player."""
         self.name: str = name
         self.tile_stack: list[int] = []
         self.bot: bool = bot
@@ -25,7 +25,7 @@ class Player:
         return [42]
 
     def add_tile(self, tile: int) -> None:
-        """Add a tile to the player stack"""
+        """Add a tile to the player stack."""
         self.tile_stack.append(tile)
 
     def remove_tile(self) -> int:

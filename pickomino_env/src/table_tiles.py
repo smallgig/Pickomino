@@ -2,10 +2,10 @@
 
 
 class TableTiles:
-    """Define the Tiles on the Table"""
+    """Define the tiles on the table."""
 
     def __init__(self) -> None:
-        """Constructor"""
+        """Construct the table tiles."""
         self._tile_table: dict[int, bool] = {
             21: True,
             22: True,
@@ -34,7 +34,7 @@ class TableTiles:
         return self._tile_table
 
     def is_empty(self) -> bool:
-        """Check if the table is empty"""
+        """Check if the table is empty."""
         if self._tile_table.values():
             return False
         return True
