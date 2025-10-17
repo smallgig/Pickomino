@@ -281,10 +281,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             None,
         )
         if steal_index is not None:
-            return_value = (
-                self._steal_from_bot(steal_index) * 2
-            )  # TODO Reward mal 2? Da Tile von Spieler genommen wurde
-            # TODO und Chance zu gewinnen dadurch erhöht ist (Schwer von außen zu setzen)
+            return_value = self._steal_from_bot(steal_index)
 
         # Only pick a tile if it is on the table.
         elif self._table_tiles.get_table()[dice_sum]:
