@@ -144,4 +144,4 @@ MIT License (c) 2025 Jarl,Robin, Tanja
 
 ---
 
-**Viel Erfolg beim Trainieren!** 
+**Viel Erfolg beim Trainieren!**

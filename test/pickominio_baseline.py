@@ -1,11 +1,10 @@
 # import gym
-import gymnasium as gym
+import time
 
+import gymnasium as gym
+import matplotlib.pyplot as plt
 from stable_baselines3 import PPO  # WORKS GREAT! even better 8sec done!
 from stable_baselines3.common.results_plotter import load_results, ts2xy
-import matplotlib.pyplot as plt
-
-import time
 
 start_time = time.time()
 log_dir = "../logs/"

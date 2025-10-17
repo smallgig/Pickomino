@@ -1,16 +1,17 @@
 """Pickomino game with gymnasium API."""
 
 from typing import Any
-import numpy as np
-import gymnasium as gym
-from gymnasium.core import RenderFrame
-from numpy import ndarray, dtype
 
-from pickomino_env.src.dice import Dice
-from pickomino_env.src.table_tiles import TableTiles
-from pickomino_env.src.player import Player
-from pickomino_env.src.bot import Bot
+import gymnasium as gym
+import numpy as np
+from gymnasium.core import RenderFrame
+from numpy import dtype, ndarray
+
 from pickomino_env.src import utils
+from pickomino_env.src.bot import Bot
+from pickomino_env.src.dice import Dice
+from pickomino_env.src.player import Player
+from pickomino_env.src.table_tiles import TableTiles
 
 RED = "\033[31m"
 NO_RED = "\033[0m"
@@ -30,7 +31,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     NUM_DICE = 8
 
     def __init__(self, number_of_bots: int) -> None:
-        """Constructor."""
+        """Construct the environment."""
         self._action: tuple[int, int] = 0, 0
         self._roll_counter: int = 0
         self._number_of_bots: int = number_of_bots
@@ -78,10 +79,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     ) -> tuple[list[int], list[int]]:
         """Convert internal state to observation format.
 
-        Returns:
-            tuple: Dices collected and dices rolled.
+        Returns: Dices collected and dices rolled.
         """
-
         return self._dice.get_collected(), self._dice.get_rolled()
 
     def _get_obs_tiles(self) -> tuple[int, dict[int, bool]]:
@@ -94,7 +93,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     def _tiles_vector(self) -> ndarray[Any, dtype[Any]]:
         """Return tiles table as a flat binary vector of length 16 for indexes 21..36."""
-        return np.array([1 if self._table_tiles.get_table()[i] else 0 for i in range(21, 37)], dtype=np.int8)
+        return np.array(
+            [1 if self._table_tiles.get_table()[i] else 0 for i in range(21, 37)],
+            dtype=np.int8,
+        )
 
     def _current_obs(self) -> dict[str, object]:
         return {
@@ -134,8 +136,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         return return_value
 
     def _soft_reset(self) -> None:
-        """Clear collected and rolled and roll again"""
-
+        """Clear collected and rolled and roll again."""
         self._dice = Dice()
         self._failed_attempt = False
         self._roll_counter = 0
@@ -310,7 +311,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         return return_value
 
     def _set_failed_already_collected(self) -> None:
-        """Check if a die is available to take"""
+        """Check if a die is available to take."""
         can_take = any(
             rolled > 0 and collected == 0
             for rolled, collected in zip(self._dice.get_rolled(), self._dice.get_collected())
@@ -336,12 +337,13 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
 
     def _set_failed_no_worms(self) -> None:
-        """No worm collected and action stop"""
+        """No worm collected and action stop."""
         if not self._dice.score()[1] and self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
             self._failed_attempt = True
             self._explanation = RED + "Failed: No worm collected" + NO_RED
 
     def _play_bot(self) -> None:
+        """Play a bot if there is one."""
         bot = Bot()
         bot_action: tuple[int, int] = 0, 0
         for player in self._players[1:]:
@@ -349,13 +351,16 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                 # pylint: disable=while-used
                 while bot_action[1] == 0 and not self._terminated and not self._failed_attempt:
                     bot_action = bot.policy(
-                        self._dice.get_rolled(), self._dice.get_collected(), self._table_tiles.smallest()
+                        self._dice.get_rolled(),
+                        self._dice.get_collected(),
+                        self._table_tiles.smallest(),
                     )
                     self._step_bot(bot_action)
             bot_action = 0, 0
             self._current_player_index += 1
 
     def _step_bot(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
+        """Step the bot."""
         self._action = action
         reward = 0
 
@@ -373,7 +378,13 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             return obs, reward, terminated, truncated, info
 
         if self._truncated:
-            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+            return (
+                self._current_obs(),
+                reward,
+                self._terminated,
+                self._truncated,
+                self._get_info(),
+            )
 
         # Collect and roll the dice
         self._step_dice()
@@ -381,16 +392,29 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP or self._failed_attempt:
             reward = self._step_tiles()
             self._soft_reset()
-            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+            return (
+                self._current_obs(),
+                reward,
+                self._terminated,
+                self._truncated,
+                self._get_info(),
+            )
 
         # Game over check
         if not self._table_tiles.highest():
             self._terminated = True
             self._explanation = "No Tile on the table, game over."
 
-        return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+        return (
+            self._current_obs(),
+            reward,
+            self._terminated,
+            self._truncated,
+            self._get_info(),
+        )
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
+        """Take a step in the environment."""
         self._action = action
         reward = 0
         # Check legal move before doing a step.
@@ -413,7 +437,13 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self.reset()
             return obs, reward, terminated, truncated, info
         if self._truncated:
-            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+            return (
+                self._current_obs(),
+                reward,
+                self._terminated,
+                self._truncated,
+                self._get_info(),
+            )
 
         # Collect and roll the dice
         self._step_dice()
@@ -425,9 +455,21 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self._current_player_index = 1
             self._play_bot()
             self._current_player_index = 0
-            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+            return (
+                self._current_obs(),
+                reward,
+                self._terminated,
+                self._truncated,
+                self._get_info(),
+            )
 
-        return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+        return (
+            self._current_obs(),
+            reward,
+            self._terminated,
+            self._truncated,
+            self._get_info(),
+        )
 
 
 def print_roll(observation: tuple[list[int], list[int]], total: int, dice: object) -> None:
@@ -454,13 +496,22 @@ if __name__ == "__main__":
     game_reward: int = 0
     # for key, value in info.items():
     #     print(key, value)
-    GAME_TOTAL = game_info["sum"]
-    dice_rolled_coll = game_observation["dice_collected"], game_observation["dice_rolled"]
+    game_total = game_info["sum"]
+    dice_rolled_coll = (
+        game_observation["dice_collected"],
+        game_observation["dice_rolled"],
+    )
     print("Reset")
     for step in range(MAX_TURNS):
         print("Step:", step)
-        print("Your showing tile: ", game_observation["tile_players"], "(your reward = ", game_reward, ")")
-        print_roll(dice_rolled_coll, GAME_TOTAL, game_info["dice"])
+        print(
+            "Your showing tile: ",
+            game_observation["tile_players"],
+            "(your reward = ",
+            game_reward,
+            ")",
+        )
+        print_roll(dice_rolled_coll, game_total, game_info["dice"])
         print("Tiles on table:", end=" ")
         for ind, game_tile in enumerate(game_observation["tiles_table"]):
             if game_tile:
@@ -471,8 +522,11 @@ if __name__ == "__main__":
         print()
         game_action = (SELECTION, stop)
         game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
-        dice_rolled_coll = game_observation["dice_collected"], game_observation["dice_rolled"]
-        GAME_TOTAL = game_info["sum"]
+        dice_rolled_coll = (
+            game_observation["dice_collected"],
+            game_observation["dice_rolled"],
+        )
+        game_total = game_info["sum"]
         explanation = game_info["explanation"]
         print(f"Terminated: {game_terminated} Truncated:{game_truncated} \nExplanation: {explanation}")
         print("Rolled: ", game_observation["dice_rolled"])

@@ -1,14 +1,17 @@
 """Test bot"""
 
 import numpy as np
-from pickomino_env.src.bot import Bot
+
 from pickomino_env.pickomino_gym_env import PickominoEnv
+from pickomino_env.src.bot import Bot
 
 RED = "\033[31m"
 NO_RED = "\033[0m"
 
 
-def print_roll(observation: tuple[list[int], list[int]], total: object, dice: object) -> None:
+def print_roll(
+    observation: tuple[list[int], list[int]], total: object, dice: object
+) -> None:
     """Print one roll."""
     print(dice)
     # Print line of collected dice.
@@ -58,21 +61,31 @@ for step in range(max_turns):
     print()
     print("Explanation: ", (game_info["explanation"]))
     smallest_tile: int = int(str(game_info["smallest_tile"]))  # Hairy hack.
-    selection, stop = bot.policy(game_observation["dice_rolled"], game_observation["dice_collected"], smallest_tile)
+    selection, stop = bot.policy(
+        game_observation["dice_rolled"],
+        game_observation["dice_collected"],
+        smallest_tile,
+    )
     print("Action:")
     print(
         "     Selection (1-6):",
         selection + 1,  # Player starts with 1.
         "   (Sum after collecting = ",
-        game_info["sum"] + game_observation["dice_rolled"][selection] * values[selection],
+        game_info["sum"]
+        + game_observation["dice_rolled"][selection] * values[selection],
         ")",
     )
     print("     Finish?:", "Stop" if stop else "Roll")
     game_action = (selection, stop)
-    game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
+    game_observation, game_reward, game_terminated, game_truncated, game_info = (
+        env.step(game_action)
+    )
     total_reward += game_reward
 
-    dice_coll_rolled = game_observation["dice_collected"], game_observation["dice_rolled"]
+    dice_coll_rolled = (
+        game_observation["dice_collected"],
+        game_observation["dice_rolled"],
+    )
     game_total = game_info["sum"]
     failed_attempt = game_info["failed_attempt"]
     print(
