@@ -1,4 +1,4 @@
-"""Test bot"""
+"""Test bot."""
 
 import numpy as np
 
@@ -9,9 +9,7 @@ RED = "\033[31m"
 NO_RED = "\033[0m"
 
 
-def print_roll(
-    observation: tuple[list[int], list[int]], total: object, dice: object
-) -> None:
+def print_roll(observation: tuple[list[int], list[int]], total: object, dice: object) -> None:
     """Print one roll."""
     print(dice)
     # Print line of collected dice.
@@ -26,7 +24,7 @@ def print_roll(
     print("----------------------------------------------------------")
 
 
-max_turns: int = 100000
+MAX_TURNS: int = 100000
 env = PickominoEnv(0)
 game_observation, game_info = env.reset()
 game_reward: int = 0
@@ -40,7 +38,7 @@ dice_coll_rolled = game_observation["dice_collected"], game_observation["dice_ro
 print("Reset")
 total_reward: int = 0
 step: int = 0
-for step in range(max_turns):
+for step in range(MAX_TURNS):
     print()
     print("==================================================================")
     print("Step:", step)
@@ -71,15 +69,12 @@ for step in range(max_turns):
         "     Selection (1-6):",
         selection + 1,  # Player starts with 1.
         "   (Sum after collecting = ",
-        game_info["sum"]
-        + game_observation["dice_rolled"][selection] * values[selection],
+        game_info["sum"] + game_observation["dice_rolled"][selection] * values[selection],
         ")",
     )
     print("     Finish?:", "Stop" if stop else "Roll")
     game_action = (selection, stop)
-    game_observation, game_reward, game_terminated, game_truncated, game_info = (
-        env.step(game_action)
-    )
+    game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
     total_reward += game_reward
 
     dice_coll_rolled = (
