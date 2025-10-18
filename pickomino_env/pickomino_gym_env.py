@@ -19,7 +19,7 @@ GREEN = "\033[32m"
 NO_GREEN = "\033[0m"
 
 
-class PickominoEnv(gym.Env):  # type: ignore[type-arg]
+class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes
     """The environment class."""
 
     SMALLEST_TILE = 21
@@ -32,21 +32,22 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     def __init__(self, number_of_bots: int) -> None:
         """Construct the environment."""
-        self._action: tuple[int, int] = 0, 0
-        self._roll_counter: int = 0
-        self._number_of_bots: int = number_of_bots
-        self._you: Player = Player(bot=False, name="You")
+        # Idea for refactoring: Have just on complex variable with the return value of the step function.
+        # pylint ignore=too-many-instance-attributes
+        self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
+        self._roll_counter: int = 0  # This is not used.
+        self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players) - 1 instead.
+        self._you: Player = Player(bot=False, name="You")  # Put this in the players list and remove it from here.
         self._players: list[Player] = []
-        self._create_players()
-        self._remaining_dice: int = self.NUM_DICE
+        self._create_players()  # Put this function call after the variable initializations.
+        self._remaining_dice: int = self.NUM_DICE  # Get rid of this. We do not need it.
         self._terminated: bool = False
         self._truncated: bool = False
-        self._failed_attempt: bool = False
+        self._failed_attempt: bool = False  # Candidate for class Checker.
         self._explanation: str = "Constructor"  # Why the terminated, truncated or failed attempt is set.
         self._current_player_index: int = 0  # 0 for the player, 1 or more for bots
-
         self._dice = Dice()
-        self._table_tiles = TableTiles()
+        self._table_tiles = TableTiles()  # Consider a complex class Table consisting of table tiles and players tiles.
 
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
@@ -165,7 +166,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     # Causes mypy issues.
     # def reset(self, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
     def reset(
-        self, seed: int | None = None, options: dict[str, Any] | None = None
+        self, *, seed: int | None = None, options: dict[str, Any] | None = None
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Start a new episode.
 
