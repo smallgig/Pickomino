@@ -41,11 +41,11 @@ step: int = 0
 for step in range(MAX_TURNS):
     print()
     print("==================================================================")
-    print("Step:", step)
+    print("Bot test running with Step:", step)
     print(
-        "Your showing tile: ",
+        "Your top showing tile: ",
         game_observation["tile_players"],
-        "(your reward = ",
+        "(Your latest reward = ",
         (RED + f"{game_reward}" + NO_RED) if game_reward < 0 else game_reward,
         ")",
     )
