@@ -1,7 +1,7 @@
 """Test Pickomino."""
 
-import pickomino_gym_env
 import numpy as np
+import pickomino_gym_env
 
 
 def test_basics():

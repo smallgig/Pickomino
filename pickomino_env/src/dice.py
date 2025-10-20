@@ -1,6 +1,7 @@
 """Class dice."""
 
 import random as rand
+
 import numpy as np
 
 
@@ -16,7 +17,14 @@ class Dice:
     def __init__(self) -> None:
         self.values: list[int] = [1, 2, 3, 4, 5, 5]  # Worm has value 5.
         self._n_dice: int = 8
-        self._collected: list[int] = [0, 0, 0, 0, 0, 0]  # Collected dice, up to 8 per side.
+        self._collected: list[int] = [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]  # Collected dice, up to 8 per side.
         self._rolled: list[int] = [0, 0, 0, 0, 0, 0]  # Last roll.
 
     def collect(self, action_face: int) -> list[int]:
@@ -52,6 +60,7 @@ class Dice:
         return current_score, has_worms
 
     def __str__(self) -> str:
+        """Print the dice."""
         die_faces: list[str] = [
             "",  # index = 0 doesn't have a face
             "[     ]\n[  @  ]\n[     ]",  # index 1

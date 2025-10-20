@@ -59,7 +59,11 @@ for step in range(MAX_TURNS):
     print()
     print("Explanation: ", (game_info["explanation"]))
     smallest_tile: int = int(str(game_info["smallest_tile"]))  # Hairy hack.
-    selection, stop = bot.policy(game_observation["dice_rolled"], game_observation["dice_collected"], smallest_tile)
+    selection, stop = bot.policy(
+        game_observation["dice_rolled"],
+        game_observation["dice_collected"],
+        smallest_tile,
+    )
     print("Action:")
     print(
         "     Selection (1-6):",
@@ -73,7 +77,10 @@ for step in range(MAX_TURNS):
     game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
     total_reward += game_reward
 
-    dice_coll_rolled = game_observation["dice_collected"], game_observation["dice_rolled"]
+    dice_coll_rolled = (
+        game_observation["dice_collected"],
+        game_observation["dice_rolled"],
+    )
     game_total = game_info["sum"]
     failed_attempt = game_info["failed_attempt"]
     print(

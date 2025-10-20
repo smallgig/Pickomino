@@ -1,4 +1,5 @@
 import gymnasium as gym
+
 import pickomino_env  # wichtig: löst das register() aus
 
 env = gym.make("Pickomino-v0")

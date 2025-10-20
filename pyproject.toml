@@ -17,3 +17,7 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pickomino_env*"]
+
+[tool.pydocstyle]
+convention = "numpy"
+

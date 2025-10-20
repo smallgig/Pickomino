@@ -31,24 +31,26 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
     NUM_DICE = 8
 
     def __init__(self, number_of_bots: int) -> None:
-        """Construct object."""
-        self._action: tuple[int, int] = 0, 0
-        self._roll_counter: int = 0
-        self._number_of_bots: int = number_of_bots
-        self._you: Player = Player(bot=False, name="You")
+        """Construct the environment."""
+        # Idea for refactoring: Have just on complex variable with the return value of the step function.
+        # pylint ignore=too-many-instance-attributes
+        self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
+        self._roll_counter: int = 0  # This is not used.
+        self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players) - 1 instead.
+        self._you: Player = Player(bot=False, name="You")  # Put this in the players list and remove it from here.
         self._players: list[Player] = []
-        self._create_players()
-        self._remaining_dice: int = self.NUM_DICE
+        self._create_players()  # Put this function call after the variable initializations.
+        self._remaining_dice: int = self.NUM_DICE  # Get rid of this. We do not need it.
         self._terminated: bool = False
         self._truncated: bool = False
-        self._failed_attempt: bool = False
+        self._failed_attempt: bool = False  # Candidate for class Checker.
         self._explanation: str = "Constructor"  # Why the terminated, truncated or failed attempt is set.
         self._current_player_index: int = 0  # 0 for the player, 1 or more for bots.
         self._last_returned_tile: int = 0  # For info.
         self._last_picked_tile: int = 0  # For info.
         self._last_turned_tile: int = 0  # For infor.
         self._dice = Dice()
-        self._table_tiles = TableTiles()
+        self._table_tiles = TableTiles()  # Consider a complex class Table consisting of table tiles and players tiles.
 
         # Define what the agent can observe.
         # Dict space gives us structured, human-readable observations.
@@ -81,8 +83,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
     ) -> tuple[list[int], list[int]]:
         """Convert internal state to observation format.
 
-        Returns:
-            tuple: Dices collected and dices rolled.
+        Returns: Dices collected and dices rolled.
         """
         return self._dice.get_collected(), self._dice.get_rolled()
 
@@ -96,7 +97,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
     def _tiles_vector(self) -> ndarray[Any, dtype[Any]]:
         """Return tiles table as a flat binary vector of length 16 for indexes 21..36."""
-        return np.array([1 if self._table_tiles.get_table()[i] else 0 for i in range(21, 37)], dtype=np.int8)
+        return np.array(
+            [1 if self._table_tiles.get_table()[i] else 0 for i in range(21, 37)],
+            dtype=np.int8,
+        )
 
     def _current_obs(self) -> dict[str, object]:
         return {
@@ -334,6 +338,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._explanation = RED + "Failed: No worm collected" + NO_RED
 
     def _play_bot(self) -> None:
+        """Play a bot if there is one."""
         bot = Bot()
         bot_action: tuple[int, int] = 0, 0
         for player in self._players[1:]:
@@ -341,13 +346,16 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 # pylint: disable=while-used
                 while bot_action[1] == 0 and not self._terminated and not self._failed_attempt:
                     bot_action = bot.policy(
-                        self._dice.get_rolled(), self._dice.get_collected(), self._table_tiles.smallest()
+                        self._dice.get_rolled(),
+                        self._dice.get_collected(),
+                        self._table_tiles.smallest(),
                     )
                     self._step_bot(bot_action)
             bot_action = 0, 0
             self._current_player_index += 1
 
     def _step_bot(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
+        """Step the bot."""
         self._action = action
         reward = 0
 
@@ -365,7 +373,13 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             return obs, reward, terminated, truncated, info
 
         if self._truncated:
-            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+            return (
+                self._current_obs(),
+                reward,
+                self._terminated,
+                self._truncated,
+                self._get_info(),
+            )
 
         # Collect and roll the dice
         self._step_dice()
@@ -373,17 +387,29 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP or self._failed_attempt:
             reward = self._step_tiles()
             self._soft_reset()
-            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+            return (
+                self._current_obs(),
+                reward,
+                self._terminated,
+                self._truncated,
+                self._get_info(),
+            )
 
         # Game over check
         if not self._table_tiles.highest():
             self._terminated = True
             self._explanation = "No Tile on the table, game over."
 
-        return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+        return (
+            self._current_obs(),
+            reward,
+            self._terminated,
+            self._truncated,
+            self._get_info(),
+        )
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
-        """Take one step in environment."""
+        """Take a step in the environment."""
         self._action = action
         reward = 0
         # Check legal move before doing a step.
@@ -406,7 +432,13 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self.reset()
             return obs, reward, terminated, truncated, info
         if self._truncated:
-            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+            return (
+                self._current_obs(),
+                reward,
+                self._terminated,
+                self._truncated,
+                self._get_info(),
+            )
 
         # Collect and roll the dice
         self._step_dice()
@@ -418,9 +450,21 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._current_player_index = 1
             self._play_bot()
             self._current_player_index = 0
-            return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+            return (
+                self._current_obs(),
+                reward,
+                self._terminated,
+                self._truncated,
+                self._get_info(),
+            )
 
-        return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+        return (
+            self._current_obs(),
+            reward,
+            self._terminated,
+            self._truncated,
+            self._get_info(),
+        )
 
 
 def print_roll(observation: tuple[list[int], list[int]], total: int, dice: object) -> None:
@@ -464,7 +508,10 @@ if __name__ == "__main__":
         print()
         game_action = (SELECTION, stop)
         game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
-        dice_rolled_coll = game_observation["dice_collected"], game_observation["dice_rolled"]
+        dice_rolled_coll = (
+            game_observation["dice_collected"],
+            game_observation["dice_rolled"],
+        )
         game_total = game_info["sum"]
         explanation = game_info["explanation"]
         print(f"Terminated: {game_terminated} Truncated:{game_truncated} \nExplanation: {explanation}")

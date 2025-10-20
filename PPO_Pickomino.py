@@ -1,12 +1,14 @@
-import gymnasium as gym
-from gymnasium import spaces
-import numpy as np
-from gymnasium.spaces.utils import flatten, flatten_space
-from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.env_checker import check_env
-from stable_baselines3.common.callbacks import BaseCallback
-from stable_baselines3 import PPO
 import os
+
+import gymnasium as gym
+import numpy as np
+from gymnasium import spaces
+from gymnasium.spaces.utils import flatten, flatten_space
+from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.env_checker import check_env
+from stable_baselines3.common.monitor import Monitor
+
 
 # -------- Debug-Validator (prüft ROH-Obs vor dem Flatten) --------
 class ValidateObs(gym.Wrapper):
@@ -17,14 +19,20 @@ class ValidateObs(gym.Wrapper):
                 assert k in obs, f"{path}: key fehlt: {k}"
                 self._check(obs[k], sp, f"{path}.{k}" if path else k)
         elif isinstance(space, spaces.Tuple):
-            assert isinstance(obs, (tuple, list)), f"{path}: erwartet tuple/list, bekam {type(obs)}"
+            assert isinstance(
+                obs, (tuple, list)
+            ), f"{path}: erwartet tuple/list, bekam {type(obs)}"
             assert len(obs) == len(space.spaces), f"{path}: Länge passt nicht"
             for i, sp in enumerate(space.spaces):
                 self._check(obs[i], sp, f"{path}[{i}]")
         elif isinstance(space, (spaces.Box, spaces.MultiBinary, spaces.MultiDiscrete)):
-            assert not isinstance(obs, spaces.Space), f"{path}: VALUE IST SPACE {type(obs)}"
+            assert not isinstance(
+                obs, spaces.Space
+            ), f"{path}: VALUE IST SPACE {type(obs)}"
         elif isinstance(space, spaces.Discrete):
-            assert not isinstance(obs, spaces.Space), f"{path}: VALUE IST SPACE {type(obs)}"
+            assert not isinstance(
+                obs, spaces.Space
+            ), f"{path}: VALUE IST SPACE {type(obs)}"
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -36,18 +44,23 @@ class ValidateObs(gym.Wrapper):
         self._check(obs, self.env.observation_space)
         return obs, r, terminated, truncated, info
 
+
 # -------- Actions: Tuple(Discrete,...) -> MultiDiscrete --------
 class TupleToMultiDiscrete(gym.ActionWrapper):
     def __init__(self, env):
         super().__init__(env)
-        if isinstance(env.action_space, spaces.Tuple) and all(isinstance(s, spaces.Discrete) for s in env.action_space.spaces):
+        if isinstance(env.action_space, spaces.Tuple) and all(
+            isinstance(s, spaces.Discrete) for s in env.action_space.spaces
+        ):
             self.dims = [s.n for s in env.action_space.spaces]
             self.action_space = spaces.MultiDiscrete(self.dims)
         else:
             self.dims = None
             self.action_space = env.action_space
+
     def action(self, a):
         return tuple(int(x) for x in a) if self.dims else a
+
 
 # -------- Null-Werte bauen (rekursiv) --------
 def zeros_from_space(sp: spaces.Space):
@@ -65,6 +78,7 @@ def zeros_from_space(sp: spaces.Space):
         return tuple(zeros_from_space(sub) for sub in sp.spaces)
     raise TypeError(f"zeros_from_space: nicht unterstützt: {type(sp)}")
 
+
 def _sanitize_discrete(space: spaces.Discrete, obs):
     v = int(obs)
     lo = int(space.start)
@@ -77,6 +91,7 @@ def _sanitize_discrete(space: spaces.Discrete, obs):
             v = lo
     return v
 
+
 def _sanitize_multidiscrete(space: spaces.MultiDiscrete, obs):
     arr = np.asarray(obs, dtype=np.int64).ravel()
     n = np.asarray(space.nvec, dtype=np.int64).ravel()
@@ -88,6 +103,7 @@ def _sanitize_multidiscrete(space: spaces.MultiDiscrete, obs):
     arr = np.mod(arr, n_safe)
     return arr.astype(np.int64)
 
+
 def _sanitize_multibinary(space: spaces.MultiBinary, obs):
     arr = np.asarray(obs, dtype=np.int8).ravel()
     if arr.size != space.n:
@@ -95,6 +111,7 @@ def _sanitize_multibinary(space: spaces.MultiBinary, obs):
     # nur {0,1} erlauben
     arr = (arr != 0).astype(np.int8)
     return arr
+
 
 def sanitize_obs(space: spaces.Space, obs):
     # Falls versehentlich ein Space-Objekt als Wert kommt -> Nullwerte
@@ -104,8 +121,10 @@ def sanitize_obs(space: spaces.Space, obs):
     if isinstance(space, spaces.Dict):
         if not isinstance(obs, dict):
             return zeros_from_space(space)
-        return {k: sanitize_obs(sp_k, obs.get(k, zeros_from_space(sp_k)))
-                for k, sp_k in space.spaces.items()}
+        return {
+            k: sanitize_obs(sp_k, obs.get(k, zeros_from_space(sp_k)))
+            for k, sp_k in space.spaces.items()
+        }
 
     if isinstance(space, spaces.Tuple):
         if not isinstance(obs, (tuple, list)) or len(obs) != len(space.spaces):
@@ -142,15 +161,18 @@ class SafeFlattenToBox(gym.ObservationWrapper):
         super().__init__(env)
         self._S = env.observation_space
         self.observation_space = flatten_space(self._S)
+
     def observation(self, obs):
         obs = sanitize_obs(self._S, obs)
         return flatten(self._S, obs)
+
 
 # -------- TensorBoard-Callback (zusätzliche Scalars) --------
 class TBCallback(BaseCallback):
     def __init__(self, verbose=0):
         super().__init__(verbose)
         self._updates = 0
+
     def _on_step(self) -> bool:
         self._updates += 1
         # Lernrate loggen (falls Schedules genutzt werden)
@@ -164,10 +186,11 @@ class TBCallback(BaseCallback):
 def make_env(seed: int = 0):
     e = gym.make("Pickomino-v0")
     e = TupleToMultiDiscrete(e)  # Tuple(Discrete,...) -> MultiDiscrete
-    e = SafeFlattenToBox(e)      # rekursiv sanitisieren + 1D-Box flatten
+    e = SafeFlattenToBox(e)  # rekursiv sanitisieren + 1D-Box flatten
     e = Monitor(e)
     e.reset(seed=seed)
     return e
+
 
 env = make_env(0)
 
@@ -181,7 +204,11 @@ from stable_baselines3.common.callbacks import EvalCallback
 
 eval_env = make_env(seed=123)
 eval_cb = EvalCallback(
-    eval_env, eval_freq=5000, n_eval_episodes=20,
-    deterministic=True, best_model_save_path="models", log_path="eval"
+    eval_env,
+    eval_freq=5000,
+    n_eval_episodes=20,
+    deterministic=True,
+    best_model_save_path="models",
+    log_path="eval",
 )
 model.learn(200_000, tb_log_name="PickominoPPO", callback=[TBCallback(), eval_cb])

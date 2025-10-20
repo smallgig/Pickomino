@@ -7,14 +7,13 @@ Created on Thu Aug 21 13:44:26 2025
 
 # import gym
 import gymnasium as gym
-
+import matplotlib.pyplot as plt
 from stable_baselines3 import PPO  # WORKS GREAT! even better 8sec done!
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.results_plotter import load_results, ts2xy
 
 # from stable_baselines3 import SAC # Soft Actor-Critic (SAC) is suitable for continuous action spaces
 import pickomino_env
-from stable_baselines3.common.results_plotter import load_results, ts2xy
-from stable_baselines3.common.monitor import Monitor
-import matplotlib.pyplot as plt
 
 render_mode = None
 

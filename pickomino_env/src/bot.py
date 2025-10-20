@@ -1,11 +1,11 @@
-"""Bot class"""
+"""Bot class."""
 
 import numpy as np
 from numpy.ma.core import argmax
 
 
 class Bot:
-    """Bot class"""
+    """Bot class."""
 
     HEURISTIC = "heuristic"
 
@@ -14,6 +14,7 @@ class Bot:
         self.current_policy: str = self.HEURISTIC
 
     def __str__(self) -> str:
+        """Return a string representation."""
         return f"Bot policy: {self.current_policy}"
 
     def set_policy(self, policy: str) -> None:
@@ -32,6 +33,7 @@ class Bot:
 
     def _heuristic_policy(self, rolled: list[int], collected: list[int], smallest: int) -> tuple[int, int]:
         """Heuristic Strategy.
+
         1. On or after the third roll, take worms if you can.
         2. Otherwise, take the die side that contributes the most points.
         3. Quit as soon as you can take a tile.
@@ -67,7 +69,8 @@ if __name__ == "__main__":
     bot = Bot()  # Using the Bot class to avoid pylint messages.
     print("bot", bot)
     print(
-        "bot.policy([1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], 1)", bot.policy([1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], 1)
+        "bot.policy([1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], 1)",
+        bot.policy([1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], 1),
     )
     print("bot.get_policy()", bot.get_policy())
     bot.set_policy("Test")
