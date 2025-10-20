@@ -92,6 +92,7 @@ for step in range(MAX_TURNS):
         failed_attempt,
     )
     print("Player Stack:", game_info["player_stack"])
+    print("Last returned tile:", game_info["last_returned_tile"])
     print("Total reward:", total_reward)
     print()
     if game_terminated:
