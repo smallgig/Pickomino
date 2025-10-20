@@ -1,8 +1,9 @@
-"""Test bot"""
+"""Test bot."""
 
 import numpy as np
-from pickomino_env.src.bot import Bot
+
 from pickomino_env.pickomino_gym_env import PickominoEnv
+from pickomino_env.src.bot import Bot
 
 RED = "\033[31m"
 NO_RED = "\033[0m"
@@ -23,7 +24,7 @@ def print_roll(observation: tuple[list[int], list[int]], total: object, dice: ob
     print("----------------------------------------------------------")
 
 
-max_turns: int = 100000
+MAX_TURNS: int = 100000
 env = PickominoEnv(0)
 game_observation, game_info = env.reset()
 game_reward: int = 0
@@ -37,7 +38,7 @@ dice_coll_rolled = game_observation["dice_collected"], game_observation["dice_ro
 print("Reset")
 total_reward: int = 0
 step: int = 0
-for step in range(max_turns):
+for step in range(MAX_TURNS):
     print()
     print("==================================================================")
     print("Step:", step)
@@ -84,6 +85,7 @@ for step in range(max_turns):
         failed_attempt,
     )
     print("Player Stack:", game_info["player_stack"])
+    print("Last returned tile:", game_info["last_returned_tile"])
     print("Total reward:", total_reward)
     print()
     if game_terminated:

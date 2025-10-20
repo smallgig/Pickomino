@@ -1,16 +1,17 @@
 """Pickomino game with gymnasium API."""
 
 from typing import Any
-import numpy as np
-import gymnasium as gym
-from gymnasium.core import RenderFrame
-from numpy import ndarray, dtype
 
-from pickomino_env.src.dice import Dice
-from pickomino_env.src.table_tiles import TableTiles
-from pickomino_env.src.player import Player
-from pickomino_env.src.bot import Bot
+import gymnasium as gym
+import numpy as np
+from gymnasium.core import RenderFrame
+from numpy import dtype, ndarray
+
 from pickomino_env.src import utils
+from pickomino_env.src.bot import Bot
+from pickomino_env.src.dice import Dice
+from pickomino_env.src.player import Player
+from pickomino_env.src.table_tiles import TableTiles
 
 RED = "\033[31m"
 NO_RED = "\033[0m"
@@ -18,7 +19,7 @@ GREEN = "\033[32m"
 NO_GREEN = "\033[0m"
 
 
-class PickominoEnv(gym.Env):  # type: ignore[type-arg]
+class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes
     """The environment class."""
 
     SMALLEST_TILE = 21
@@ -30,7 +31,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     NUM_DICE = 8
 
     def __init__(self, number_of_bots: int) -> None:
-        """Constructor."""
+        """Construct object."""
         self._action: tuple[int, int] = 0, 0
         self._roll_counter: int = 0
         self._number_of_bots: int = number_of_bots
@@ -42,8 +43,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         self._truncated: bool = False
         self._failed_attempt: bool = False
         self._explanation: str = "Constructor"  # Why the terminated, truncated or failed attempt is set.
-        self._current_player_index: int = 0  # 0 for the player, 1 or more for bots
-
+        self._current_player_index: int = 0  # 0 for the player, 1 or more for bots.
+        self._last_returned_tile: int = 0  # For info.
+        self._last_picked_tile: int = 0  # For info.
+        self._last_turned_tile: int = 0  # For infor.
         self._dice = Dice()
         self._table_tiles = TableTiles()
 
@@ -81,7 +84,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         Returns:
             tuple: Dices collected and dices rolled.
         """
-
         return self._dice.get_collected(), self._dice.get_rolled()
 
     def _get_obs_tiles(self) -> tuple[int, dict[int, bool]]:
@@ -129,27 +131,27 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             "failed_attempt": self._failed_attempt,
             "player_stack": self._players[0].show_all(),
             "smallest_tile": self._table_tiles.smallest(),
+            "last_returned_tile": self._last_returned_tile,
+            "last_picked_tile": self._last_picked_tile,
+            "last_turned_tile": self._last_turned_tile,
             # "self.legal_move(action)": self._legal_move(action),
         }
         return return_value
 
     def _soft_reset(self) -> None:
-        """Clear collected and rolled and roll again"""
-
+        """Clear collected and rolled and roll again."""
         self._dice = Dice()
         self._failed_attempt = False
         self._roll_counter = 0
-        # print(f"PRINT DEBUGGING - rolling {self._num_dice} dice.")
         self._dice.roll()
 
     def _remove_tile_from_player(self) -> int:
         return_value = 0
-
         if self._players[self._current_player_index].show():
             tile_to_return: int = self._players[
                 self._current_player_index
             ].remove_tile()  # Remove the tile from the player.
-            # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
+            self._last_returned_tile = tile_to_return
             self._table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
             return_value = -utils.get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
             # If the returned tile is not the highest, turn the highest tile face down, by setting it to False.
@@ -158,13 +160,13 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             # Turn the highest tile if there is one.
             if highest:
                 self._table_tiles.set_tile(highest, False)
-
+                self._last_turned_tile = highest
         return return_value
 
     # Causes mypy issues.
     # def reset(self, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
     def reset(
-        self, seed: int | None = None, options: dict[str, Any] | None = None
+        self, *, seed: int | None = None, options: dict[str, Any] | None = None
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Start a new episode.
 
@@ -185,13 +187,11 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         self._failed_attempt = False
         self._terminated = False
         self._truncated = False
-
-        # print(f"PRINT DEBUGGING - rolling {self._num_dice} dice.")
+        self._last_returned_tile = 0  # For info.
+        self._last_picked_tile = 0  # For info.
+        self._last_turned_tile = 0  # For info.
         self._dice.roll()
-
-        return_obs = self._current_obs()
-
-        return return_obs, self._get_info()
+        return self._current_obs(), self._get_info()
 
     def _action_is_allowed(self) -> None:
         """Check if action is allowed."""
@@ -222,7 +222,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self._truncated = True
             self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
 
-        # Action allowed tried to take tile.
+        # Get to here:Action allowed try to take a tile.
 
     def _step_dice(self) -> None:
         """Execute one roll of the dice and picking or returning a tile.
@@ -246,10 +246,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     def _steal_from_bot(self, steal_index: int) -> int:
         tile_to_return: int = self._players[steal_index].remove_tile()  # Remove the tile from the player.
         self._players[self._current_player_index].add_tile(tile_to_return)
-        # print("PRINT DEBUGGING - Returning tile:", tile_to_return, "to the table.")
-        return_value = utils.get_worms(tile_to_return)
-
-        return return_value
+        self._last_returned_tile = tile_to_return
+        return utils.get_worms(tile_to_return)
 
     def _step_tiles(self) -> int:
         """Pick or return a tile.
@@ -259,14 +257,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         :return: Value of moving the tile [-4 to +4]
         """
         dice_sum: int = self._dice.score()[0]
-        # print("PRINT DEBUGGING - dice_sum: ", dice_sum)
-
         # Using the dice sum as an index in [21..36] below. Hence, for dice_sum < 21 need to return early.
         # A failed attempt or 21 was not reached. Return the tile to the table.
         if self._failed_attempt:
             return_value = self._remove_tile_from_player()
-            # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
-            # print("PRINT DEBUGGING - Your tiles:", self.you)
             self._soft_reset()
             return return_value
         # Environment takes the highest tile on the table.
@@ -285,7 +279,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
         # Only pick a tile if it is on the table.
         elif self._table_tiles.get_table()[dice_sum]:
-            # print("PRINT DEBUGGING - Picking tile:", dice_sum)
+            self._last_picked_tile = dice_sum
             self._players[self._current_player_index].add_tile(dice_sum)  # Add the tile to the player or bot.
             self._table_tiles.set_tile(dice_sum, False)  # Mark the tile as no longer on the table.
             return_value = utils.get_worms(dice_sum)
@@ -295,22 +289,20 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             # Find the highest tile smaller than the dice sum.
             highest: int = self._table_tiles.find_next_lower_tile(dice_sum)
             if highest:  # Found the highest tile to pick from the table.
-                # print("PRINT DEBUGGING - Picking tile:", highest)
+                self._last_picked_tile = highest
                 self._players[self._current_player_index].add_tile(highest)  # Add the tile to the player.
                 self._table_tiles.set_tile(highest, False)  # Mark the tile as no longer on the table.
                 return_value = utils.get_worms(highest)
-            # Also no smaller tiles available -> have to return players showing tile if there is one.
+            # No smaller tiles are available -> have to return players showing tile if there is one.
             else:
                 return_value = self._remove_tile_from_player()
                 self._explanation = RED + "No available tile on the table to take" + NO_RED
-                # print("PRINT DEBUGGING - Turning tile:", highest, "on the table.")
 
-        # print("PRINT DEBUGGING - Your tiles:", self.you)
         self._soft_reset()
         return return_value
 
     def _set_failed_already_collected(self) -> None:
-        """Check if a die is available to take"""
+        """Check if a die is available to take."""
         can_take = any(
             rolled > 0 and collected == 0
             for rolled, collected in zip(self._dice.get_rolled(), self._dice.get_collected())
@@ -336,7 +328,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
 
     def _set_failed_no_worms(self) -> None:
-        """No worm collected and action stop"""
+        """No worm collected and action stop."""
         if not self._dice.score()[1] and self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
             self._failed_attempt = True
             self._explanation = RED + "Failed: No worm collected" + NO_RED
@@ -364,7 +356,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         if self._terminated:
             obs, reward, terminated, truncated, info = (
                 self._current_obs(),
-                0,
+                0,  # Bots do not generate rewards.
                 self._terminated,
                 self._truncated,
                 self._get_info(),
@@ -391,6 +383,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
+        """Take one step in environment."""
         self._action = action
         reward = 0
         # Check legal move before doing a step.
@@ -452,15 +445,15 @@ if __name__ == "__main__":
     env = PickominoEnv(NUMBER_OF_PLAYERS)
     game_observation, game_info = env.reset()
     game_reward: int = 0
-    # for key, value in info.items():
-    #     print(key, value)
-    GAME_TOTAL = game_info["sum"]
+    game_total = game_info["sum"]
     dice_rolled_coll = game_observation["dice_collected"], game_observation["dice_rolled"]
-    print("Reset")
+    print("Reset! Info before playing:")
+    for key, value in game_info.items():
+        print(key, value)
     for step in range(MAX_TURNS):
         print("Step:", step)
         print("Your showing tile: ", game_observation["tile_players"], "(your reward = ", game_reward, ")")
-        print_roll(dice_rolled_coll, GAME_TOTAL, game_info["dice"])
+        print_roll(dice_rolled_coll, game_total, game_info["dice"])
         print("Tiles on table:", end=" ")
         for ind, game_tile in enumerate(game_observation["tiles_table"]):
             if game_tile:
@@ -472,9 +465,10 @@ if __name__ == "__main__":
         game_action = (SELECTION, stop)
         game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
         dice_rolled_coll = game_observation["dice_collected"], game_observation["dice_rolled"]
-        GAME_TOTAL = game_info["sum"]
+        game_total = game_info["sum"]
         explanation = game_info["explanation"]
         print(f"Terminated: {game_terminated} Truncated:{game_truncated} \nExplanation: {explanation}")
         print("Rolled: ", game_observation["dice_rolled"])
+        print("Last returned tile:", game_info["last_returned_tile"])
         if game_terminated:
             game_observation, game_info = env.reset()
