@@ -202,25 +202,25 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
 
         # Check action values are within range
-        if self._action[PickominoEnv.ACTION_INDEX_DICE] not in range(0, 6) or self._action[
-            PickominoEnv.ACTION_INDEX_ROLL
-        ] not in range(0, 2):
+        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[self.ACTION_INDEX_ROLL] not in range(
+            0, 2
+        ):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value was not rolled.
-        if self._dice.get_rolled()[self._action[PickominoEnv.ACTION_INDEX_DICE]] == 0:
+        if self._dice.get_rolled()[self._action[self.ACTION_INDEX_DICE]] == 0:
             self._truncated = True
             self._explanation = RED + "Truncated: Selected Face value not rolled" + NO_RED
 
         # Dice already collected cannot be taken again.
-        if self._dice.get_collected()[self._action[PickominoEnv.ACTION_INDEX_DICE]] != 0:
+        if self._dice.get_collected()[self._action[self.ACTION_INDEX_DICE]] != 0:
             self._truncated = True
             self._explanation = RED + "Truncated: Dice already collected cannot be taken again" + NO_RED
 
         remaining_dice = self._dice.get_rolled().copy()
-        remaining_dice[self._action[PickominoEnv.ACTION_INDEX_DICE]] = 0
+        remaining_dice[self._action[self.ACTION_INDEX_DICE]] = 0
 
-        if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_ROLL and not remaining_dice:
+        if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_ROLL and not remaining_dice:
             self._truncated = True
             self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
 
@@ -233,13 +233,13 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         """
         self._set_failed_already_collected()
 
-        self._dice.collect(self._action[PickominoEnv.ACTION_INDEX_DICE])
+        self._dice.collect(self._action[self.ACTION_INDEX_DICE])
 
         self._set_failed_too_low()
         self._set_failed_no_worms()
 
         # Action is to roll
-        if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_ROLL:
+        if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_ROLL:
             self._dice.roll()
             self._set_failed_already_collected()
             self._set_failed_too_low()
@@ -266,7 +266,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._soft_reset()
             return return_value
         # Environment takes the highest tile on the table.
-        # Check if any tile can be picked from another player
+        # Check if any tile can be picked from another player.
         # Index from player to steal.
         steal_index = next(
             (
@@ -320,18 +320,18 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
     def _set_failed_too_low(self) -> None:
         """Failed: 21 not reached and action stop or no dice left."""
-        if self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
-            if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
+        if self._dice.score()[0] < self.SMALLEST_TILE:
+            if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and action stop" + NO_RED
 
-            if sum(self._dice.get_collected()) == self.NUM_DICE and self._dice.score()[0] < PickominoEnv.SMALLEST_TILE:
+            if sum(self._dice.get_collected()) == self.NUM_DICE and self._dice.score()[0] < self.SMALLEST_TILE:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
 
     def _set_failed_no_worms(self) -> None:
         """No worm collected and action stop."""
-        if not self._dice.score()[1] and self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP:
+        if not self._dice.score()[1] and self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP:
             self._failed_attempt = True
             self._explanation = RED + "Failed: No worm collected" + NO_RED
 
@@ -382,7 +382,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # Collect and roll the dice
         self._step_dice()
 
-        if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP or self._failed_attempt:
+        if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP or self._failed_attempt:
             reward = self._step_tiles()
             self._soft_reset()
             return (
@@ -442,7 +442,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._step_dice()
 
         # Action is to stop or failed attempt, get reward from step tiles.
-        if self._action[PickominoEnv.ACTION_INDEX_ROLL] == PickominoEnv.ACTION_STOP or self._failed_attempt:
+        if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP or self._failed_attempt:
             # self._set_failed_attempt()
             reward = self._step_tiles()
             self._current_player_index = 1
