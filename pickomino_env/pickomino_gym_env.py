@@ -19,7 +19,7 @@ GREEN = "\033[32m"
 NO_GREEN = "\033[0m"
 
 
-class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes
+class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
     """The environment class."""
 
     SMALLEST_TILE = 21
@@ -32,8 +32,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
     def __init__(self, number_of_bots: int) -> None:
         """Construct the environment."""
-        # Idea for refactoring: Have just on complex variable with the return value of the step function.
-        # pylint ignore=too-many-instance-attributes
+        # The following is an idea for refactoring.
+        # Have only on complex variable with the return value of the step function.
         self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
         self._roll_counter: int = 0  # This is not used.
         self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players) - 1 instead.
@@ -52,7 +52,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._dice = Dice()
         self._table_tiles = TableTiles()  # Consider a complex class Table consisting of table tiles and players tiles.
 
-        # Define what the agent can observe.
+        # Define what the AI agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Max 8 dice.
         self.observation_space = gym.spaces.Dict(
@@ -167,8 +167,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 self._last_turned_tile = highest
         return return_value
 
-    # Causes mypy issues.
-    # def reset(self, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
     ) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -269,7 +267,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             return return_value
         # Environment takes the highest tile on the table.
         # Check if any tile can be picked from another player
-        # Index from player to steal
+        # Index from player to steal.
         steal_index = next(
             (
                 i
