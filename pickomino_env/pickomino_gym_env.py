@@ -266,7 +266,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._soft_reset()
             return return_value
         # Environment takes the highest tile on the table.
-        # Check if any tile can be picked from another player
+        # Check if any tile can be picked from another player.
         # Index from player to steal.
         steal_index = next(
             (
@@ -467,8 +467,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
 if __name__ == "__main__":
     test_bot = Bot()
-    NUMBER_OF_PLAYERS: int = 5
+    game_number_of_bots: int = int(input("Enter number of bots you want to play against (0 - 6): "))
     MAX_TURNS: int = 300
 
-    env = PickominoEnv(NUMBER_OF_PLAYERS)
+    env = PickominoEnv(game_number_of_bots)
     test_bot.play_manual_game(env, MAX_TURNS)
