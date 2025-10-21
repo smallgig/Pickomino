@@ -19,7 +19,7 @@ GREEN = "\033[32m"
 NO_GREEN = "\033[0m"
 
 
-class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes
+class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
     """The environment class."""
 
     SMALLEST_TILE = 21
@@ -32,8 +32,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
     def __init__(self, number_of_bots: int) -> None:
         """Construct the environment."""
-        # Idea for refactoring: Have just on complex variable with the return value of the step function.
-        # pylint ignore=too-many-instance-attributes
+        # The following is an idea for refactoring.
+        # Have only on complex variable with the return value of the step function.
         self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
         self._roll_counter: int = 0  # This is not used.
         self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players) - 1 instead.
@@ -52,7 +52,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._dice = Dice()
         self._table_tiles = TableTiles()  # Consider a complex class Table consisting of table tiles and players tiles.
 
-        # Define what the agent can observe.
+        # Define what the AI agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Max 8 dice.
         self.observation_space = gym.spaces.Dict(
@@ -167,8 +167,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 self._last_turned_tile = highest
         return return_value
 
-    # Causes mypy issues.
-    # def reset(self, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[ObsType, dict[str, Any]]:
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
     ) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -269,7 +267,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             return return_value
         # Environment takes the highest tile on the table.
         # Check if any tile can be picked from another player
-        # Index from player to steal
+        # Index from player to steal.
         steal_index = next(
             (
                 i
@@ -467,55 +465,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         )
 
 
-def print_roll(observation: tuple[list[int], list[int]], total: int, dice: object) -> None:
-    """Print one roll."""
-    print(dice)
-    # Print line of collected dice.
-    for collected in range(len(observation[0])):
-        print(f"   {observation[0][collected]}      ", end="")
-    # Print sum at the end of the collected dice line
-    print(f" collected   sum = {total}")
-    # Print line of rolled dice.
-    for rolled in range(len(observation[1])):
-        print(f"   {observation[1][rolled]}      ", end="")
-    print(" rolled")
-    print("----------------------------------------------------------")
-
-
 if __name__ == "__main__":
-    # Interactive test.
+    test_bot = Bot()
     NUMBER_OF_PLAYERS: int = 5
     MAX_TURNS: int = 300
+
     env = PickominoEnv(NUMBER_OF_PLAYERS)
-    game_observation, game_info = env.reset()
-    game_reward: int = 0
-    game_total = game_info["sum"]
-    dice_rolled_coll = game_observation["dice_collected"], game_observation["dice_rolled"]
-    print("Reset! Info before playing:")
-    for key, value in game_info.items():
-        print(key, value)
-    for step in range(MAX_TURNS):
-        print("Step:", step)
-        print("Your showing tile: ", game_observation["tile_players"], "(your reward = ", game_reward, ")")
-        print_roll(dice_rolled_coll, game_total, game_info["dice"])
-        print("Tiles on table:", end=" ")
-        for ind, game_tile in enumerate(game_observation["tiles_table"]):
-            if game_tile:
-                print(ind + 21, end=" ")
-        print()
-        SELECTION: int = int(input("Which dice do you want to collect? (1..5 or worm =6): ")) - 1
-        stop: int = int(input("Keep rolling? (0 = ROLL,  1 = STOP: "))
-        print()
-        game_action = (SELECTION, stop)
-        game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
-        dice_rolled_coll = (
-            game_observation["dice_collected"],
-            game_observation["dice_rolled"],
-        )
-        game_total = game_info["sum"]
-        explanation = game_info["explanation"]
-        print(f"Terminated: {game_terminated} Truncated:{game_truncated} \nExplanation: {explanation}")
-        print("Rolled: ", game_observation["dice_rolled"])
-        print("Last returned tile:", game_info["last_returned_tile"])
-        if game_terminated:
-            game_observation, game_info = env.reset()
+    test_bot.play_manual_game(env, MAX_TURNS)
