@@ -33,13 +33,12 @@ class Bot:
         return action
 
     @staticmethod
-    def play_manual_game(
-        env, max_turns: int = 300
-    ) -> None:  # If None is always the return value, it pops in console when playing a game
-        """Interactive Test"""
+    # If None is always the return value, it pops in console when playing a game.
+    # The env should be type annotated env:PickominoEnv but leads to circular import.
+    def play_manual_game(env, max_turns: int = 300) -> None:  # type: ignore [no-untyped-def]
+        """Run interactive test."""
         game_observation, game_info = env.reset()
         game_reward: int = 0
-        game_total = game_info["sum"]
 
         dice_rolled_coll = (
             game_observation["dice_collected"],
@@ -53,28 +52,23 @@ class Bot:
         for step in range(max_turns):
             print("Step:", step)
             print("Your showing tile: ", game_observation["tile_players"], "(your reward = ", game_reward, ")")
-            print_roll(dice_rolled_coll, game_total, game_info["dice"])
+            print_roll(dice_rolled_coll, game_info["sum"], game_info["dice"])
             print("Tiles on table:", end=" ")
 
             for ind, game_tile in enumerate(game_observation["tiles_table"]):
                 if game_tile:
                     print(ind + 21, end=" ")
             print()
-
             selection: int = int(input("Which dice do you want to collect? (1..5 or worm =6): ")) - 1
             stop: int = int(input("Keep rolling? (0 = ROLL,  1 = STOP): "))
             print()
-
-            game_action = (selection, stop)
-            game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
+            game_observation, game_reward, game_terminated, game_truncated, game_info = env.step((selection, stop))
             dice_rolled_coll = (
                 game_observation["dice_collected"],
                 game_observation["dice_rolled"],
             )
-            game_total = game_info["sum"]
-            explanation = game_info["explanation"]
-
-            print(f"Terminated: {game_terminated} Truncated:{game_truncated} \nExplanation: {explanation}")
+            print(f"Terminated: {game_terminated} Truncated:{game_truncated}")
+            print(f'Explanation: {game_info["explanation"]}')
             print("Rolled: ", game_observation["dice_rolled"])
             print("Last returned tile:", game_info["last_returned_tile"])
 
