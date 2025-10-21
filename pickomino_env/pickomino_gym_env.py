@@ -266,7 +266,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._soft_reset()
             return return_value
         # Environment takes the highest tile on the table.
-        # Check if any tile can be picked from another player
+        # Check if any tile can be picked from another player.
         # Index from player to steal.
         steal_index = next(
             (
