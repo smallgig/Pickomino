@@ -32,6 +32,38 @@ class Bot:
             action = self._heuristic_policy(rolled, collected, smallest)
         return action
 
+    def _heuristic_policy(self, rolled: list[int], collected: list[int], smallest: int) -> tuple[int, int]:
+        """Heuristic Strategy.
+
+        1. On or after the third roll, take worms if you can.
+        2. Otherwise, take the die side that contributes the most points.
+        3. Quit as soon as you can take a tile.
+        """
+        action_roll = 0
+        self.roll_counter += 1
+        values = [1, 2, 3, 4, 5, 5]
+
+        if sum(collected):
+            self.roll_counter = 0
+
+        # Set rolled[ind] to 0 if already collected
+        for ind, die in enumerate(collected):
+            if die:
+                rolled[ind] = 0
+        # 2. Otherwise, take the die side that contributes the most points.
+        contribution = np.multiply(rolled, values)
+        action_dice = int(argmax(contribution))
+
+        # 1. On or after the third roll, take worms if you can.
+        if self.roll_counter >= 3 and not collected[5] and rolled[5]:  # pylint: disable=magic-value-comparison
+            action_dice = 5
+
+        # 3. Quit as soon as you can take a tile.
+        if sum(np.multiply(collected, values)) + contribution[action_dice] >= smallest:
+            action_roll = 1
+
+        return action_dice, action_roll
+
     @staticmethod
     # If None is always the return value, it pops in console when playing a game.
     # The env should be type annotated env:PickominoEnv but leads to circular import.
@@ -74,38 +106,6 @@ class Bot:
 
             if game_terminated:
                 game_observation, game_info = env.reset()
-
-    def _heuristic_policy(self, rolled: list[int], collected: list[int], smallest: int) -> tuple[int, int]:
-        """Heuristic Strategy.
-
-        1. On or after the third roll, take worms if you can.
-        2. Otherwise, take the die side that contributes the most points.
-        3. Quit as soon as you can take a tile.
-        """
-        action_roll = 0
-        self.roll_counter += 1
-        values = [1, 2, 3, 4, 5, 5]
-
-        if sum(collected):
-            self.roll_counter = 0
-
-        # Set rolled[ind] to 0 if already collected
-        for ind, die in enumerate(collected):
-            if die:
-                rolled[ind] = 0
-        # 2. Otherwise, take the die side that contributes the most points.
-        contribution = np.multiply(rolled, values)
-        action_dice = int(argmax(contribution))
-
-        # 1. On or after the third roll, take worms if you can.
-        if self.roll_counter >= 3 and not collected[5] and rolled[5]:  # pylint: disable=magic-value-comparison
-            action_dice = 5
-
-        # 3. Quit as soon as you can take a tile.
-        if sum(np.multiply(collected, values)) + contribution[action_dice] >= smallest:
-            action_roll = 1
-
-        return action_dice, action_roll
 
 
 def print_roll(observation: tuple[list[int], list[int]], total: int, dice: object) -> None:
