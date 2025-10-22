@@ -7,7 +7,9 @@ import numpy as np
 from gymnasium.core import RenderFrame
 from numpy import dtype, ndarray
 
+
 from pickomino_env.src import utils
+from pickomino_env.bot_test import BotTest
 from pickomino_env.src.bot import Bot
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.player import Player
@@ -466,9 +468,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
 
 if __name__ == "__main__":
-    test_bot = Bot()
+    bot = BotTest()
     game_number_of_bots: int = int(input("Enter number of bots you want to play against (0 - 6): "))
     MAX_TURNS: int = 300
 
     env = PickominoEnv(game_number_of_bots)
-    test_bot.play_manual_game(env, MAX_TURNS)
+    # bot.play_automated(env, MAX_TURNS)
+    bot.play_manual(env, MAX_TURNS)
