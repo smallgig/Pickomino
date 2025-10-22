@@ -1,97 +1,102 @@
 # Pickomino
-Implements the game [Pickomino](https://www.maartenpoirot.com/pickomino/play_pickomino_en) as an Environment with a standard API for Reinforcement Learning.
+
+Implements the game [Pickomino](https://www.maartenpoirot.com/pickomino/play_pickomino_en) as an Environment with
+a standard API for Reinforcement Learning.
 
 # Pickomino Gymnasium Environment 🐛🎲
 
-Ein **Gymnasium**-kompatibles Environment für das Würfelspiel **Pickomino (Heckmeck am Bratwurmeck)**
-Ziel: Einen Agenten trainieren, der in diesem MDP optimale Entscheidungen trifft (Sorte wählen / stoppen).
+An environment conforming to the **Gymnasium** API for the dice game **Pickomino (Heckmeck am Bratwurmeck)**
+Goal: train a Reinforcement Learning agent for optimal play (which dice to collect, when to stop).
 
-## Inhalte
+## Content
 
-* `pickomino_env/pickomino_gym_env.py` – deine `PickominoEnv` Klasse
-* `pickomino_env/__init__.py` – **automatische Registrierung** des Environments als `Pickomino-v0`
-* `pyproject.toml` – Paket-Metadaten & Abhängigkeiten
+* `pickomino_env/pickomino_gym_env.py` – your `PickominoEnv` class
+* `pickomino_env/__init__.py` – **automatic registration** of the environment as `Pickomino-v0`
+* `pyproject.toml` – Package-Metadata & dependencies
+
 ---
 
-## Installation (Entwicklungsmodus)
+## Installation (developer mode)
 
 ```bash
-# 1) Optional: virtuelle Umgebung
+# 1) Optional: virtual environment
 python -m venv .venv
 # Windows: .venv\Scripts\activate
 # Linux/Mac: source .venv/bin/activate
 
-# 2) Abhängigkeiten & Paket install.
+# 2) Dependencies & Package installation.
 pip install -e .
 ```
 
-> `-e` (editable) verlinkt dein Arbeitsverzeichnis – Änderungen am Code wirken sofort.
+> `-e` (editable) link to your work space - change in the code take effect immediately.
 
 ---
 
-## Projektstruktur
+## Project Structure
 
 ```
 pickomino-env/
 ├─ pyproject.toml
 ├─ README.md
 └─ pickomino_env/
-   ├─ __init__.py                 # registriert "Pickomino-v0" beim Import
+   ├─ __init__.py                 # registers "Pickomino-v0" when importet
    └─ pickomino_gym_env.py        # class PickominoEnv(gym.Env)
 ```
 
-Optional: `rl_pickomino_qlearning.py` im Root (Trainingsskript).
+Optional: `rl_pickomino_qlearning.py` in the root (Training script).
 
 ---
 
-## Environment verwenden
+## Environment usage
 
-Die Registrierung passiert automatisch beim Import von `pickomino_env`.
+Registration happens automatically when importing from `pickomino_env`.
 
 ```python
 import gymnasium as gym
-import pickomino_env  # ⚠️ wichtig: löst die Registrierung aus
+import pickomino_env  # Important: this causes the registration.
 
-env = gym.make("Pickomino-v0")  # kwargs überschreiben Defaults
+env = gym.make("Pickomino-v0")  # kwargs overwrites the defaults.
 obs, info = env.reset(seed=42)
-print("Init ok. Beispiel-Observation:", obs)
+print("Init ok. Example observation:", obs)
 ```
 
-### Beobachtungen & Aktionen (derzeitige API)
+### Observations & Actions (current API)
 
 * **Observation**: `obs = (dice_collected, dice_rolled)`
-  Beide sind Längen-6-Vektoren (Index 0 = Wurm, 1..5 = Augen).
+  Both are vectors of length 6 (index 0 = die face 1, index 1 = die face 2, ..., index 5 = worm).
 * **Action**: `(face, roll_again)`
 
-  * `face ∈ {0..5}` (0=Wurm) → nimm alle geworfenen Würfel dieser Sorte
-  * `roll_again ∈ {0,1}` → 0 = **stoppen**, 1 = **weiter würfeln**
-
-> Hinweis: In der gelieferten Env sind die `observation_space`-Deklarationen noch `Discrete(6)`. Für algorithmische Stabilität empfiehlt sich **`Box(shape=(6,), dtype=int)`** o. **`MultiDiscrete([9]*6)`**. Das Beispiel-Training codiert die Observation intern selbst, daher läuft es auch so.
+    * `face ∈ {0..5}` (5=worm) → collect all rolled dice with this face
+    * `roll_again ∈ {0,1}` → 0 = **roll*, 1 = **stop**
 
 ---
 
-## Regeln (Kurzfassung)
+## Rules (summary)
 
-* 8 Würfel: `1..5` & **Wurm** (W). Wurm zählt **5** zur Summe.
-* Du **musst** mind. **einen Wurm** sammeln und **Summe ≥ 21**, um ein Plättchen zu nehmen.
-* Beim Stoppen nimmst du das **höchste offene Plättchen ≤ Summe** (oder stiehlst exakt passendes Top-Plättchen eines Gegners).
-* **Misswurf** (kein neues Gesicht wählbar oder Stop ohne Voraussetzungen): oberstes eigenes Plättchen zurück, höchstes offenes wird zusätzlich umgedreht.
+* 8 dice: `1..5` & **worm**. Worm count **5** towards the sum.
+* You **have to** collect at least  **one worm** and **sum ≥ 21**, in order to pick a tile.
+* When you stop rolling, you pick **the highest available tile ≤ sum**.
+* (or steal the top tile from another player's stack if you have the exact sum).
+* **A failed attempt** (no die can be collected or rules not followed): your top tile is returned to the table.
+* If it is not the highest still available on the table, then the highest tile is turned face down.
 
 ---
 
-## Typische Stolpersteine & Fixes
+## Typical issues and resolutions
 
 1. **`ValueError: list.remove(x): x not in list`**
-   Ursache: `step_tiles()` versucht `tile_table.remove(sum)`.
-   **Fix:** Nimm **max(\[t for t in tile\_table if t ≤ sum])** nur bei **Stop** (oder wenn **keine Würfel** übrig) *und* nur mit **mind. einem Wurm**.
+   Cause: `step_tiles()` tries to `tile_table.remove(sum)`.
+   **Fix:** take **max(\[t for t in tile\_table if t ≤ sum])** only if you **stop** rolling
+   (or **no die** left) *and* only with **at least one worm**.
 
-2. **`legal_move` setzt `self.terminated`, gibt aber lokale Flags zurück**
-   Konsistent machen: **nur lokale** Variablen setzen und zurückgeben **oder** explizit `return self.terminated, self.truncated`.
+2. **`legal_move` setting `self.terminated` to true, but gives local flag back.**
+   Consistency: set and return **only local** variable **or** explicit `return self.terminated, self.truncated`.
 
-3. **Observation-Space passt nicht**
-   Für Clean-Gym:
+3. **Observation-Space does not fit**
+   For a clean gymnasium:
 
    ```python
+   import numpy as np
    from gymnasium import spaces
    self.observation_space = spaces.Dict({
        "dice_collected": spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
@@ -100,48 +105,49 @@ print("Init ok. Beispiel-Observation:", obs)
    })
    ```
 
-4. **Stop-Aktion**
-   Im Agenten als eigene diskrete Aktion modelliert (z. B. ID 12), die auf `(face=0, roll_again=0)` gemappt wird.
+4. **Stop action**
+   Model as discrete action in the Reinforcement Learning Agent (e.g. ID 12), map to `(face=0, roll_again=0)`.
 
 ---
 
-## Tests (Schnellcheck)
+## Tests (sanity check)
 
 ```python
 import gymnasium as gym, pickomino_env
 env = gym.make("Pickomino-v0")
 obs, info = env.reset(seed=0)
 for _ in range(5):
-    action = (1, 1)   # nimm „1er“, dann weiterwürfeln
+    action = (1, 1)   # Collect ones, keep rolling.
     obs, r, term, trunc, info = env.step(action)
     print("r=", r, "term=", term, "trunc=", trunc)
 ```
 
 ---
 
-## Entwicklung
+## Development
 
-* Format: `ruff` / `black` empfohlen
+* Format: `ruff` / `black` recommended
 * Lint: `pip install ruff black`
 * Run: `ruff check . && black .`
 
 ---
 
-## Lizenz
+## License
 
-Wähle eine Lizenz (z. B. MIT) und lege eine Datei `LICENSE` ab:
+Select a License (e.g. MIT) and add a file `LICENSE`:
 
 ```
-MIT License (c) 2025 Jarl,Robin, Tanja
+MIT License (c) 2025 Jarl, Robin
 ```
 
 ---
 
-## Danksagung
+## Thanks
 
-* Spielidee: **Heckmeck am Bratwurmeck**
-* RL-Beispiel: tabellarisches Q-Learning (einfache Baseline; für größere Zustandsräume DQN empfehlen)
+* Idea: **Pickomino (Heckmeck am Bratwurmeck)**
+* Reinforcement Learning example: table Q-Learning (simple Baseline; for larger state spaces DQN is recommended.)
+* Karsten and Tanja for their support.
 
 ---
 
-**Viel Erfolg beim Trainieren!**
+**We wish success when training!**
