@@ -51,8 +51,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._last_returned_tile: int = 0  # For info.
         self._last_picked_tile: int = 0  # For info.
         self._last_turned_tile: int = 0  # For infor.
-        self._dice = Dice()
-        self._table_tiles = TableTiles()  # Consider a complex class Table consisting of table tiles and players tiles.
+        self._dice: Dice = Dice()
+        self._table_tiles: TableTiles = (
+            TableTiles()
+        )  # Consider a complex class Table consisting of table tiles and players tiles.
 
         # Define what the AI agent can observe.
         # Dict space gives us structured, human-readable observations.
@@ -140,7 +142,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             "last_returned_tile": self._last_returned_tile,
             "last_picked_tile": self._last_picked_tile,
             "last_turned_tile": self._last_turned_tile,
-            # "self.legal_move(action)": self._legal_move(action),
         }
         return return_value
 

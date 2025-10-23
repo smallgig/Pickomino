@@ -1,7 +1,11 @@
 """Bot class."""
 
+from typing import cast
+
 import numpy as np
 from numpy.ma.core import argmax
+
+from pickomino_env.src.dice import Dice
 
 
 class Bot:
