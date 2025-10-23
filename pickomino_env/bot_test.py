@@ -1,9 +1,12 @@
 """Test bot."""
 
+from typing import cast
+
 import numpy as np
 
 from pickomino_env.pickomino_gym_env import PickominoEnv
 from pickomino_env.src.bot import Bot
+from pickomino_env.src.dice import Dice
 
 RED = "\033[31m"
 NO_RED = "\033[0m"
@@ -65,11 +68,13 @@ for step in range(MAX_TURNS):
         smallest_tile,
     )
     print("Action:")
+    test_dice = cast(Dice, game_info["dice"])
+    test_score = test_dice.score()[0]
     print(
         "     Selection (1-6):",
         selection + 1,  # Player starts with 1.
         "   (Sum after collecting = ",
-        game_info["sum"] + game_observation["dice_rolled"][selection] * values[selection],
+        test_score + game_observation["dice_rolled"][selection] * values[selection],
         ")",
     )
     print("     Finish?:", "Stop" if stop else "Roll")
@@ -81,16 +86,8 @@ for step in range(MAX_TURNS):
         game_observation["dice_collected"],
         game_observation["dice_rolled"],
     )
-    game_total = game_info["sum"]
-    failed_attempt = game_info["failed_attempt"]
-    print(
-        "Terminated:",
-        game_terminated,
-        "          Truncated:",
-        game_truncated,
-        "          Failed attempt:",
-        failed_attempt,
-    )
+    game_total = cast(Dice, game_info["dice"]).score()[0]
+    print("Terminated:", game_terminated, "          Truncated:", game_truncated)
     print("Player Stack:", game_info["player_stack"])
     print("Last returned tile:", game_info["last_returned_tile"])
     print("Total reward:", total_reward)
@@ -116,4 +113,3 @@ print(
 )
 print(f"Terminated: {game_terminated}")
 print(f"Truncated: {game_truncated}")
-print("Failed attempt:", game_info["failed_attempt"])

@@ -1,7 +1,11 @@
 """Bot class."""
 
+from typing import cast
+
 import numpy as np
 from numpy.ma.core import argmax
+
+from pickomino_env.src.dice import Dice
 
 
 class Bot:
@@ -84,7 +88,7 @@ class Bot:
         for step in range(max_turns):
             print("Step:", step)
             print("Your showing tile: ", game_observation["tile_players"], "(your reward = ", game_reward, ")")
-            print_roll(dice_rolled_coll, game_info["sum"], game_info["dice"])
+            print_roll(dice_rolled_coll, cast(Dice, game_info["dice"]).score()[0], game_info["dice"])
             print("Tiles on table:", end=" ")
 
             for ind, game_tile in enumerate(game_observation["tiles_table"]):
