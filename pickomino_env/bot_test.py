@@ -4,7 +4,6 @@ from typing import cast
 
 import numpy as np
 
-from pickomino_env.pickomino_gym_env import PickominoEnv
 from pickomino_env.src.bot import Bot
 from pickomino_env.src.dice import Dice
 
@@ -19,45 +18,45 @@ class BotTest:
     @staticmethod
     # If None is always the return value, it pops in console when playing a game.
     # The env should be type annotated env:PickominoEnv but leads to circular import.
-    def play_manual(env, max_turns: int = 300) -> None:  # type: ignore [no-untyped-def]
+    def play_manual_game(env, max_turns: int = 300) -> None:  # type: ignore [no-untyped-def]
         """Run interactive test."""
-        observation, info = env.reset()
-        reward: int = 0
+        game_observation, game_info = env.reset()
+        game_reward: int = 0
 
         dice_rolled_coll = (
-            observation["dice_collected"],
-            observation["dice_rolled"],
+            game_observation["dice_collected"],
+            game_observation["dice_rolled"],
         )
 
         print("Reset! Info before playing:")
-        for key, value in info.items():
+        for key, value in game_info.items():
             print(key, value)
 
         for step in range(max_turns):
             print("Step:", step)
-            print("Your showing tile: ", observation["tile_players"], "(your reward = ", reward, ")")
-            print_roll(dice_rolled_coll, info["sum"], info["dice"])
+            print("Your showing tile: ", game_observation["tile_players"], "(your reward = ", game_reward, ")")
+            print_roll(dice_rolled_coll, cast(Dice, game_info["dice"]).score()[0], game_info["dice"])
             print("Tiles on table:", end=" ")
 
-            for inde, tile in enumerate(observation["tiles_table"]):
-                if tile:
-                    print(inde + 21, end=" ")
+            for ind, game_tile in enumerate(game_observation["tiles_table"]):
+                if game_tile:
+                    print(ind + 21, end=" ")
             print()
             selection: int = int(input("Which dice do you want to collect? (1..5 or worm =6): ")) - 1
             stop: int = int(input("Keep rolling? (0 = ROLL,  1 = STOP): "))
             print()
-            observation, reward, terminated, truncated, info = env.step((selection, stop))
+            game_observation, game_reward, game_terminated, game_truncated, game_info = env.step((selection, stop))
             dice_rolled_coll = (
-                observation["dice_collected"],
-                observation["dice_rolled"],
+                game_observation["dice_collected"],
+                game_observation["dice_rolled"],
             )
-            print(f"Terminated: {terminated} Truncated:{truncated}")
-            print(f'Explanation: {info["explanation"]}')
-            print("Rolled: ", observation["dice_rolled"])
-            print("Last returned tile:", info["last_returned_tile"])
+            print(f"Terminated: {game_terminated} Truncated:{game_truncated}")
+            print(f'Explanation: {game_info["explanation"]}')
+            print("Rolled: ", game_observation["dice_rolled"])
+            print("Last returned tile:", game_info["last_returned_tile"])
 
-            if terminated:
-                observation, info = env.reset()
+            if game_terminated:
+                game_observation, game_info = env.reset()
 
         return None
 
@@ -73,91 +72,82 @@ class BotTest:
         bot = Bot()
         values = np.array([1, 2, 3, 4, 5, 5], int)
 
-dice_coll_rolled = game_observation["dice_collected"], game_observation["dice_rolled"]
-print("Reset")
-total_reward: int = 0
-step: int = 0
-for step in range(MAX_TURNS):
-    print()
-    print("==================================================================")
-    print("Bot test running with Step:", step)
-    print(
-        "Your top showing tile: ",
-        game_observation["tile_players"],
-        "(Your latest reward = ",
-        (RED + f"{game_reward}" + NO_RED) if game_reward < 0 else game_reward,
-        ")",
-    )
-    print_roll(dice_coll_rolled, game_total, game_info["dice"])
-    print("Tiles on table:", end=" ")
-    for ind, game_tile in enumerate(game_observation["tiles_table"]):
-        if game_tile:
-            print(ind + 21, end=" ")
-        else:
-            print("_", end=" ")
-    print()
-    print("Explanation: ", (game_info["explanation"]))
-    smallest_tile: int = int(str(game_info["smallest_tile"]))  # Hairy hack.
-    selection, stop = bot.policy(
-        game_observation["dice_rolled"],
-        game_observation["dice_collected"],
-        smallest_tile,
-    )
-    print("Action:")
-    test_dice = cast(Dice, game_info["dice"])
-    test_score = test_dice.score()[0]
-    print(
-        "     Selection (1-6):",
-        selection + 1,  # Player starts with 1.
-        "   (Sum after collecting = ",
-        test_score + game_observation["dice_rolled"][selection] * values[selection],
-        ")",
-    )
-    print("     Finish?:", "Stop" if stop else "Roll")
-    game_action = (selection, stop)
-    game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
-    total_reward += game_reward
+        dice_coll_rolled = game_observation["dice_collected"], game_observation["dice_rolled"]
+        print("Reset")
+        total_reward: int = 0
+        step: int = 0
+        for step in range(max_turns):
+            print()
+            print("==================================================================")
+            print("Bot test running with Step:", step)
+            print(
+                "Your top showing tile: ",
+                game_observation["tile_players"],
+                "(Your latest reward = ",
+                (RED + f"{game_reward}" + NO_RED) if game_reward < 0 else game_reward,
+                ")",
+            )
+            print_roll(dice_coll_rolled, game_total, game_info["dice"])
+            print("Tiles on table:", end=" ")
+            for ind, game_tile in enumerate(game_observation["tiles_table"]):
+                if game_tile:
+                    print(ind + 21, end=" ")
+                else:
+                    print("_", end=" ")
+            print()
+            print("Explanation: ", (game_info["explanation"]))
+            smallest_tile: int = int(str(game_info["smallest_tile"]))  # Hairy hack.
+            selection, stop = bot.policy(
+                game_observation["dice_rolled"],
+                game_observation["dice_collected"],
+                smallest_tile,
+            )
+            print("Action:")
+            test_dice = cast(Dice, game_info["dice"])
+            test_score = test_dice.score()[0]
+            print(
+                "     Selection (1-6):",
+                selection + 1,  # Player starts with 1.
+                "   (Sum after collecting = ",
+                test_score + game_observation["dice_rolled"][selection] * values[selection],
+                ")",
+            )
+            print("     Finish?:", "Stop" if stop else "Roll")
+            game_action = (selection, stop)
+            game_observation, game_reward, game_terminated, game_truncated, game_info = env.step(game_action)
+            total_reward += game_reward
 
-    dice_coll_rolled = (
-        game_observation["dice_collected"],
-        game_observation["dice_rolled"],
-    )
-    game_total = game_info["sum"]
-    failed_attempt = game_info["failed_attempt"]
-    print(
-        "Terminated:",
-        game_terminated,
-        "          Truncated:",
-        game_truncated,
-        "          Failed attempt:",
-        failed_attempt,
-    )
-    print("Player Stack:", game_info["player_stack"])
-    print("Last returned tile:", game_info["last_returned_tile"])
-    print("Total reward:", total_reward)
-    print()
-    if game_terminated:
-        break
-print()
-print()
-print("===================================================================")
-print("===================================================================")
-print("Final state:")
-print("Step:", step)
-print("Explanation:", game_info["explanation"])
-print("Player Stack:", game_info["player_stack"])
-print("Total reward (Score):")
-print(RED + f"{total_reward}" + NO_RED)
-print(
-    "Your showing tile: ",
-    game_observation["tile_players"],
-    "(your reward = ",
-    (RED + f"{game_reward}" + NO_RED) if game_reward < 0 else game_reward,
-    ")",
-)
-print(f"Terminated: {game_terminated}")
-print(f"Truncated: {game_truncated}")
-print("Failed attempt:", game_info["failed_attempt"])
+            dice_coll_rolled = (
+                game_observation["dice_collected"],
+                game_observation["dice_rolled"],
+            )
+            game_total = cast(Dice, game_info["dice"]).score()[0]
+            print("Terminated:", game_terminated, "          Truncated:", game_truncated)
+            print("Player Stack:", game_info["player_stack"])
+            print("Last returned tile:", game_info["last_returned_tile"])
+            print("Total reward:", total_reward)
+            print()
+            if game_terminated:
+                break
+        print()
+        print()
+        print("===================================================================")
+        print("===================================================================")
+        print("Final state:")
+        print("Step:", step)
+        print("Explanation:", game_info["explanation"])
+        print("Player Stack:", game_info["player_stack"])
+        print("Total reward (Score):")
+        print(RED + f"{total_reward}" + NO_RED)
+        print(
+            "Your showing tile: ",
+            game_observation["tile_players"],
+            "(your reward = ",
+            (RED + f"{game_reward}" + NO_RED) if game_reward < 0 else game_reward,
+            ")",
+        )
+        print(f"Terminated: {game_terminated}")
+        print(f"Truncated: {game_truncated}")
 
 
 def print_roll(observation: tuple[list[int], list[int]], total: object, dice: object) -> None:
