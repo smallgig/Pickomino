@@ -1,11 +1,7 @@
 """Bot class."""
 
-from typing import cast
-
 import numpy as np
 from numpy.ma.core import argmax
-
-from pickomino_env.src.dice import Dice
 
 
 class Bot:
@@ -67,21 +63,6 @@ class Bot:
             action_roll = 1
 
         return action_dice, action_roll
-
-
-def print_roll(observation: tuple[list[int], list[int]], total: int, dice: object) -> None:
-    """Print one roll."""
-    print(dice)
-    # Print line of collected dice.
-    for collected in range(len(observation[0])):
-        print(f"   {observation[0][collected]}      ", end="")
-    # Print sum at the end of the collected dice line
-    print(f" collected   sum = {total}")
-    # Print line of rolled dice.
-    for rolled in range(len(observation[1])):
-        print(f"   {observation[1][rolled]}      ", end="")
-    print(" rolled")
-    print("----------------------------------------------------------")
 
 
 if __name__ == "__main__":
