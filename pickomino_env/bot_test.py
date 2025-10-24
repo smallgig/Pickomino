@@ -21,7 +21,6 @@ class BotTest:
     def __init__(self) -> None:
         pass
 
-    # If None is always the return value, it pops in console when playing a game.
     def play_manual_game(self, env: PickominoEnv) -> None:
         """Run interactive test."""
         game_observation, game_info = env.reset()
@@ -58,8 +57,6 @@ class BotTest:
 
             if game_terminated:
                 game_observation, game_info = env.reset()
-
-        # return None
 
     def play_automated(self, env: PickominoEnv) -> None:
         """Play automated game."""
