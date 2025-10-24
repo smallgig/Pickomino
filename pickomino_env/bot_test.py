@@ -143,13 +143,13 @@ def print_roll(collected: list[int], rolled: list[int], total: object, dice: obj
     """Print one roll."""
     print(dice)
     # Print line of collected dice.
-    for collect in collected:
-        print(f"   {collected[collect]}      ", end="")
+    for die in collected:
+        print(f"   {die}      ", end="")
     # Print sum at the end of the collected dice line
     print(f" collected   (Sum = {total})")
     # Print line of rolled dice.
-    for roll in rolled:
-        print(f"   {rolled[roll]}      ", end="")
+    for die in rolled:
+        print(f"   {die}      ", end="")
     print(" rolled")
     print("----------------------------------------------------------")
 
@@ -159,5 +159,5 @@ if __name__ == "__main__":
     game_number_of_bots: int = int(input("Enter number of bots you want to play against (0 - 6): "))
 
     game_env = PickominoEnv(game_number_of_bots)
-    game_bot.play_automated(game_env)
-    # game_bot.play_manual_game(game_env)
+    # game_bot.play_automated(game_env)
+    game_bot.play_manual_game(game_env)
