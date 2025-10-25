@@ -458,9 +458,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
 
 if __name__ == "__main__":
-    test_bot = Bot()
-    game_number_of_bots: int = int(input("Enter number of bots you want to play against (0 - 6): "))
-    MAX_TURNS: int = 300
-
-    env = PickominoEnv(game_number_of_bots)
-    test_bot.play_manual_game(env, MAX_TURNS)
+    env = PickominoEnv(1)
+    game_observation, game_info = env.reset()
+    print(game_observation, game_info)
+    print()
+    print("==========================")
+    print()
+    print("TO PLAY: run bot_test.py")
+    print()
+    print("===========================")
