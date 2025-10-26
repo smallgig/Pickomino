@@ -419,7 +419,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 self._truncated,
                 self._get_info(),
             )
-            self.reset()
             return obs, reward, terminated, truncated, info
         if self._truncated:
             return (
