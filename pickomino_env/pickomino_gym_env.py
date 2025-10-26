@@ -313,7 +313,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
     def _set_failed_too_low(self) -> None:
         """Failed: 21 not reached and action stop or no dice left."""
         # Environment takes the highest tile on the table or player stack.
-        # Check if any tile can be picked from another player
+        # Check if any tile can be picked from another player.
         # Index from player to steal.
         steal_index = next(
             (
