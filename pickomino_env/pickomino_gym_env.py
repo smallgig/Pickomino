@@ -312,14 +312,33 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
     def _set_failed_too_low(self) -> None:
         """Failed: 21 not reached and action stop or no dice left."""
+        # Environment takes the highest tile on the table or player stack.
+        # Check if any tile can be picked from another player
+        # Index from player to steal.
+        steal_index = next(
+            (
+                i
+                for i, player in enumerate(self._players)
+                if i != self._current_player_index and player.show() == self._dice.score()[0]
+            ),
+            None,
+        )
+
         if self._dice.score()[0] < self.SMALLEST_TILE:
+
             if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and action stop" + NO_RED
 
-            if sum(self._dice.get_collected()) == self.NUM_DICE and self._dice.score()[0] < self.SMALLEST_TILE:
+            if sum(self._dice.get_collected()) == self.NUM_DICE:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
+
+        # Check if no tile available on table or from player to take.
+        elif not self._table_tiles.find_next_lower_tile(self._dice.score()[0]) and steal_index is None:
+            self._failed_attempt = True
+            self._explanation = RED + "Failed: No tile on table or from another player can be taken" + NO_RED
+
 
     def _set_failed_no_worms(self) -> None:
         """No worm collected and action stop."""
