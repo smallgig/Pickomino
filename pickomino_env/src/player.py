@@ -1,6 +1,6 @@
 """Class player."""
 
-from pickomino_env.src import utils
+from pickomino_env.src.table_tiles import TableTiles
 
 
 class Player:
@@ -35,8 +35,9 @@ class Player:
     def score(self) -> int:
         """Return player score at the end of the game."""
         score: int = 0
+        table = TableTiles()
         for tile in self.tile_stack:
-            score += utils.get_worms(tile)
+            score += table.worm_values[tile - 21]    # Maybe better solution than this?
         return score
 
 
