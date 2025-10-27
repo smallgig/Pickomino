@@ -7,7 +7,6 @@ import numpy as np
 from gymnasium.core import RenderFrame
 from numpy import dtype, ndarray
 
-from pickomino_env.src import utils
 from pickomino_env.src.bot import Bot
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.player import Player
@@ -195,9 +194,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
 
         # Check action values are within range
-        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[self.ACTION_INDEX_ROLL] not in range(
-            0, 2
-        ):
+        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[
+            self.ACTION_INDEX_ROLL
+        ] not in range(0, 2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value was not rolled.
