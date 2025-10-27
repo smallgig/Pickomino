@@ -7,7 +7,6 @@ import numpy as np
 from gymnasium.core import RenderFrame
 from numpy import dtype, ndarray
 
-from pickomino_env.src import utils
 from pickomino_env.src.bot import Bot
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.player import Player
@@ -149,7 +148,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             ].remove_tile()  # Remove the tile from the player.
             self._last_returned_tile = tile_to_return
             self._table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
-            return_value = -utils.get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
+            worm_index = tile_to_return - self.SMALLEST_TILE
+            return_value = -self._table_tiles.worm_values[worm_index]  # Reward is MINUS the value of the worm value.
             # If the returned tile is not the highest, turn the highest tile face down, by setting it to False.
             # Search for the highest tile to turn.
             highest = self._table_tiles.highest()
@@ -194,9 +194,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
 
         # Check action values are within range
-        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[self.ACTION_INDEX_ROLL] not in range(
-            0, 2
-        ):
+        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[
+            self.ACTION_INDEX_ROLL
+        ] not in range(0, 2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value was not rolled.
@@ -241,7 +241,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         tile_to_return: int = self._players[steal_index].remove_tile()  # Remove the tile from the player.
         self._players[self._current_player_index].add_tile(tile_to_return)
         self._last_returned_tile = tile_to_return
-        return utils.get_worms(tile_to_return)
+        worm_index = tile_to_return - self.SMALLEST_TILE
+        return self._table_tiles.worm_values[worm_index]
 
     def _step_tiles(self) -> int:
         """Pick or return a tile.
@@ -276,7 +277,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._last_picked_tile = dice_sum
             self._players[self._current_player_index].add_tile(dice_sum)  # Add the tile to the player or bot.
             self._table_tiles.set_tile(dice_sum, False)  # Mark the tile as no longer on the table.
-            return_value = utils.get_worms(dice_sum)
+            worm_index = dice_sum - self.SMALLEST_TILE
+            return_value = self._table_tiles.worm_values[worm_index]
         # Tile is not available on the table
         else:
             # Pick the highest of the tiles smaller than the unavailable tile
@@ -286,7 +288,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 self._last_picked_tile = highest
                 self._players[self._current_player_index].add_tile(highest)  # Add the tile to the player.
                 self._table_tiles.set_tile(highest, False)  # Mark the tile as no longer on the table.
-                return_value = utils.get_worms(highest)
+                worm_index = highest - self.SMALLEST_TILE
+                return_value = self._table_tiles.worm_values[worm_index]
             # No smaller tiles are available -> have to return players showing tile if there is one.
             else:
                 return_value = self._remove_tile_from_player()
