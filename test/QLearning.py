@@ -85,9 +85,7 @@ def legal_actions(obs: Dict) -> List[Tuple[int, int]]:
     return acts
 
 
-def epsilon_greedy(
-    Qs: Dict[Tuple, float], actions: List[Tuple[int, int]], eps: float
-) -> Tuple[int, int]:
+def epsilon_greedy(Qs: Dict[Tuple, float], actions: List[Tuple[int, int]], eps: float) -> Tuple[int, int]:
     if not actions:
         return (0, 1)
     if random.random() < eps:
@@ -195,9 +193,7 @@ def train_qlearning(
 
         if ep % 200 == 0:
             ma = moving_average(episode_returns, ma_window)
-            print(
-                f"[Ep {ep:5d}] return={ep_return:+.2f}  avg({ma_window})≈{ma[-1]:+.2f}  eps={eps:.3f}  steps={steps}"
-            )
+            print(f"[Ep {ep:5d}] return={ep_return:+.2f}  avg({ma_window})≈{ma[-1]:+.2f}  eps={eps:.3f}  steps={steps}")
 
     # Speichern
     with open(save_path, "wb") as f:
@@ -207,9 +203,7 @@ def train_qlearning(
     # Lernkurven-Plot
     ma = moving_average(episode_returns, ma_window)
     plt.figure()
-    plt.plot(
-        range(1, len(episode_returns) + 1), episode_returns, label="Return/Episode"
-    )
+    plt.plot(range(1, len(episode_returns) + 1), episode_returns, label="Return/Episode")
     plt.plot(range(1, len(ma) + 1), ma, label=f"Moving Avg (window={ma_window})")
     plt.xlabel("Episode")
     plt.ylabel("Return")
@@ -227,9 +221,7 @@ def train_qlearning(
 # ------------------------ Auswertung (greedy) ------------------------
 
 
-def run_greedy_episode(
-    env_id: str, Q: Dict, render: bool = False, seed: int | None = None
-) -> float:
+def run_greedy_episode(env_id: str, Q: Dict, render: bool = False, seed: int | None = None) -> float:
     env = gym.make(env_id)
     if seed is not None:
         obs, info = env.reset(seed=seed)
@@ -258,9 +250,7 @@ def run_greedy_episode(
 # ------------------------ Main ------------------------
 
 if __name__ == "__main__":
-    print(
-        "Training Q-Learning auf Pickomino-v0 (mit TensorBoard & Lernkurven-Plot) ..."
-    )
+    print("Training Q-Learning auf Pickomino-v0 (mit TensorBoard & Lernkurven-Plot) ...")
     Q, rets = train_qlearning(
         env_id="Pickomino-v0",
         episodes=10000,  # je nach Geduld erhöhen

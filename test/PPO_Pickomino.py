@@ -19,20 +19,14 @@ class ValidateObs(gym.Wrapper):
                 assert k in obs, f"{path}: key fehlt: {k}"
                 self._check(obs[k], sp, f"{path}.{k}" if path else k)
         elif isinstance(space, spaces.Tuple):
-            assert isinstance(
-                obs, (tuple, list)
-            ), f"{path}: erwartet tuple/list, bekam {type(obs)}"
+            assert isinstance(obs, (tuple, list)), f"{path}: erwartet tuple/list, bekam {type(obs)}"
             assert len(obs) == len(space.spaces), f"{path}: Länge passt nicht"
             for i, sp in enumerate(space.spaces):
                 self._check(obs[i], sp, f"{path}[{i}]")
         elif isinstance(space, (spaces.Box, spaces.MultiBinary, spaces.MultiDiscrete)):
-            assert not isinstance(
-                obs, spaces.Space
-            ), f"{path}: VALUE IST SPACE {type(obs)}"
+            assert not isinstance(obs, spaces.Space), f"{path}: VALUE IST SPACE {type(obs)}"
         elif isinstance(space, spaces.Discrete):
-            assert not isinstance(
-                obs, spaces.Space
-            ), f"{path}: VALUE IST SPACE {type(obs)}"
+            assert not isinstance(obs, spaces.Space), f"{path}: VALUE IST SPACE {type(obs)}"
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -121,10 +115,7 @@ def sanitize_obs(space: spaces.Space, obs):
     if isinstance(space, spaces.Dict):
         if not isinstance(obs, dict):
             return zeros_from_space(space)
-        return {
-            k: sanitize_obs(sp_k, obs.get(k, zeros_from_space(sp_k)))
-            for k, sp_k in space.spaces.items()
-        }
+        return {k: sanitize_obs(sp_k, obs.get(k, zeros_from_space(sp_k))) for k, sp_k in space.spaces.items()}
 
     if isinstance(space, spaces.Tuple):
         if not isinstance(obs, (tuple, list)) or len(obs) != len(space.spaces):
