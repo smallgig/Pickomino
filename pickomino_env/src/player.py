@@ -7,7 +7,7 @@ class Player:
     """Player class with his tiles and name."""
 
     def __init__(self, bot: bool, name: str) -> None:
-        """Construct a player."""
+        """Initialize a player."""
         self.name: str = name
         self.tile_stack: list[int] = []
         self.bot: bool = bot
