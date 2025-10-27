@@ -154,6 +154,7 @@ def print_roll(collected: list[int], rolled: list[int], total: object, dice: obj
 
 
 if __name__ == "__main__":
+    # Keep offering to play until user does not want to play again.
     while True:  # pylint: disable=while-used
         game_bot = BotTest()
         mode_auto: bool = bool(int(input("For automatic play enter '1', for manual enter '0': ")))
