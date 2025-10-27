@@ -227,14 +227,14 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         self._dice.collect(self._action[self.ACTION_INDEX_DICE])
 
-        self._set_failed_too_low()
+        self._set_failed_no_tile_to_take()
         self._set_failed_no_worms()
 
         # Action is to roll
         if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_ROLL:
             self._dice.roll()
             self._set_failed_already_collected()
-            self._set_failed_too_low()
+            self._set_failed_no_tile_to_take()
             self._set_failed_no_worms()
 
     def _steal_from_bot(self, steal_index: int) -> int:
@@ -310,7 +310,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             f"No possible rolled dice to taken in {self._dice.get_rolled()}" + NO_RED
         )
 
-    def _set_failed_too_low(self) -> None:
+    def _set_failed_no_tile_to_take(self) -> None:
         """Failed: 21 not reached and action stop or no dice left."""
         # Environment takes the highest tile on the table or player stack.
         # Check if any tile can be picked from another player.
