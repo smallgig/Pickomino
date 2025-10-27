@@ -56,7 +56,6 @@ class BotTest:
             print("Last returned tile:", game_info["last_returned_tile"])
 
             if game_terminated:
-                game_observation, game_info = env.reset()
                 break
 
     def play_automated(self, env: PickominoEnv) -> None:
@@ -157,5 +156,5 @@ if __name__ == "__main__":
     game_number_of_bots: int = int(input("Enter number of bots you want to play against (0 - 6): "))
 
     game_env = PickominoEnv(game_number_of_bots)
-    game_bot.play_automated(game_env)
-    # game_bot.play_manual_game(game_env)
+    # game_bot.play_automated(game_env)
+    game_bot.play_manual_game(game_env)
