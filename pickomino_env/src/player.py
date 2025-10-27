@@ -37,7 +37,7 @@ class Player:
         score: int = 0
         table = TableTiles()
         for tile in self.tile_stack:
-            score += table.worm_values[tile - 21]    # Maybe better solution than this?
+            score += table.worm_values[tile - 21]  # List of worm values count from zero.
         return score
 
 

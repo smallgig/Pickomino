@@ -24,7 +24,7 @@ class TableTiles:
             35: True,
             36: True,
         }
-        self.worm_values = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4]
+        self.worm_values: list[int] = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4]
 
     def set_tile(self, tile_number: int, truth_value: bool) -> None:
         """Set one Tile."""
@@ -65,6 +65,7 @@ class TableTiles:
             if key < dice_sum and value:
                 lowest = key
         return lowest
+
 
 if __name__ == "__main__":
     print("This is the table tiles file.")
