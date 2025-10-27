@@ -56,7 +56,7 @@ class BotTest:
             print("Last returned tile:", game_info["last_returned_tile"])
 
             if game_terminated:
-                game_observation, game_info = env.reset()
+                break
 
     def play_automated(self, env: PickominoEnv) -> None:
         """Play automated game."""
