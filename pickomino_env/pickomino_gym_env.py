@@ -194,9 +194,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
 
         # Check action values are within range
-        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[self.ACTION_INDEX_ROLL] not in range(
-            0, 2
-        ):
+        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[
+            self.ACTION_INDEX_ROLL
+        ] not in range(0, 2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value was not rolled.
@@ -347,29 +347,24 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
     def _step_bot(self, action: tuple[int, int]) -> None:
         """Step the bot."""
         self._action = action
-
         self._action_is_allowed()
 
-        if self._terminated:
-            return None
+        # Stop immediately if action was not allowed or similar.
+        if self._terminated or self._truncated:
+            return
 
-        if self._truncated:
-            return None
-
-        # Collect and roll the dice
+        # Collect and roll the dice.
         self._step_dice()
 
+        # Stopp rolling, move tile.
         if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP or self._failed_attempt:
             self._step_tiles()
             self._soft_reset()
-            return None
 
-        # Game over check
+        # Game over check.
         if not self._table_tiles.highest():
             self._terminated = True
-            self._explanation = "No Tile on the table, game over."
-
-        return None
+            self._explanation = f"{GREEN}No Tile on the table, game over.{NO_GREEN}"
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         """Take a step in the environment."""
