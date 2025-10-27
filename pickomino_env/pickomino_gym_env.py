@@ -194,9 +194,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
 
         # Check action values are within range
-        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[self.ACTION_INDEX_ROLL] not in range(
-            0, 2
-        ):
+        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[
+            self.ACTION_INDEX_ROLL
+        ] not in range(0, 2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value was not rolled.
@@ -410,24 +410,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._terminated = True
             self._explanation = GREEN + "No Tile on the table, GAME OVER!" + NO_GREEN
 
-        # Have to keep the values to return after resetting.
-        if self._terminated:
-            obs, reward, terminated, truncated, info = (
-                self._current_obs(),
-                0,
-                self._terminated,
-                self._truncated,
-                self._get_info(),
-            )
-            return obs, reward, terminated, truncated, info
-        if self._truncated:
-            return (
-                self._current_obs(),
-                reward,
-                self._terminated,
-                self._truncated,
-                self._get_info(),
-            )
+        if self._terminated or self._truncated:
+            return self._current_obs(), 0, self._terminated, self._truncated, self._get_info()
 
         # Collect and roll the dice
         self._step_dice()
@@ -439,21 +423,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._current_player_index = 1
             self._play_bot()
             self._current_player_index = 0
-            return (
-                self._current_obs(),
-                reward,
-                self._terminated,
-                self._truncated,
-                self._get_info(),
-            )
 
-        return (
-            self._current_obs(),
-            reward,
-            self._terminated,
-            self._truncated,
-            self._get_info(),
-        )
+        return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
 
 
 if __name__ == "__main__":
