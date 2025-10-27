@@ -365,59 +365,27 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             bot_action = 0, 0
             self._current_player_index += 1
 
-    def _step_bot(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
+    def _step_bot(self, action: tuple[int, int]) -> None:
         """Step the bot."""
         self._action = action
-        reward = 0
-
         self._action_is_allowed()
 
-        if self._terminated:
-            obs, reward, terminated, truncated, info = (
-                self._current_obs(),
-                0,  # Bots do not generate rewards.
-                self._terminated,
-                self._truncated,
-                self._get_info(),
-            )
-            self.reset()
-            return obs, reward, terminated, truncated, info
+        # Stop immediately if action was not allowed or similar.
+        if self._terminated or self._truncated:
+            return
 
-        if self._truncated:
-            return (
-                self._current_obs(),
-                reward,
-                self._terminated,
-                self._truncated,
-                self._get_info(),
-            )
-
-        # Collect and roll the dice
+        # Collect and roll the dice.
         self._step_dice()
 
+        # Stopp rolling, move tile.
         if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP or self._failed_attempt:
-            reward = self._step_tiles()
+            self._step_tiles()
             self._soft_reset()
-            return (
-                self._current_obs(),
-                reward,
-                self._terminated,
-                self._truncated,
-                self._get_info(),
-            )
 
-        # Game over check
+        # Game over check.
         if not self._table_tiles.highest():
             self._terminated = True
-            self._explanation = "No Tile on the table, game over."
-
-        return (
-            self._current_obs(),
-            reward,
-            self._terminated,
-            self._truncated,
-            self._get_info(),
-        )
+            self._explanation = f"{GREEN}No Tile on the table, game over.{NO_GREEN}"
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         """Take a step in the environment."""
