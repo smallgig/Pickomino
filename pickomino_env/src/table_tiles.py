@@ -24,6 +24,7 @@ class TableTiles:
             35: True,
             36: True,
         }
+        self.worm_values: list[int] = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4]
 
     def set_tile(self, tile_number: int, truth_value: bool) -> None:
         """Set one Tile."""

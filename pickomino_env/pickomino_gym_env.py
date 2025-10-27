@@ -7,7 +7,6 @@ import numpy as np
 from gymnasium.core import RenderFrame
 from numpy import dtype, ndarray
 
-from pickomino_env.src import utils
 from pickomino_env.src.bot import Bot
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.player import Player
@@ -149,7 +148,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             ].remove_tile()  # Remove the tile from the player.
             self._last_returned_tile = tile_to_return
             self._table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
-            return_value = -utils.get_worms(tile_to_return)  # Reward is MINUS the value of the returned tile.
+            worm_index = tile_to_return - self.SMALLEST_TILE
+            return_value = -self._table_tiles.worm_values[worm_index]  # Reward is MINUS the value of the worm value.
             # If the returned tile is not the highest, turn the highest tile face down, by setting it to False.
             # Search for the highest tile to turn.
             highest = self._table_tiles.highest()
@@ -194,9 +194,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
 
         # Check action values are within range
-        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[self.ACTION_INDEX_ROLL] not in range(
-            0, 2
-        ):
+        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[
+            self.ACTION_INDEX_ROLL
+        ] not in range(0, 2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value was not rolled.
@@ -227,21 +227,22 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         self._dice.collect(self._action[self.ACTION_INDEX_DICE])
 
-        self._set_failed_too_low()
+        self._set_failed_no_tile_to_take()
         self._set_failed_no_worms()
 
         # Action is to roll
         if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_ROLL:
             self._dice.roll()
             self._set_failed_already_collected()
-            self._set_failed_too_low()
+            self._set_failed_no_tile_to_take()
             self._set_failed_no_worms()
 
     def _steal_from_bot(self, steal_index: int) -> int:
         tile_to_return: int = self._players[steal_index].remove_tile()  # Remove the tile from the player.
         self._players[self._current_player_index].add_tile(tile_to_return)
         self._last_returned_tile = tile_to_return
-        return utils.get_worms(tile_to_return)
+        worm_index = tile_to_return - self.SMALLEST_TILE
+        return self._table_tiles.worm_values[worm_index]
 
     def _step_tiles(self) -> int:
         """Pick or return a tile.
@@ -276,7 +277,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._last_picked_tile = dice_sum
             self._players[self._current_player_index].add_tile(dice_sum)  # Add the tile to the player or bot.
             self._table_tiles.set_tile(dice_sum, False)  # Mark the tile as no longer on the table.
-            return_value = utils.get_worms(dice_sum)
+            worm_index = dice_sum - self.SMALLEST_TILE
+            return_value = self._table_tiles.worm_values[worm_index]
         # Tile is not available on the table
         else:
             # Pick the highest of the tiles smaller than the unavailable tile
@@ -286,7 +288,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 self._last_picked_tile = highest
                 self._players[self._current_player_index].add_tile(highest)  # Add the tile to the player.
                 self._table_tiles.set_tile(highest, False)  # Mark the tile as no longer on the table.
-                return_value = utils.get_worms(highest)
+                worm_index = highest - self.SMALLEST_TILE
+                return_value = self._table_tiles.worm_values[worm_index]
             # No smaller tiles are available -> have to return players showing tile if there is one.
             else:
                 return_value = self._remove_tile_from_player()
@@ -310,16 +313,34 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             f"No possible rolled dice to taken in {self._dice.get_rolled()}" + NO_RED
         )
 
-    def _set_failed_too_low(self) -> None:
-        """Failed: 21 not reached and action stop or no dice left."""
+    def _set_failed_no_tile_to_take(self) -> None:
+        """Failed: Not able to take tile with dice sum reached."""
+        # Environment takes the highest tile on the table or player stack.
+        # Check if any tile can be picked from another player.
+        # Index from player to steal.
+        steal_index = next(
+            (
+                i
+                for i, player in enumerate(self._players)
+                if i != self._current_player_index and player.show() == self._dice.score()[0]
+            ),
+            None,
+        )
+        # pylint: disable=confusing-consecutive-elif
         if self._dice.score()[0] < self.SMALLEST_TILE:
+
             if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and action stop" + NO_RED
 
-            if sum(self._dice.get_collected()) == self.NUM_DICE and self._dice.score()[0] < self.SMALLEST_TILE:
+            if sum(self._dice.get_collected()) == self.NUM_DICE:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
+
+        # Check if no tile available on the table or from player to take.
+        elif not self._table_tiles.find_next_lower_tile(self._dice.score()[0]) and steal_index is None:
+            self._failed_attempt = True
+            self._explanation = RED + "Failed: No tile on table or from another player can be taken" + NO_RED
 
     def _set_failed_no_worms(self) -> None:
         """No worm collected and action stop."""
@@ -344,59 +365,27 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             bot_action = 0, 0
             self._current_player_index += 1
 
-    def _step_bot(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
+    def _step_bot(self, action: tuple[int, int]) -> None:
         """Step the bot."""
         self._action = action
-        reward = 0
-
         self._action_is_allowed()
 
-        if self._terminated:
-            obs, reward, terminated, truncated, info = (
-                self._current_obs(),
-                0,  # Bots do not generate rewards.
-                self._terminated,
-                self._truncated,
-                self._get_info(),
-            )
-            self.reset()
-            return obs, reward, terminated, truncated, info
+        # Stop immediately if action was not allowed or similar.
+        if self._terminated or self._truncated:
+            return
 
-        if self._truncated:
-            return (
-                self._current_obs(),
-                reward,
-                self._terminated,
-                self._truncated,
-                self._get_info(),
-            )
-
-        # Collect and roll the dice
+        # Collect and roll the dice.
         self._step_dice()
 
+        # Stopp rolling, move tile.
         if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP or self._failed_attempt:
-            reward = self._step_tiles()
+            self._step_tiles()
             self._soft_reset()
-            return (
-                self._current_obs(),
-                reward,
-                self._terminated,
-                self._truncated,
-                self._get_info(),
-            )
 
-        # Game over check
+        # Game over check.
         if not self._table_tiles.highest():
             self._terminated = True
-            self._explanation = "No Tile on the table, game over."
-
-        return (
-            self._current_obs(),
-            reward,
-            self._terminated,
-            self._truncated,
-            self._get_info(),
-        )
+            self._explanation = f"{GREEN}No Tile on the table, game over.{NO_GREEN}"
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         """Take a step in the environment."""
