@@ -30,7 +30,12 @@ class BotTest:
         for key, value in game_info.items():
             print(key, value)
 
+        game_terminated: bool = False
+
         for step in range(self.MAX_TURNS):
+            if game_terminated:
+                break
+
             print("Step:", step)
             print("Your showing tile: ", game_observation["tile_players"], "(your reward = ", game_reward, ")")
             print_roll(
@@ -54,9 +59,6 @@ class BotTest:
             print(f'Explanation: {game_info["explanation"]}')
             print("Rolled: ", game_observation["dice_rolled"])
             print("Last returned tile:", game_info["last_returned_tile"])
-
-            if game_terminated:
-                break
 
     def play_automated(self, env: PickominoEnv) -> None:
         """Play automated game."""
@@ -152,9 +154,21 @@ def print_roll(collected: list[int], rolled: list[int], total: object, dice: obj
 
 
 if __name__ == "__main__":
-    game_bot = BotTest()
-    game_number_of_bots: int = int(input("Enter number of bots you want to play against (0 - 6): "))
+    # Keep offering to play until user does not want to play again.
+    while True:  # pylint: disable=while-used
+        game_bot = BotTest()
+        mode_auto: bool = bool(int(input("For automatic play enter '1', for manual enter '0': ")))
+        game_number_of_bots: int = int(input("Enter number of bots you want to play against (0 - 6): "))
+        game_env = PickominoEnv(game_number_of_bots)
+        if mode_auto:
+            game_bot.play_automated(game_env)
+        else:
+            game_bot.play_manual_game(game_env)
 
-    game_env = PickominoEnv(game_number_of_bots)
-    # game_bot.play_automated(game_env)
-    game_bot.play_manual_game(game_env)
+        print()
+        print(f"{RED} ============================================= {NO_RED}")
+        print(f"{RED}Game ended! Printing results is still open.{NO_RED}")
+        play_again: bool = bool(int(input("Play again? Enter '1', else '0': ")))
+        print("You entered: ", play_again)
+        if not play_again:
+            break
