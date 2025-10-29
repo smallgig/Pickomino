@@ -1,5 +1,6 @@
 """Pickomino game with gymnasium API."""
 
+# Testing push to main without Pull Request violates Rule Set.
 from typing import Any
 
 import gymnasium as gym
@@ -63,7 +64,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 # Flatten the tiles into a 16-length binary vector. Needed for SB3 compatibility.
                 # Nested dicts are not supported by SB3.
                 "tiles_table": gym.spaces.Box(low=0, high=1, shape=(16,), dtype=np.int8),
-                "tile_players": gym.spaces.Box(low=0, high=36, shape=(len(self._players), ), dtype=np.int8)
+                "tile_players": gym.spaces.Box(low=0, high=36, shape=(len(self._players),), dtype=np.int8),
             }
         )
         # Action space is a tuple. First action: which dice to take. Second action: roll again or not.
@@ -108,7 +109,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             "dice_collected": np.array(self._dice.get_collected()),
             "dice_rolled": np.array(self._dice.get_rolled()),
             "tiles_table": self._tiles_vector(),
-            "tile_players": np.array(list(map(lambda p: p.show(), self._players)), dtype=np.int8),  # pylint: disable=bad-builtin
+            "tile_players": np.array(
+                list(map(lambda p: p.show(), self._players)), dtype=np.int8
+            ),  # pylint: disable=bad-builtin
         }
 
     def _get_info(self) -> dict[str, object]:
@@ -194,9 +197,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
 
         # Check action values are within range
-        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[self.ACTION_INDEX_ROLL] not in range(
-            0, 2
-        ):
+        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[
+            self.ACTION_INDEX_ROLL
+        ] not in range(0, 2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value was not rolled.
