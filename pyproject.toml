@@ -8,11 +8,11 @@ version = "0.1.0"
 description = "Pickomino (Heckmeck) Gymnasium environment"
 readme = ""
 requires-python = ">=3.9"
-authors = [{ name = "Jarl,Robin,Tanja" }]
+authors = [{ name = "Jarl and Robin" }]
 dependencies = ["gymnasium>=0.28", "numpy>=1.23"]
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["pickomino_env/src", "."]
 include = ["pickomino_env*"]
 
 [tool.pydocstyle]
@@ -21,3 +21,6 @@ convention = "numpy"
 [flake8]
 ignore = ["E203", "W503", "E128", "E129"]  # Black wins
 max-line-length = 119
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

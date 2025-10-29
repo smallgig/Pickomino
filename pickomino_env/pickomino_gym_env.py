@@ -109,9 +109,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             "dice_collected": np.array(self._dice.get_collected()),
             "dice_rolled": np.array(self._dice.get_rolled()),
             "tiles_table": self._tiles_vector(),
-            "tile_players": np.array(
-                list(map(lambda p: p.show(), self._players)), dtype=np.int8
-            ),  # pylint: disable=bad-builtin
+            # pylint: disable=bad-builtin
+            "tile_players": np.array(list(map(lambda p: p.show(), self._players)), dtype=np.int8),
         }
 
     def _get_info(self) -> dict[str, object]:
@@ -197,9 +196,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
 
         # Check action values are within range
-        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[
-            self.ACTION_INDEX_ROLL
-        ] not in range(0, 2):
+        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[self.ACTION_INDEX_ROLL] not in range(
+            0, 2
+        ):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value was not rolled.
@@ -426,6 +425,6 @@ if __name__ == "__main__":
     print()
     print("==========================")
     print()
-    print("TO PLAY: run bot_test.py")
+    print("TO PLAY: run main.py")
     print()
     print("===========================")

@@ -44,14 +44,5 @@ def test_multiple_actions():
     #         observation, reward, terminated, truncated, info = env.step((selection, 0))
 
 
-def run_all_test():
-    """Run all tests."""
-    test__init__()
-    test_reset()
-    test_step()
-    test_multiple_actions()
-
-
 if __name__ == "__main__":
-    env = PickominoEnv(2)
-    run_all_test()
+    print("This file should be called with pytest.")
