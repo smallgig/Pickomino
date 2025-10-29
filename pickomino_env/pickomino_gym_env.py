@@ -63,7 +63,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 # Flatten the tiles into a 16-length binary vector. Needed for SB3 compatibility.
                 # Nested dicts are not supported by SB3.
                 "tiles_table": gym.spaces.Box(low=0, high=1, shape=(16,), dtype=np.int8),
-                "tile_players": gym.spaces.Box(low=0, high=36, shape=(len(self._players), ), dtype=np.int8)
+                "tile_players": gym.spaces.Box(low=0, high=36, shape=(len(self._players),), dtype=np.int8),
             }
         )
         # Action space is a tuple. First action: which dice to take. Second action: roll again or not.
@@ -108,7 +108,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             "dice_collected": np.array(self._dice.get_collected()),
             "dice_rolled": np.array(self._dice.get_rolled()),
             "tiles_table": self._tiles_vector(),
-            "tile_players": np.array(list(map(lambda p: p.show(), self._players)), dtype=np.int8),  # pylint: disable=bad-builtin
+            # pylint: disable=bad-builtin
+            "tile_players": np.array(list(map(lambda p: p.show(), self._players)), dtype=np.int8),
         }
 
     def _get_info(self) -> dict[str, object]:
