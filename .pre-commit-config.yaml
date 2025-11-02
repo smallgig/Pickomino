@@ -1,13 +1,22 @@
+#file: noinspection YAMLSchemaValidation
 # Keeping repository quality high.
 exclude: ^test/
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
+      - id: debug-statements  # Check for debugger imports and breakpoint() in python files.
+      - id: check-ast  # Check whether files parse as valid python.
+      - id: fix-byte-order-marker  # Removes UTF-8 byte order marker.
+      - id: check-json
+      - id: detect-private-key  # Detect-private-key is not in the repo.
       - id: check-yaml
       - id: check-added-large-files
+      - id: check-shebang-scripts-are-executable
+      - id: check-case-conflict  # Check filenames for conflicts in case-insensitive filesystem:macOS HFS+, Windows FAT.
+      - id: end-of-file-fixer  # Makes sure files end in a newline and only a newline.
+      - id: trailing-whitespace
+      - id: mixed-line-ending
   - repo: https://github.com/psf/black
     rev: 25.9.0
     hooks:
@@ -19,7 +28,7 @@ repos:
       - id: isort
         args: [ "--profile", "black" ]
   - repo: https://github.com/pycqa/pylint
-    rev: v4.0.1
+    rev: v4.0.2
     hooks:
       - id: pylint
         additional_dependencies: [ "gymnasium","numpy" ]
@@ -35,6 +44,18 @@ repos:
       - id: flake8
         args: [ "--docstring-convention=numpy", "--max-line-length=120", "--ignore=D406,D407" ]
         additional_dependencies: [ "flake8-bugbear", "flake8-docstrings", "pydocstyle>=6.3.0" ]
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        language: python
+        entry: >
+          python -c "import subprocess, sys;
+          subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', '.']);
+          sys.exit(subprocess.call([sys.executable, '-m', 'pytest']))"
+        additional_dependencies: [ "pytest==8.4.2" ]
+        pass_filenames: false
+        stages: [ pre-push ]  # Only run on push instead of every commit.
 
   # We need to check this first! ruff would replace flake8-bugbear and might conflict with Black
   # flake8-bugbear is deprecated, so we want to use ruff instead
