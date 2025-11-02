@@ -1,5 +1,6 @@
 """Pickomino game with gymnasium API."""
 
+# Testing push to main without Pull Request violates Rule Set.
 from typing import Any
 
 import gymnasium as gym
@@ -195,9 +196,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
 
         # Check action values are within range
-        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[self.ACTION_INDEX_ROLL] not in range(
-            0, 2
-        ):
+        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[
+            self.ACTION_INDEX_ROLL
+        ] not in range(0, 2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value was not rolled.
