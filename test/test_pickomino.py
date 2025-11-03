@@ -13,6 +13,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 # from stable_baselines3 import SAC # Soft Actor-Critic (SAC) is suitable for continuous action spaces.
 
 import pickomino_env  # Important: activates the registration.
+from pickomino_env.src.bot import Bot
 
 log_dir = "./logs/"
 run_time = 0
@@ -44,19 +45,22 @@ def test_step():
 
 
 def test_multiple_actions():
-    """Test multiple actions."""
-    pass
-    # observation, info = env.reset()
-    #
-    # taken = []
-    # for step in range(6):
-    #     selection = int(np.argmax(observation['dice_rolled']))
-    #
-    #     # Do not select the same die face value again
-    #     if selection in taken:
-    #         observation['dice_collected'][selection] = 0
-    #         selection = int(np.argmax(observation['dice_rolled']))
-    #         observation, reward, terminated, truncated, info = env.step((selection, 0))
+    """Test multiple actions.
+
+    Is a bit like play automated without printouts.
+    """
+    obs, info = env.reset()
+    bot = Bot()
+    total_reward = 0
+
+    for step in range(3000):
+        selection, stop = bot.policy(obs["dice_rolled"], obs["dice_collected"], int(str(info["smallest_tile"])))
+        obs, reward, terminated, truncated, info = env.step((selection, stop))
+        total_reward += reward
+        # score = cast(Dice, game_info["dice"]).score()[0]
+        if terminated:
+            break
+    print("\nTotal Reward:", total_reward)
 
 
 def test_stable_baselines3():
