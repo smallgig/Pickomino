@@ -9,10 +9,10 @@ from gymnasium.core import RenderFrame
 from numpy import dtype, ndarray
 
 from pickomino_env.src.bot import Bot
+from pickomino_env.src.checker import Checker
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.player import Player
 from pickomino_env.src.table_tiles import TableTiles
-from pickomino_env.src.checker import Checker
 
 RED = "\033[31m"
 NO_RED = "\033[0m"
@@ -51,11 +51,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._last_picked_tile: int = 0  # For info.
         self._last_turned_tile: int = 0  # For infor.
         self._dice: Dice = Dice()
-        self._checker: Checker = Checker()
         self._table_tiles: TableTiles = (
             TableTiles()
         )  # Consider a complex class Table consisting of table tiles and players tiles.
-
+        self._checker: Checker = Checker(self._dice, self._players, self._table_tiles)
         # Define what the AI agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Max 8 dice.
@@ -140,6 +139,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
     def _soft_reset(self) -> None:
         """Clear collected and rolled and roll again."""
         self._dice = Dice()
+        self._checker = Checker(self._dice, self._players, self._table_tiles)
         self._failed_attempt = False
         self._roll_counter = 0
         self._dice.roll()
@@ -178,6 +178,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # IMPORTANT:Must call this first. Seed the random number generator.
         super().reset(seed=seed)
         self._dice = Dice()
+        self._checker = Checker(self._dice, self._players, self._table_tiles)
         self._you = Player(bot=False, name="You")
         self._players = []
         self._create_players()
@@ -227,19 +228,23 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         :param: action: The action to take: which dice to collect.
         """
-        self._failed_attempt, self._explanation = self._checker.set_failed_already_collected(self._dice)
+        self._failed_attempt, self._explanation = self._checker.set_failed_already_collected()
 
         self._dice.collect(self._action[self.ACTION_INDEX_DICE])
 
-        self._failed_attempt, self._explanation = self._checker.set_failed_no_tile_to_take(self._dice, self._players, self._table_tiles, self._current_player_index, self._action)
-        self._failed_attempt, self._explanation = self._checker.set_failed_no_worms(self._dice, self._action)
+        self._failed_attempt, self._explanation = self._checker.set_failed_no_tile_to_take(
+            self._current_player_index, self._action
+        )
+        self._failed_attempt, self._explanation = self._checker.set_failed_no_worms(self._action)
 
         # Action is to roll
         if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_ROLL:
             self._dice.roll()
-            self._failed_attempt, self._explanation = self._checker.set_failed_already_collected(self._dice)
-            self._failed_attempt, self._explanation = self._checker.set_failed_no_tile_to_take(self._dice, self._players, self._table_tiles, self._current_player_index, self._action)
-            self._failed_attempt, self._explanation = self._checker.set_failed_no_worms(self._dice, self._action)
+            self._failed_attempt, self._explanation = self._checker.set_failed_already_collected()
+            self._failed_attempt, self._explanation = self._checker.set_failed_no_tile_to_take(
+                self._current_player_index, self._action
+            )
+            self._failed_attempt, self._explanation = self._checker.set_failed_no_worms(self._action)
 
     def _steal_from_bot(self, steal_index: int) -> int:
         tile_to_return: int = self._players[steal_index].remove_tile()  # Remove the tile from the player.
