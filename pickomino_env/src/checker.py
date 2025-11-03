@@ -1,26 +1,22 @@
 """Class Checker."""
 
+from pickomino_env.src.constants import (  # Coloured printouts.; Game constants.; For action indexing.
+    ACTION_INDEX_ROLL,
+    ACTION_STOP,
+    GREEN,
+    NO_GREEN,
+    NO_RED,
+    NUM_DICE,
+    RED,
+    SMALLEST_TILE,
+)
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.player import Player
 from pickomino_env.src.table_tiles import TableTiles
 
-RED = "\033[31m"
-NO_RED = "\033[0m"
-GREEN = "\033[32m"
-NO_GREEN = "\033[0m"
-
 
 class Checker:
     """Class Checker."""
-
-    # pylint: disable=duplicate-code
-    SMALLEST_TILE = 21
-    LARGEST_TILE = 36
-    ACTION_INDEX_DICE = 0
-    ACTION_INDEX_ROLL = 1
-    ACTION_ROLL = 0
-    ACTION_STOP = 1
-    NUM_DICE = 8
 
     def __init__(self, dice: Dice, players: list[Player], table_tiles: TableTiles):
         self._failed_attempt = False
@@ -61,13 +57,13 @@ class Checker:
             None,
         )
         # pylint: disable=confusing-consecutive-elif
-        if self._dice.score()[0] < self.SMALLEST_TILE:
+        if self._dice.score()[0] < SMALLEST_TILE:
 
-            if action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP:
+            if action[ACTION_INDEX_ROLL] == ACTION_STOP:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and action stop" + NO_RED
 
-            if sum(self._dice.get_collected()) == self.NUM_DICE:
+            if sum(self._dice.get_collected()) == NUM_DICE:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
 
@@ -80,7 +76,7 @@ class Checker:
 
     def set_failed_no_worms(self, action: tuple[int, int]) -> tuple[bool, str]:
         """No worm collected and action stop."""
-        if not self._dice.score()[1] and action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP:
+        if not self._dice.score()[1] and action[ACTION_INDEX_ROLL] == ACTION_STOP:
             self._failed_attempt = True
             self._explanation = RED + "Failed: No worm collected" + NO_RED
 

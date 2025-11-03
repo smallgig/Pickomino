@@ -10,27 +10,26 @@ from numpy import dtype, ndarray
 
 from pickomino_env.src.bot import Bot
 from pickomino_env.src.checker import Checker
+from pickomino_env.src.constants import (  # Coloured printouts, game and action constants.
+    ACTION_INDEX_DICE,
+    ACTION_INDEX_ROLL,
+    ACTION_ROLL,
+    ACTION_STOP,
+    GREEN,
+    LARGEST_TILE,
+    NO_GREEN,
+    NO_RED,
+    NUM_DICE,
+    RED,
+    SMALLEST_TILE,
+)
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.player import Player
 from pickomino_env.src.table_tiles import TableTiles
 
-RED = "\033[31m"
-NO_RED = "\033[0m"
-GREEN = "\033[32m"
-NO_GREEN = "\033[0m"
-
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
     """The environment class."""
-
-    # pylint: disable=duplicate-code
-    SMALLEST_TILE = 21
-    LARGEST_TILE = 36
-    ACTION_INDEX_DICE = 0
-    ACTION_INDEX_ROLL = 1
-    ACTION_ROLL = 0
-    ACTION_STOP = 1
-    NUM_DICE = 8
 
     def __init__(self, number_of_bots: int) -> None:
         """Construct the environment."""
@@ -42,7 +41,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._you: Player = Player(bot=False, name="You")  # Put this in the players list and remove it from here.
         self._players: list[Player] = []
         self._create_players()  # Put this function call after the variable initializations.
-        self._remaining_dice: int = self.NUM_DICE  # Get rid of this. We do not need it.
+        self._remaining_dice: int = NUM_DICE  # Get rid of this. We do not need it.
         self._terminated: bool = False
         self._truncated: bool = False
         self._failed_attempt: bool = False  # Candidate for class Checker.
@@ -66,7 +65,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 # Flatten the tiles into a 16-length binary vector. Needed for SB3 compatibility.
                 # Nested dicts are not supported by SB3.
                 "tiles_table": gym.spaces.Box(low=0, high=1, shape=(16,), dtype=np.int8),
-                "tile_players": gym.spaces.Box(low=0, high=36, shape=(len(self._players),), dtype=np.int8),
+                "tile_players": gym.spaces.Box(low=0, high=LARGEST_TILE, shape=(len(self._players),), dtype=np.int8),
             }
         )
         # Action space is a tuple. First action: which dice to take. Second action: roll again or not.
@@ -153,7 +152,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             ].remove_tile()  # Remove the tile from the player.
             self._last_returned_tile = tile_to_return
             self._table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
-            worm_index = tile_to_return - self.SMALLEST_TILE
+            worm_index = tile_to_return - SMALLEST_TILE
             return_value = -self._table_tiles.worm_values[worm_index]  # Reward is MINUS the value of the worm value.
             # If the returned tile is not the highest, turn the highest tile face down, by setting it to False.
             # Search for the highest tile to turn.
@@ -200,25 +199,23 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
 
         # Check action values are within range
-        if self._action[self.ACTION_INDEX_DICE] not in range(0, 6) or self._action[self.ACTION_INDEX_ROLL] not in range(
-            0, 2
-        ):
+        if self._action[ACTION_INDEX_DICE] not in range(0, 6) or self._action[ACTION_INDEX_ROLL] not in range(0, 2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
         # Selected Face value was not rolled.
-        if self._dice.get_rolled()[self._action[self.ACTION_INDEX_DICE]] == 0:
+        if self._dice.get_rolled()[self._action[ACTION_INDEX_DICE]] == 0:
             self._truncated = True
             self._explanation = RED + "Truncated: Selected Face value not rolled" + NO_RED
 
         # Dice already collected cannot be taken again.
-        if self._dice.get_collected()[self._action[self.ACTION_INDEX_DICE]] != 0:
+        if self._dice.get_collected()[self._action[ACTION_INDEX_DICE]] != 0:
             self._truncated = True
             self._explanation = RED + "Truncated: Dice already collected cannot be taken again" + NO_RED
 
         remaining_dice = self._dice.get_rolled().copy()
-        remaining_dice[self._action[self.ACTION_INDEX_DICE]] = 0
+        remaining_dice[self._action[ACTION_INDEX_DICE]] = 0
 
-        if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_ROLL and not remaining_dice:
+        if self._action[ACTION_INDEX_ROLL] == ACTION_ROLL and not remaining_dice:
             self._truncated = True
             self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
 
@@ -231,7 +228,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         """
         self._failed_attempt, self._explanation = self._checker.set_failed_already_collected()
 
-        self._dice.collect(self._action[self.ACTION_INDEX_DICE])
+        self._dice.collect(self._action[ACTION_INDEX_DICE])
 
         self._failed_attempt, self._explanation = self._checker.set_failed_no_tile_to_take(
             self._current_player_index, self._action
@@ -239,7 +236,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt, self._explanation = self._checker.set_failed_no_worms(self._action)
 
         # Action is to roll
-        if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_ROLL:
+        if self._action[ACTION_INDEX_ROLL] == ACTION_ROLL:
             self._dice.roll()
             self._failed_attempt, self._explanation = self._checker.set_failed_already_collected()
             self._failed_attempt, self._explanation = self._checker.set_failed_no_tile_to_take(
@@ -251,7 +248,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         tile_to_return: int = self._players[steal_index].remove_tile()  # Remove the tile from the player.
         self._players[self._current_player_index].add_tile(tile_to_return)
         self._last_returned_tile = tile_to_return
-        worm_index = tile_to_return - self.SMALLEST_TILE
+        worm_index = tile_to_return - SMALLEST_TILE
         return self._table_tiles.worm_values[worm_index]
 
     def _step_tiles(self) -> int:
@@ -287,7 +284,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._last_picked_tile = dice_sum
             self._players[self._current_player_index].add_tile(dice_sum)  # Add the tile to the player or bot.
             self._table_tiles.set_tile(dice_sum, False)  # Mark the tile as no longer on the table.
-            worm_index = dice_sum - self.SMALLEST_TILE
+            worm_index = dice_sum - SMALLEST_TILE
             return_value = self._table_tiles.worm_values[worm_index]
         # Tile is not available on the table
         else:
@@ -298,7 +295,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 self._last_picked_tile = highest
                 self._players[self._current_player_index].add_tile(highest)  # Add the tile to the player.
                 self._table_tiles.set_tile(highest, False)  # Mark the tile as no longer on the table.
-                worm_index = highest - self.SMALLEST_TILE
+                worm_index = highest - SMALLEST_TILE
                 return_value = self._table_tiles.worm_values[worm_index]
             # No smaller tiles are available -> have to return players showing tile if there is one.
             else:
@@ -338,7 +335,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._step_dice()
 
         # Stopp rolling, move tile.
-        if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP or self._failed_attempt:
+        if self._action[ACTION_INDEX_ROLL] == ACTION_STOP or self._failed_attempt:
             self._step_tiles()
             self._soft_reset()
 
@@ -366,7 +363,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._step_dice()
 
         # Action is to stop or failed attempt, get reward from step tiles.
-        if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP or self._failed_attempt:
+        if self._action[ACTION_INDEX_ROLL] == ACTION_STOP or self._failed_attempt:
             # self._set_failed_attempt()
             reward = self._step_tiles()
             self._current_player_index = 1

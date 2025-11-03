@@ -1,7 +1,5 @@
 """Class table tiles."""
 
-# pylint: disable=duplicate-code
-
 
 class TableTiles:
     """Define the tiles on the table."""
