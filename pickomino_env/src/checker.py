@@ -1,6 +1,6 @@
 """Class Checker."""
 
-from pickomino_env.src.constants import (  # Coloured printouts.; Game constants.; For action indexing.
+from pickomino_env.src.constants import (  # Coloured printouts, game and action constants.
     ACTION_INDEX_ROLL,
     ACTION_STOP,
     GREEN,
