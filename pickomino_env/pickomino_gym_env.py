@@ -23,6 +23,7 @@ NO_GREEN = "\033[0m"
 class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
     """The environment class."""
 
+    # pylint: disable=duplicate-code
     SMALLEST_TILE = 21
     LARGEST_TILE = 36
     ACTION_INDEX_DICE = 0

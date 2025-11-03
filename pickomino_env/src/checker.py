@@ -13,6 +13,7 @@ NO_GREEN = "\033[0m"
 class Checker:
     """Class Checker."""
 
+    # pylint: disable=duplicate-code
     SMALLEST_TILE = 21
     LARGEST_TILE = 36
     ACTION_INDEX_DICE = 0
@@ -27,7 +28,6 @@ class Checker:
         self._dice = dice
         self._players = players
         self._table_tiles = table_tiles
-        # Init dice object? or give it with method parameter
 
     def set_failed_already_collected(self) -> tuple[bool, str]:
         """Check if a die is available to take."""
