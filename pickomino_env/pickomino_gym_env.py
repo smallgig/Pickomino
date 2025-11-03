@@ -12,6 +12,7 @@ from pickomino_env.src.bot import Bot
 from pickomino_env.src.dice import Dice
 from pickomino_env.src.player import Player
 from pickomino_env.src.table_tiles import TableTiles
+from pickomino_env.src.checker import Checker
 
 RED = "\033[31m"
 NO_RED = "\033[0m"
@@ -50,6 +51,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._last_picked_tile: int = 0  # For info.
         self._last_turned_tile: int = 0  # For infor.
         self._dice: Dice = Dice()
+        self._checker: Checker = Checker()
         self._table_tiles: TableTiles = (
             TableTiles()
         )  # Consider a complex class Table consisting of table tiles and players tiles.
@@ -225,19 +227,19 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         :param: action: The action to take: which dice to collect.
         """
-        self._set_failed_already_collected()
+        self._failed_attempt, self._explanation = self._checker.set_failed_already_collected(self._dice)
 
         self._dice.collect(self._action[self.ACTION_INDEX_DICE])
 
-        self._set_failed_no_tile_to_take()
-        self._set_failed_no_worms()
+        self._failed_attempt, self._explanation = self._checker.set_failed_no_tile_to_take(self._dice, self._players, self._table_tiles, self._current_player_index, self._action)
+        self._failed_attempt, self._explanation = self._checker.set_failed_no_worms(self._dice, self._action)
 
         # Action is to roll
         if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_ROLL:
             self._dice.roll()
-            self._set_failed_already_collected()
-            self._set_failed_no_tile_to_take()
-            self._set_failed_no_worms()
+            self._failed_attempt, self._explanation = self._checker.set_failed_already_collected(self._dice)
+            self._failed_attempt, self._explanation = self._checker.set_failed_no_tile_to_take(self._dice, self._players, self._table_tiles, self._current_player_index, self._action)
+            self._failed_attempt, self._explanation = self._checker.set_failed_no_worms(self._dice, self._action)
 
     def _steal_from_bot(self, steal_index: int) -> int:
         tile_to_return: int = self._players[steal_index].remove_tile()  # Remove the tile from the player.
@@ -299,56 +301,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         self._soft_reset()
         return return_value
-
-    def _set_failed_already_collected(self) -> None:
-        """Check if a die is available to take."""
-        can_take = any(
-            rolled > 0 and collected == 0
-            for rolled, collected in zip(self._dice.get_rolled(), self._dice.get_collected())
-        )
-
-        self._failed_attempt = not can_take
-        self._explanation = (
-            GREEN + "Good case" + NO_GREEN
-            if can_take
-            else RED + f"Failed: Collected was {self._dice.get_collected()}\n"
-            f"No possible rolled dice to taken in {self._dice.get_rolled()}" + NO_RED
-        )
-
-    def _set_failed_no_tile_to_take(self) -> None:
-        """Failed: Not able to take a tile with dice sum reached."""
-        # Environment takes the highest tile on the table or player stack.
-        # Check if any tile can be picked from another player.
-        # Index from player to steal.
-        steal_index = next(
-            (
-                i
-                for i, player in enumerate(self._players)
-                if i != self._current_player_index and player.show() == self._dice.score()[0]
-            ),
-            None,
-        )
-        # pylint: disable=confusing-consecutive-elif
-        if self._dice.score()[0] < self.SMALLEST_TILE:
-
-            if self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP:
-                self._failed_attempt = True
-                self._explanation = RED + "Failed: 21 not reached and action stop" + NO_RED
-
-            if sum(self._dice.get_collected()) == self.NUM_DICE:
-                self._failed_attempt = True
-                self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
-
-        # Check if no tile available on the table or from player to take.
-        elif not self._table_tiles.find_next_lower_tile(self._dice.score()[0]) and steal_index is None:
-            self._failed_attempt = True
-            self._explanation = RED + "Failed: No tile on table or from another player can be taken" + NO_RED
-
-    def _set_failed_no_worms(self) -> None:
-        """No worm collected and action stop."""
-        if not self._dice.score()[1] and self._action[self.ACTION_INDEX_ROLL] == self.ACTION_STOP:
-            self._failed_attempt = True
-            self._explanation = RED + "Failed: No worm collected" + NO_RED
 
     def _play_bot(self) -> None:
         """Play a bot if there is one."""
