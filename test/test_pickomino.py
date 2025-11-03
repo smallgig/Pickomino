@@ -1,7 +1,9 @@
 """Test Pickomino."""
 
+import os
 import time
 import numpy as np
+import pytest
 import gymnasium as gym
 import matplotlib.pyplot as plt
 from stable_baselines3 import PPO
@@ -14,9 +16,6 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 
 import pickomino_env  # Important: activates the registration.
 from pickomino_env.src.bot import Bot
-
-log_dir = "./logs/"
-run_time = 0
 
 # Create environment to test.
 env = gym.make("Pickomino-v0", number_of_bots=2)  # base environment
@@ -68,49 +67,92 @@ def test_stable_baselines3():
     check_env(env)
 
 
-def test_ppo():
-    """Test PPO from stable_baselines3."""
-    start_time = time.time()
+# Will likely delete this later.
+# def test_ppo():
+#     """Test PPO from stable_baselines3."""
+#     start_time = time.time()
+#
+#     def make_env():
+#         """Create environment with function for testing PPO."""
+#         ppo_env = gym.make("Pickomino-v0", number_of_bots=2)
+#         ppo_env = Monitor(ppo_env, log_dir)  # Wrap with Stable Baselines 3's Monitor.
+#         return ppo_env
+#
+#     # Vectorize environment for PPO for parallel environments
+#     vec_ppo_env = DummyVecEnv([make_env])
+#
+#     # ent_coef for diversity of the policy through entropy
+#     # target_kl limits how far the policy may stray from the old status per update (trust-region).
+#     algorithm = PPO("MultiInputPolicy", vec_ppo_env)  # Add ', verbose=1' as necessary
+#     algorithm.learn(total_timesteps=100)  # 1 step = on action! (not episode!)
+#
+#     end_time = time.time()
+#     global run_time
+#     run_time = end_time - start_time
 
-    def make_env():
+
+# def test_ppo_plotting():
+#     """Test PPO plotting."""
+#     x, y = ts2xy(load_results(log_dir), "timesteps")
+#     plt.plot(x, y)
+#     plt.xlabel("Timesteps")
+#     plt.ylabel("Rewards")
+#     plt.title(f"Learning Curve in {run_time:.0f} seconds")
+#     plt.grid()
+#     plt.show()
+
+
+@pytest.fixture(scope="session")
+def ppo_setup(tmp_path_factory):
+    """Fixture for creating a PPO model."""
+    log_dir = tmp_path_factory.mktemp("ppo_logs")
+
+    def make_env(rank):
         """Create environment with function for testing PPO."""
-        ppo_env = gym.make("Pickomino-v0", number_of_bots=2)
-        ppo_env = Monitor(ppo_env, log_dir)  # Wrap with Stable Baselines 3's Monitor.
-        return ppo_env
 
-    # Vectorize environment for PPO for parallel environments
-    vec_ppo_env = DummyVecEnv([make_env])
+        def _init():
+            ppop_env = gym.make("Pickomino-v0", number_of_bots=2)
+            ppop_env = Monitor(ppop_env, filename=f"{log_dir}/{rank}")
+            return ppop_env
 
-    # ent_coef for diversity of the policy through entropy
-    # target_kl limits how far the policy may stray from the old status per update (trust-region).
-    algorithm = PPO("MultiInputPolicy", vec_ppo_env)  # Add ', verbose=1' as necessary
-    algorithm.learn(total_timesteps=100)  # 1 step = on action! (not episode!)
+        return _init
 
-    end_time = time.time()
-    global run_time
-    run_time = end_time - start_time
+    # More advanced - for later.
+    # from stable_baselines3.common.vec_env import SubprocVecEnv
+    # par_env = SubprocVecEnv([make_env for _ in range(8)])  # 8 parallel envs.
+    par_env = DummyVecEnv([make_env(i) for i in range(8)])  # 8 sequential envs for debugging.
+    model = PPO("MultiInputPolicy", par_env)
+
+    start_time = time.time()
+    # model.learn(total_timesteps=500_000)  # Noticeable learning in 15 minutes on my machine.
+    model.learn(total_timesteps=500)  # Run fast
+    ppo_run_time = time.time() - start_time
+    assert ppo_run_time < 900, f"PPO training took too long: {ppo_run_time:.0f} seconds"
+    return model, log_dir, ppo_run_time
 
 
-def test_ppo_plotting():
-    """Test PPO plotting."""
-    x, y = ts2xy(load_results(log_dir), "timesteps")
+def test_ppo_plotting(ppo_setup):
+    """Test PPO result plotting (non-interactive)."""
+    model, log_dir, ppo_run_time = ppo_setup
+    print("Plotting... with time: ", ppo_run_time)
+    x, y = ts2xy(load_results(str(log_dir)), "timesteps")
+
+    # Simple validation: no crash and x, y are arrays
+    assert x is not None
+    assert y is not None
+
+    # Plot (non-blocking)
+    plt.figure()
     plt.plot(x, y)
     plt.xlabel("Timesteps")
     plt.ylabel("Rewards")
-    plt.title(f"Learning Curve in {run_time:.0f} seconds")
-    plt.grid()
-    plt.show()
+    plt.title(f"Learning Curve in {ppo_run_time:.0f} seconds")
+    plt.grid(True)
+    os.makedirs("test/plots", exist_ok=True)
+    plt.savefig("test/plots/PPO_learning_curve.png")
+    plt.close()
 
-
-# def test_ppo_parallel():
-#    """Test PPO parallel."""
-#    start_time = time.time()
-# from stable_baselines3.common.vec_env import SubprocVecEnv
-
-# def make_env():
-#     return gym.make("CartPole-v1")
-
-# env = SubprocVecEnv([make_env for _ in range(8)])  # 8 parallel envs
+    assert len(x) > 0, "No training data found in monitor logs."
 
 
 if __name__ == "__main__":
