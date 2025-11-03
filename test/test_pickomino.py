@@ -10,6 +10,8 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.results_plotter import load_results, ts2xy
 from stable_baselines3.common.vec_env import DummyVecEnv
 
+# from stable_baselines3 import SAC # Soft Actor-Critic (SAC) is suitable for continuous action spaces.
+
 import pickomino_env  # Important: activates the registration.
 
 log_dir = "./logs/"
@@ -75,6 +77,8 @@ def test_ppo():
     # Vectorize environment for PPO for parallel environments
     vec_ppo_env = DummyVecEnv([make_env])
 
+    # ent_coef for diversity of the policy through entropy
+    # target_kl limits how far the policy may stray from the old status per update (trust-region).
     algorithm = PPO("MultiInputPolicy", vec_ppo_env)  # Add ', verbose=1' as necessary
     algorithm.learn(total_timesteps=100)  # 1 step = on action! (not episode!)
 
