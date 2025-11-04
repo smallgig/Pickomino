@@ -36,7 +36,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # The following is an idea for refactoring.
         # Have only on complex variable with the return value of the step function.
         self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
-        self._you: Player = Player(bot=False, name="You")  # Put this in the players list and remove it from here.
         self._players: list[Player] = []
         self._terminated: bool = False
         self._truncated: bool = False
@@ -83,7 +82,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             "Echo",
             "Foxtrot",
         ]  # For later rendering or improved manual play.
-        self._players.append(self._you)
+        self._players.append(Player(bot=False, name="You"))
         for i in range(number_of_bots):
             self._players.append(Player(bot=True, name=names[i]))
 
@@ -181,7 +180,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         super().reset(seed=seed)
         self._dice = Dice()
         self._checker = Checker(self._dice, self._players, self._table_tiles)
-        self._you = Player(bot=False, name="You")
         self._create_players(len(self._players) - 1)  # Expects the number of bots, hence –1.
         self._table_tiles = TableTiles()
         self._failed_attempt = False

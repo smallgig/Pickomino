@@ -23,7 +23,7 @@ class Player:
         """Show all tiles on the player stack."""
         if self.tile_stack:
             return self.tile_stack
-        return [42]  # Invalid value helps debugging.
+        return [42]  # Invalid value helps debugging, but shows 42 in middle of game when stack is empty!
 
     def add_tile(self, tile: int) -> None:
         """Add a tile to the player stack."""

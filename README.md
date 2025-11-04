@@ -92,20 +92,7 @@ print("Init ok. Example observation:", obs)
 2. **`legal_move` setting `self.terminated` to true, but gives local flag back.**
    Consistency: set and return **only local** variable **or** explicit `return self.terminated, self.truncated`.
 
-3. **Observation-Space does not fit**
-   For a clean gymnasium:
-
-   ```python
-   import numpy as np
-   from gymnasium import spaces
-   self.observation_space = spaces.Dict({
-       "dice_collected": spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
-       "dice_rolled":    spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
-       "player":         spaces.Discrete(num_players),
-   })
-   ```
-
-4. **Stop action**
+3. **Stop action**
    Model as discrete action in the Reinforcement Learning Agent (e.g. ID 12), map to `(face=0, roll_again=0)`.
 
 ---
