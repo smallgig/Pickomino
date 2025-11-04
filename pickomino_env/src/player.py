@@ -1,5 +1,6 @@
 """Class player."""
 
+from pickomino_env.src.constants import SMALLEST_TILE
 from pickomino_env.src.table_tiles import TableTiles
 
 
@@ -22,7 +23,7 @@ class Player:
         """Show all tiles on the player stack."""
         if self.tile_stack:
             return self.tile_stack
-        return [42]
+        return [42]  # Invalid value helps debugging.
 
     def add_tile(self, tile: int) -> None:
         """Add a tile to the player stack."""
@@ -37,7 +38,7 @@ class Player:
         score: int = 0
         table = TableTiles()
         for tile in self.tile_stack:
-            score += table.worm_values[tile - 21]  # List of worm values count from zero.
+            score += table.worm_values[tile - SMALLEST_TILE]  # List of worm values count from zero.
         return score
 
 

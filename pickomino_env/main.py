@@ -6,10 +6,12 @@ import numpy as np
 
 from pickomino_env.pickomino_gym_env import PickominoEnv
 from pickomino_env.src.bot import Bot
+from pickomino_env.src.constants import (  # Coloured printouts, game and action constants.
+    NO_RED,
+    RED,
+    SMALLEST_TILE,
+)
 from pickomino_env.src.dice import Dice
-
-RED = "\033[31m"
-NO_RED = "\033[0m"
 
 
 class BotTest:
@@ -48,7 +50,7 @@ class BotTest:
 
             for ind, game_tile in enumerate(game_observation["tiles_table"]):
                 if game_tile:
-                    print(ind + 21, end=" ")
+                    print(ind + SMALLEST_TILE, end=" ")
             print()
             selection: int = int(input("Which dice do you want to collect? (1..5 or worm =6): ")) - 1
             stop: int = int(input("Keep rolling? (0 = ROLL,  1 = STOP): "))
@@ -88,7 +90,7 @@ class BotTest:
             print("Tiles on table:", end=" ")
             for ind, game_tile in enumerate(game_obs["tiles_table"]):
                 if game_tile:
-                    print(ind + 21, end=" ")
+                    print(ind + SMALLEST_TILE, end=" ")
                 else:
                     print("_", end=" ")
             print()
