@@ -12,6 +12,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.results_plotter import load_results, ts2xy
 from stable_baselines3.common.vec_env import DummyVecEnv
 
+# For later
 # from stable_baselines3 import SAC # Soft Actor-Critic (SAC) is suitable for continuous action spaces.
 
 import pickomino_env  # Important: activates the registration.
@@ -59,7 +60,7 @@ def test_multiple_actions():
         # score = cast(Dice, game_info["dice"]).score()[0]
         if terminated:
             break
-    print("\nTotal Reward:", total_reward)
+    # print("\nTotal Reward:", total_reward)
 
 
 def test_stable_baselines3():
@@ -67,67 +68,36 @@ def test_stable_baselines3():
     check_env(env)
 
 
-# Will likely delete this later.
-# def test_ppo():
-#     """Test PPO from stable_baselines3."""
-#     start_time = time.time()
-#
-#     def make_env():
-#         """Create environment with function for testing PPO."""
-#         ppo_env = gym.make("Pickomino-v0", number_of_bots=2)
-#         ppo_env = Monitor(ppo_env, log_dir)  # Wrap with Stable Baselines 3's Monitor.
-#         return ppo_env
-#
-#     # Vectorize environment for PPO for parallel environments
-#     vec_ppo_env = DummyVecEnv([make_env])
-#
-#     # ent_coef for diversity of the policy through entropy
-#     # target_kl limits how far the policy may stray from the old status per update (trust-region).
-#     algorithm = PPO("MultiInputPolicy", vec_ppo_env)  # Add ', verbose=1' as necessary
-#     algorithm.learn(total_timesteps=100)  # 1 step = on action! (not episode!)
-#
-#     end_time = time.time()
-#     global run_time
-#     run_time = end_time - start_time
-
-
-# def test_ppo_plotting():
-#     """Test PPO plotting."""
-#     x, y = ts2xy(load_results(log_dir), "timesteps")
-#     plt.plot(x, y)
-#     plt.xlabel("Timesteps")
-#     plt.ylabel("Rewards")
-#     plt.title(f"Learning Curve in {run_time:.0f} seconds")
-#     plt.grid()
-#     plt.show()
-
-
 @pytest.fixture(scope="session")
 def ppo_setup(tmp_path_factory):
-    """Fixture for creating a PPO model."""
+    """Fixture for creating a PPO model from Stable Baselines3."""
     log_dir = tmp_path_factory.mktemp("ppo_logs")
 
     def make_env(rank):
         """Create environment with function for testing PPO."""
 
         def _init():
-            ppop_env = gym.make("Pickomino-v0", number_of_bots=2)
-            ppop_env = Monitor(ppop_env, filename=f"{log_dir}/{rank}")
-            return ppop_env
+            ppo_env = gym.make("Pickomino-v0", number_of_bots=6)
+            ppo_env = Monitor(ppo_env, filename=f"{log_dir}/{rank}")
+            return ppo_env
 
         return _init
 
-    # More advanced - for later.
+    # More advanced, hence for later.
     # from stable_baselines3.common.vec_env import SubprocVecEnv
     # par_env = SubprocVecEnv([make_env for _ in range(8)])  # 8 parallel envs.
+
+    # Vectorize environment for PPO for parallel environments
     par_env = DummyVecEnv([make_env(i) for i in range(8)])  # 8 sequential envs for debugging.
-    model = PPO("MultiInputPolicy", par_env)
+    model = PPO("MultiInputPolicy", par_env)  # Add ', verbose=1' as necessary
 
     start_time = time.time()
+    # 1 step = on action! (not episode!).
     # model.learn(total_timesteps=500_000)  # Noticeable learning in 15 minutes on my machine.
-    model.learn(total_timesteps=500)  # Run fast
+    # model.learn(total_timesteps=10_000_000)  # Going for real learning. Use assert ppo_run_time < 8 * 60 * 60,
+    model.learn(total_timesteps=100)  # Run fast
     ppo_run_time = time.time() - start_time
-    assert ppo_run_time < 900, f"PPO training took too long: {ppo_run_time:.0f} seconds"
+    assert ppo_run_time < 30, f"PPO training took too long: {ppo_run_time:.0f} seconds"
     return model, log_dir, ppo_run_time
 
 
