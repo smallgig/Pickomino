@@ -36,12 +36,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # The following is an idea for refactoring.
         # Have only on complex variable with the return value of the step function.
         self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
-        self._roll_counter: int = 0  # This is not used.
-        self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players) - 1 instead.
         self._you: Player = Player(bot=False, name="You")  # Put this in the players list and remove it from here.
         self._players: list[Player] = []
-        self._create_players()  # Put this function call after the variable initializations.
-        self._remaining_dice: int = NUM_DICE  # Get rid of this. We do not need it.
         self._terminated: bool = False
         self._truncated: bool = False
         self._failed_attempt: bool = False  # Candidate for class Checker.
@@ -60,8 +56,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # 6 possible faces of the dice. Max 8 dice.
         self.observation_space = gym.spaces.Dict(
             {
-                "dice_collected": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
-                "dice_rolled": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
+                "dice_collected": gym.spaces.Box(low=0, high=NUM_DICE, shape=(6,), dtype=np.int64),
+                "dice_rolled": gym.spaces.Box(low=0, high=NUM_DICE, shape=(6,), dtype=np.int64),
                 # Flatten the tiles into a 16-length binary vector. Needed for SB3 compatibility.
                 # Nested dicts are not supported by SB3.
                 "tiles_table": gym.spaces.Box(low=0, high=1, shape=(16,), dtype=np.int8),
@@ -71,14 +67,24 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # Action space is a tuple. First action: which dice to take. Second action: roll again or not.
         self.action_space = gym.spaces.MultiDiscrete([6, 2])
 
+        self._create_players(number_of_bots)
+
     def render(self) -> RenderFrame | list[RenderFrame] | None:
         """Render the environment."""
         # pass
 
-    def _create_players(self) -> None:
-        names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
+    def _create_players(self, number_of_bots: int) -> None:
+        self._players = []
+        names = [
+            "Alfa",
+            "Bravo",
+            "Charlie",
+            "Delta",
+            "Echo",
+            "Foxtrot",
+        ]  # For later rendering or improved manual play.
         self._players.append(self._you)
-        for i in range(self._number_of_bots):
+        for i in range(number_of_bots):
             self._players.append(Player(bot=True, name=names[i]))
 
     def _get_obs_dice(
@@ -121,9 +127,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             dict: Additional information. Useful for debugging but not necessary for learning.
         """
         return_value = {
-            "remaining_dice": self._remaining_dice,
-            "observation_space": self.observation_space,
-            "action_space": self.action_space,
             "dice": self._dice,
             "terminated": self._terminated,
             "tiles_table_vec": self._tiles_vector(),
@@ -141,7 +144,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._dice = Dice()
         self._checker = Checker(self._dice, self._players, self._table_tiles)
         self._failed_attempt = False
-        self._roll_counter = 0
         self._dice.roll()
 
     def _remove_tile_from_player(self) -> int:
@@ -180,8 +182,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._dice = Dice()
         self._checker = Checker(self._dice, self._players, self._table_tiles)
         self._you = Player(bot=False, name="You")
-        self._players = []
-        self._create_players()
+        self._create_players(len(self._players) - 1)  # Expects number of bots hence -1.
         self._table_tiles = TableTiles()
         self._failed_attempt = False
         self._terminated = False

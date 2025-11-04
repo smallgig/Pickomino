@@ -7,11 +7,6 @@ from pickomino_env.pickomino_gym_env import PickominoEnv
 env = PickominoEnv(2)
 
 
-def test__init__():
-    """Test init function."""
-    assert env._number_of_bots == 2
-
-
 def test_reset():
     """Test reset function."""
     observation, info = env.reset()
