@@ -4,6 +4,8 @@ import random as rand
 
 import numpy as np
 
+from pickomino_env.src.constants import LARGEST_TILE  # Game constant.
+
 
 class Dice:
     """Represents a collection of die face frequencies.
@@ -12,19 +14,10 @@ class Dice:
     This example means that three threes, four fours and one worm die face have been collected.
     """
 
-    LARGEST_TILE = 36
-
     def __init__(self) -> None:
         self.values: list[int] = [1, 2, 3, 4, 5, 5]  # Worm has value 5.
         self._n_dice: int = 8
-        self._collected: list[int] = [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ]  # Collected dice, up to 8 per side.
+        self._collected: list[int] = [0, 0, 0, 0, 0, 0]  # Collected dice, up to 8 per side.
         self._rolled: list[int] = [0, 0, 0, 0, 0, 0]  # Last roll.
 
     def collect(self, action_face: int) -> list[int]:
@@ -56,7 +49,7 @@ class Dice:
         # Multiply the frequency of each die face with its value
         current_score = int(np.dot(self.values, self._collected) if self._collected else 0)
         # Using the dice sum as an index in [21..36], higher rolls can only pick 36 or lower.
-        current_score = int(min(current_score, Dice.LARGEST_TILE))
+        current_score = int(min(current_score, LARGEST_TILE))
         return current_score, has_worms
 
     def __str__(self) -> str:
@@ -77,3 +70,9 @@ class Dice:
         for line in zip(*faces):
             return_value += "   ".join(line) + "\n"
         return return_value
+
+
+if __name__ == "__main__":
+    print("This is the Dice file.")
+    dice = Dice()  # Using the Dice class to avoid pylint messages.
+    print(dice)

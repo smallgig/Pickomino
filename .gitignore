@@ -1,1 +1,3 @@
 pickomino_env.egg-info
+/build/
+/dist/
