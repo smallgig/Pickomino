@@ -112,9 +112,6 @@ class Checker:
         if action[ACTION_INDEX_ROLL] == ACTION_ROLL and not remaining_dice:
             self._truncated = True
             self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
-
-        return self._terminated, self._truncated
-
         # Get to here:Action allowed try to take a tile.
 
 
