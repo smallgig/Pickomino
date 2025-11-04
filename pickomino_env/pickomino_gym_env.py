@@ -192,35 +192,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._dice.roll()
         return self._current_obs(), self._get_info()
 
-    def _action_is_allowed(self) -> None:
-        """Check if action is allowed."""
-        self._terminated = False
-        self._truncated = False
-        self._failed_attempt = False
-
-        # Check action values are within range
-        if self._action[ACTION_INDEX_DICE] not in range(0, 6) or self._action[ACTION_INDEX_ROLL] not in range(0, 2):
-            self._terminated = True
-            self._explanation = RED + "Terminated: Action index not in range" + NO_RED
-        # Selected Face value was not rolled.
-        if self._dice.get_rolled()[self._action[ACTION_INDEX_DICE]] == 0:
-            self._truncated = True
-            self._explanation = RED + "Truncated: Selected Face value not rolled" + NO_RED
-
-        # Dice already collected cannot be taken again.
-        if self._dice.get_collected()[self._action[ACTION_INDEX_DICE]] != 0:
-            self._truncated = True
-            self._explanation = RED + "Truncated: Dice already collected cannot be taken again" + NO_RED
-
-        remaining_dice = self._dice.get_rolled().copy()
-        remaining_dice[self._action[ACTION_INDEX_DICE]] = 0
-
-        if self._action[ACTION_INDEX_ROLL] == ACTION_ROLL and not remaining_dice:
-            self._truncated = True
-            self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
-
-        # Get to here:Action allowed try to take a tile.
-
     def _step_dice(self) -> None:
         """Execute one roll of the dice and picking or returning a tile.
 
@@ -325,7 +296,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
     def _step_bot(self, action: tuple[int, int]) -> None:
         """Step the bot."""
         self._action = action
-        self._action_is_allowed()
+        self._checker.action_is_allowed(action)
 
         # Stop immediately if action was not allowed or similar.
         if self._terminated or self._truncated:
@@ -349,7 +320,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._action = action
         reward = 0
         # Check legal move before doing a step.
-        self._action_is_allowed()
+        self._checker.action_is_allowed(action)
 
         # Game Over if no Tile is on the table anymore.
         if not self._table_tiles.highest():

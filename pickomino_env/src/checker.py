@@ -2,6 +2,8 @@
 
 from pickomino_env.src.constants import (  # Coloured printouts, game and action constants.
     ACTION_INDEX_ROLL,
+    ACTION_INDEX_DICE,
+    ACTION_ROLL,
     ACTION_STOP,
     GREEN,
     NO_GREEN,
@@ -20,6 +22,8 @@ class Checker:
 
     def __init__(self, dice: Dice, players: list[Player], table_tiles: TableTiles):
         self._failed_attempt = False
+        self._terminated = False
+        self._truncated = False
         self._explanation = ""
         self._dice = dice
         self._players = players
@@ -81,6 +85,37 @@ class Checker:
             self._explanation = RED + "Failed: No worm collected" + NO_RED
 
         return self._failed_attempt, self._explanation
+
+    def action_is_allowed(self, action:tuple[int, int]) -> None:
+        """Check if action is allowed."""
+        self._terminated = False
+        self._truncated = False
+        self._failed_attempt = False
+
+        # Check action values are within range
+        if action[ACTION_INDEX_DICE] not in range(0, 6) or action[ACTION_INDEX_ROLL] not in range(0, 2):
+            self._terminated = True
+            self._explanation = RED + "Terminated: Action index not in range" + NO_RED
+        # Selected Face value was not rolled.
+        if self._dice.get_rolled()[action[ACTION_INDEX_DICE]] == 0:
+            self._truncated = True
+            self._explanation = RED + "Truncated: Selected Face value not rolled" + NO_RED
+
+        # Dice already collected cannot be taken again.
+        if self._dice.get_collected()[action[ACTION_INDEX_DICE]] != 0:
+            self._truncated = True
+            self._explanation = RED + "Truncated: Dice already collected cannot be taken again" + NO_RED
+
+        remaining_dice = self._dice.get_rolled().copy()
+        remaining_dice[action[ACTION_INDEX_DICE]] = 0
+
+        if action[ACTION_INDEX_ROLL] == ACTION_ROLL and not remaining_dice:
+            self._truncated = True
+            self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
+
+        return self._terminated, self._truncated
+
+        # Get to here:Action allowed try to take a tile.
 
 
 if __name__ == "__main__":
