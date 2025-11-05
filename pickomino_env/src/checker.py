@@ -109,9 +109,10 @@ class Checker:
             self._explanation = RED + "Truncated: Dice already collected cannot be taken again" + NO_RED
             return self._terminated, self._truncated, self._explanation
 
-        remaining_dice = self._dice.get_rolled().copy()
-        remaining_dice[action[ACTION_INDEX_DICE]] = 0
+        remaining_dice = self._dice.get_rolled().copy() # Copy in order not to overwrite the real rolled variable.
+        remaining_dice[action[ACTION_INDEX_DICE]] = 0 # Overwrite with zero for the one just collected.
 
+        # Try to roll when no dice left to roll.
         if action[ACTION_INDEX_ROLL] == ACTION_ROLL and not remaining_dice:
             self._truncated = True
             self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
