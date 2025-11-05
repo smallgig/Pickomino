@@ -296,7 +296,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
     def _step_bot(self, action: tuple[int, int]) -> None:
         """Step the bot."""
         self._action = action
-        self._terminated, self._truncated = self._checker.action_is_allowed(action)
+        self._terminated, self._truncated, self._explanation = self._checker.action_is_allowed(action)
 
         # Stop immediately if action was not allowed or similar.
         if self._terminated or self._truncated:
@@ -320,7 +320,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._action = action
         reward = 0
         # Check legal move before doing a step.
-        self._terminated, self._truncated = self._checker.action_is_allowed(action)
+        self._terminated, self._truncated, self._explanation = self._checker.action_is_allowed(action)
 
         # Game Over if no Tile is on the table anymore.
         if not self._table_tiles.highest():
