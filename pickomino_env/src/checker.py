@@ -86,25 +86,28 @@ class Checker:
 
         return self._failed_attempt, self._explanation
 
-    def action_is_allowed(self, action:tuple[int, int]) -> None:
+    def action_is_allowed(self, action:tuple[int, int]) -> tuple[bool, bool]:
         """Check if action is allowed."""
         self._terminated = False
         self._truncated = False
-        self._failed_attempt = False
 
         # Check action values are within range
         if action[ACTION_INDEX_DICE] not in range(0, 6) or action[ACTION_INDEX_ROLL] not in range(0, 2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
+            return self._terminated, self._truncated
+
         # Selected Face value was not rolled.
         if self._dice.get_rolled()[action[ACTION_INDEX_DICE]] == 0:
             self._truncated = True
             self._explanation = RED + "Truncated: Selected Face value not rolled" + NO_RED
+            return self._terminated, self._truncated
 
         # Dice already collected cannot be taken again.
         if self._dice.get_collected()[action[ACTION_INDEX_DICE]] != 0:
             self._truncated = True
             self._explanation = RED + "Truncated: Dice already collected cannot be taken again" + NO_RED
+            return self._terminated, self._truncated
 
         remaining_dice = self._dice.get_rolled().copy()
         remaining_dice[action[ACTION_INDEX_DICE]] = 0
@@ -112,6 +115,9 @@ class Checker:
         if action[ACTION_INDEX_ROLL] == ACTION_ROLL and not remaining_dice:
             self._truncated = True
             self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
+            return self._terminated, self._truncated
+
+        return self._terminated, self._truncated
         # Get to here:Action allowed try to take a tile.
 
 
