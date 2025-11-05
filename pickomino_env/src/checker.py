@@ -110,7 +110,7 @@ class Checker:
             return self._terminated, self._truncated, self._explanation
 
         remaining_dice = self._dice.get_rolled().copy() # Copy in order not to overwrite the real rolled variable.
-        remaining_dice[action[ACTION_INDEX_DICE]] = 0 # Overwrite with zero for the one just collected.
+        remaining_dice[action[ACTION_INDEX_DICE]] = 0 # Overwrite with zero for the face just collected.
 
         # Try to roll when no dice left to roll.
         if action[ACTION_INDEX_ROLL] == ACTION_ROLL and not remaining_dice:
