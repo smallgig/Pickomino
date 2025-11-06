@@ -42,9 +42,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt: bool = False  # Candidate for class Checker.
         self._explanation: str = "Constructor"  # Why the terminated, truncated or failed attempt is set.
         self._current_player_index: int = 0  # 0 for the player, 1 or more for bots.
-        # self._last_returned_tile: int = 0  # For info.
-        # self._last_picked_tile: int = 0  # For info.
-        # self._last_turned_tile: int = 0  # For infor.
         self._dice: Dice = Dice()
         self._table_tiles: TableTiles = (
             TableTiles()
@@ -132,9 +129,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             "smallest_tile": self._table_tiles.smallest(),
             "explanation": self._explanation,
             "player_stack": self._players[0].show_all(),
-            # "last_returned_tile": self._last_returned_tile,
-            # "last_picked_tile": self._last_picked_tile,
-            # "last_turned_tile": self._last_turned_tile,
         }
         return return_value
 
@@ -151,7 +145,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             tile_to_return: int = self._players[
                 self._current_player_index
             ].remove_tile()  # Remove the tile from the player.
-            # self._last_returned_tile = tile_to_return
             self._table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
             worm_index = tile_to_return - SMALLEST_TILE
             return_value = -self._table_tiles.worm_values[worm_index]  # Reward is MINUS the value of the worm value.
@@ -161,7 +154,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             # Turn the highest tile if there is one.
             if highest:
                 self._table_tiles.set_tile(highest, False)
-                # self._last_turned_tile = highest
         return return_value
 
     def reset(
@@ -185,9 +177,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
         self._terminated = False
         self._truncated = False
-        # self._last_returned_tile = 0  # For info.
-        # self._last_picked_tile = 0  # For info.
-        # self._last_turned_tile = 0  # For info.
         self._dice.roll()
         return self._current_obs(), self._get_info()
 
@@ -246,7 +235,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
     def _steal_from_bot(self, steal_index: int) -> int:
         tile_to_return: int = self._players[steal_index].remove_tile()  # Remove the tile from the player.
         self._players[self._current_player_index].add_tile(tile_to_return)
-        # self._last_returned_tile = tile_to_return
         worm_index = tile_to_return - SMALLEST_TILE
         return self._table_tiles.worm_values[worm_index]
 
@@ -280,7 +268,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         # Only pick a tile if it is on the table.
         elif self._table_tiles.get_table()[dice_sum]:
-            # self._last_picked_tile = dice_sum
             self._players[self._current_player_index].add_tile(dice_sum)  # Add the tile to the player or bot.
             self._table_tiles.set_tile(dice_sum, False)  # Mark the tile as no longer on the table.
             worm_index = dice_sum - SMALLEST_TILE
@@ -291,7 +278,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             # Find the highest tile smaller than the dice sum.
             highest: int = self._table_tiles.find_next_lower_tile(dice_sum)
             if highest:  # Found the highest tile to pick from the table.
-                # self._last_picked_tile = highest
                 self._players[self._current_player_index].add_tile(highest)  # Add the tile to the player.
                 self._table_tiles.set_tile(highest, False)  # Mark the tile as no longer on the table.
                 worm_index = highest - SMALLEST_TILE
