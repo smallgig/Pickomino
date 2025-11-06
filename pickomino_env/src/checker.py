@@ -84,6 +84,7 @@ class Checker:
 
 
 if __name__ == "__main__":
+    print("This is the checker file.")
     test_dice = Dice()
     test_players: list[Player] = []
     test_tables_tiles = TableTiles()

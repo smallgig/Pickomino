@@ -69,12 +69,3 @@ if __name__ == "__main__":
     print("This is the bot file.")
     bot = Bot()  # Using the Bot class to avoid pylint messages.
     print("bot", bot)
-    print(
-        "bot.policy([1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], 1)",
-        bot.policy([1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], 1),
-    )
-    print("bot.get_policy()", bot.get_policy())
-    bot.set_policy("Test")
-    print("bot.set_policy('Test')")
-    print("bot.get_policy()", bot.get_policy())
-    print("bot", bot)

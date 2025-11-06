@@ -1,6 +1,5 @@
 """Pickomino game with gymnasium API."""
 
-# Testing push to main without Pull Request violates Rule Set.
 from typing import Any
 
 import gymnasium as gym
@@ -359,12 +358,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
 
 if __name__ == "__main__":
+    print("This is the Pickomino file.")
     env = PickominoEnv(1)
     game_observation, game_info = env.reset()
     print(game_observation, game_info)
-    print()
-    print("==========================")
-    print()
     print("TO PLAY: run main.py")
-    print()
-    print("===========================")
