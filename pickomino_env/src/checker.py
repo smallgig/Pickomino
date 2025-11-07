@@ -123,6 +123,7 @@ class Checker:
 
 
 if __name__ == "__main__":
+    print("This is th checker file. It is not meant to be run directly.")
     test_dice = Dice()
     test_players: list[Player] = []
     test_tables_tiles = TableTiles()
