@@ -1,6 +1,5 @@
 """Pickomino game with gymnasium API."""
 
-# Testing push to main without Pull Request violates Rule Set.
 from typing import Any
 
 import gymnasium as gym
