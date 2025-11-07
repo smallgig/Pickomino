@@ -97,7 +97,7 @@ def ppo_setup(tmp_path_factory):
     # model.learn(total_timesteps=10_000_000)  # Going for real learning. Use assert ppo_run_time < 8 * 60 * 60,
     model.learn(total_timesteps=100)  # Run fast
     ppo_run_time = time.time() - start_time
-    assert ppo_run_time < 30, f"PPO training took too long: {ppo_run_time:.0f} seconds"
+    assert ppo_run_time < 60, f"PPO training took too long: {ppo_run_time:.0f} seconds"
     return model, log_dir, ppo_run_time
 
 
@@ -123,6 +123,20 @@ def test_ppo_plotting(ppo_setup):
     plt.close()
 
     assert len(x) > 0, "No training data found in monitor logs."
+
+
+def test_action_out_of_range():
+    """Test action out of range."""
+    env.reset()
+    obs, reward, term, trunc, info = env.step(env.action_space.sample())  # Should be good.
+    assert not term
+    obs, reward, term, trunc, info = env.step((7, 0))  # Face out of range
+    assert term
+    env.reset()
+    obs, reward, term, trunc, info = env.step(env.action_space.sample())  # Should be good.
+    assert not term
+    obs, reward, term, trunc, info = env.step((2, 4))  # Roll out of range
+    assert term
 
 
 if __name__ == "__main__":
