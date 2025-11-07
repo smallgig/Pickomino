@@ -119,8 +119,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             dict: Additional information. Useful for debugging but not necessary for learning.
         """
         return_value = {
-            "observation_space": self.observation_space,
-            "action_space": self.action_space,
             "dice": self._dice,
             "terminated": self._terminated,
             "tiles_table_vec": self._tiles_vector(),
