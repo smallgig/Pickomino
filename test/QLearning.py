@@ -9,6 +9,8 @@ import gymnasium as gym
 import matplotlib.pyplot as plt
 from tensorboardX import SummaryWriter  # leichtgewichtig, kein PyTorch nötig
 
+import pickomino_env  # Important: activates the registration, hence allowing gym.make().
+
 # ------------------------ Hilfsfunktionen ------------------------
 
 TILES = list(range(21, 37))  # 21..36
@@ -122,7 +124,7 @@ def train_qlearning(
     plot_path: str = "learning_curve.png",
     ma_window: int = 200,
 ):
-    env = gym.make(env_id)
+    env = gym.make(env_id, number_of_bots=3)
     if seed is not None:
         obs, info = env.reset(seed=seed)
     else:
@@ -193,7 +195,9 @@ def train_qlearning(
 
         if ep % 200 == 0:
             ma = moving_average(episode_returns, ma_window)
-            print(f"[Ep {ep:5d}] return={ep_return:+.2f}  avg({ma_window})≈{ma[-1]:+.2f}  eps={eps:.3f}  steps={steps}")
+            print(
+                f"[Ep {ep:5d}] return={ep_return:+.2f}  avg({ma_window})≈{ma[-1]:+.2f}  eps={eps:.3f}  steps={steps}"
+            )
 
     # Speichern
     with open(save_path, "wb") as f:
@@ -222,7 +226,7 @@ def train_qlearning(
 
 
 def run_greedy_episode(env_id: str, Q: Dict, render: bool = False, seed: int | None = None) -> float:
-    env = gym.make(env_id)
+    env = gym.make(env_id, number_of_bots=3)
     if seed is not None:
         obs, info = env.reset(seed=seed)
     else:
