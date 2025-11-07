@@ -36,7 +36,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # The following is an idea for refactoring.
         # Have only on complex variable with the return value of the step function.
         self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
-        self._roll_counter: int = 0  # This is not used.
         self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players) - 1 instead.
         self._you: Player = Player(bot=False, name="You")  # Put this in the players list and remove it from here.
         self._players: list[Player] = []
@@ -141,7 +140,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._dice = Dice()
         self._checker = Checker(self._dice, self._players, self._table_tiles)
         self._failed_attempt = False
-        self._roll_counter = 0
         self._dice.roll()
 
     def _remove_tile_from_player(self) -> int:
