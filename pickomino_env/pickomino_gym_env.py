@@ -39,12 +39,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players) - 1 instead.
         self._you: Player = Player(bot=False, name="You")  # Put this in the players list and remove it from here.
         self._players: list[Player] = []
-        self._create_players()  # Put this function call after the variable initializations.
-        self._remaining_dice: int = NUM_DICE  # Get rid of this. We do not need it.
         self._terminated: bool = False
         self._truncated: bool = False
         self._failed_attempt: bool = False  # Candidate for class Checker.
-        self._explanation: str = "Constructor"  # Why the terminated, truncated or failed attempt is set.
+        self._explanation: str = "Constructor"  # The reason, why the terminated, truncated or failed attempt is set.
         self._current_player_index: int = 0  # 0 for the player, 1 or more for bots.
         self._last_returned_tile: int = 0  # For info.
         self._last_picked_tile: int = 0  # For info.
@@ -54,13 +52,14 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             TableTiles()
         )  # Consider a complex class Table consisting of table tiles and players tiles.
         self._checker: Checker = Checker(self._dice, self._players, self._table_tiles)
+        self._create_players()  # Do not move this to after the observation_space as Stable Baselines 3 then fails.
         # Define what the AI agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Max 8 dice.
         self.observation_space = gym.spaces.Dict(
             {
-                "dice_collected": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
-                "dice_rolled": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
+                "dice_collected": gym.spaces.Box(low=0, high=NUM_DICE, shape=(6,), dtype=np.int64),
+                "dice_rolled": gym.spaces.Box(low=0, high=NUM_DICE, shape=(6,), dtype=np.int64),
                 # Flatten the tiles into a 16-length binary vector. Needed for SB3 compatibility.
                 # Nested dicts are not supported by SB3.
                 "tiles_table": gym.spaces.Box(low=0, high=1, shape=(16,), dtype=np.int8),
@@ -120,7 +119,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             dict: Additional information. Useful for debugging but not necessary for learning.
         """
         return_value = {
-            "remaining_dice": self._remaining_dice,
             "observation_space": self.observation_space,
             "action_space": self.action_space,
             "dice": self._dice,
