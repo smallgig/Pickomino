@@ -108,8 +108,6 @@ def moving_average(values: List[float], window: int = 100) -> List[float]:
 
 
 # ------------------------ Q-Learning ------------------------
-
-
 def train_qlearning(
     env_id: str = "Pickomino-v0",
     episodes: int = 1000,
