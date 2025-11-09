@@ -39,7 +39,13 @@ class BotTest:
                 break
 
             print("Step:", step)
-            print("Your showing tile: ", game_observation["tile_players"], "(your reward = ", game_reward, ")")
+            print(
+                "Your showing tile: ",
+                game_observation["tile_players"],
+                "(your reward = ",
+                game_reward,
+                ")",
+            )
             print_roll(
                 game_observation["dice_collected"],
                 game_observation["dice_rolled"],
@@ -55,7 +61,13 @@ class BotTest:
             selection: int = int(input("Which dice do you want to collect? (1..5 or worm =6): ")) - 1
             stop: int = int(input("Keep rolling? (0 = ROLL,  1 = STOP): "))
             print()
-            game_observation, game_reward, game_terminated, game_truncated, game_info = env.step((selection, stop))
+            (
+                game_observation,
+                game_reward,
+                game_terminated,
+                game_truncated,
+                game_info,
+            ) = env.step((selection, stop))
 
             print(f"Terminated: {game_terminated} Truncated:{game_truncated}")
             print(f'Explanation: {game_info["explanation"]}')
@@ -85,7 +97,12 @@ class BotTest:
                 (RED + f"{game_reward}" + NO_RED) if game_reward < 0 else game_reward,
                 ")",
             )
-            print_roll(game_obs["dice_collected"], game_obs["dice_rolled"], game_total, game_info["dice"])
+            print_roll(
+                game_obs["dice_collected"],
+                game_obs["dice_rolled"],
+                game_total,
+                game_info["dice"],
+            )
             print("Tiles on table:", end=" ")
             for ind, game_tile in enumerate(game_obs["tiles_table"]):
                 if game_tile:
@@ -112,7 +129,7 @@ class BotTest:
             total_reward += game_reward
             game_total = cast(Dice, game_info["dice"]).score()[0]
             print("Terminated:", game_terminated, "          Truncated:", game_truncated)
-            print("Player Stack:", game_info["player_stack"])
+            print("Player Stacks:", game_info["player_stack"])
             print("Total reward:", total_reward)
             print()
             if game_terminated:
@@ -125,8 +142,8 @@ class BotTest:
         print("Step:", step)
         print("Explanation:", game_info["explanation"])
         print("Player Stack:", game_info["player_stack"])
-        print("Total reward (Score):")
-        print(RED + f"{total_reward}" + NO_RED)
+        print("Total reward:", RED + f"{total_reward}" + NO_RED)
+        print("Total score:", game_info["player_score"])
         print(
             "Your showing tile: ",
             game_obs["tile_players"],
@@ -134,6 +151,7 @@ class BotTest:
             (RED + f"{game_reward}" + NO_RED) if game_reward < 0 else game_reward,
             ")",
         )
+        print("Bot scores:", game_info["bot_scores"])
         print(f"Terminated: {game_terminated}")
         print(f"Truncated: {game_truncated}")
 

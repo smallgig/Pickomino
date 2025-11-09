@@ -75,23 +75,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         for i in range(self._number_of_bots):
             self._players.append(Player(bot=True, name=names[i]))
 
-    def _get_obs_dice(
-        self,
-    ) -> tuple[list[int], list[int]]:
-        """Convert internal state to observation format.
-
-        Returns: Dices collected and dices rolled.
-        """
-        return self._dice.get_collected(), self._dice.get_rolled()
-
-    def _get_obs_tiles(self) -> tuple[int, dict[int, bool]]:
-        """Convert internal state to observation format.
-
-        Returns:
-            dict: Tiles distribution
-        """
-        return self._players[0].show(), self._table_tiles.get_table()
-
     def _tiles_vector(self) -> ndarray[Any, dtype[Any]]:
         """Return tiles table as a flat binary vector of length 16 for indexes 21..36."""
         return np.array(
@@ -121,6 +104,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             "smallest_tile": self._table_tiles.smallest(),
             "explanation": self._explanation,
             "player_stack": self._players[0].show_all(),
+            "player_score": self._players[0].end_score(),
+            "bot_scores": [player.end_score() for player in self._players[1:]],
         }
         return return_value
 
@@ -307,7 +292,13 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._explanation = GREEN + "No Tile on the table, GAME OVER!" + NO_GREEN
 
         if self._terminated or self._truncated:
-            return self._current_obs(), 0, self._terminated, self._truncated, self._get_info()
+            return (
+                self._current_obs(),
+                0,
+                self._terminated,
+                self._truncated,
+                self._get_info(),
+            )
 
         # Collect and roll the dice
         self._step_dice()
@@ -320,7 +311,13 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._play_bot()
             self._current_player_index = 0
 
-        return self._current_obs(), reward, self._terminated, self._truncated, self._get_info()
+        return (
+            self._current_obs(),
+            reward,
+            self._terminated,
+            self._truncated,
+            self._get_info(),
+        )
 
 
 if __name__ == "__main__":

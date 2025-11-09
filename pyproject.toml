@@ -24,3 +24,8 @@ max-line-length = 119
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+
+[tool.coverage.run]
+omit = [
+    "*/pickomino_env/main.py"
+]
