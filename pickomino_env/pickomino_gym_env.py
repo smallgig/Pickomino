@@ -324,12 +324,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
 
 if __name__ == "__main__":
+    print("This is the pickomino environment file. It is not intended to be used directly. To play run main.py.")
     env = PickominoEnv(1)
     game_observation, game_info = env.reset()
     print(game_observation, game_info)
-    print()
-    print("==========================")
-    print()
-    print("TO PLAY: run main.py")
-    print()
-    print("===========================")

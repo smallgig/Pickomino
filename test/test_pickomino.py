@@ -125,5 +125,19 @@ def test_ppo_plotting(ppo_setup):
     assert len(x) > 0, "No training data found in monitor logs."
 
 
+def test_action_out_of_range():
+    """Test action out of range."""
+    env.reset()
+    obs, reward, term, trunc, info = env.step(env.action_space.sample())  # Should be good.
+    assert not term
+    obs, reward, term, trunc, info = env.step((7, 0))  # Face out of range
+    assert term
+    env.reset()
+    obs, reward, term, trunc, info = env.step(env.action_space.sample())  # Should be good.
+    assert not term
+    obs, reward, term, trunc, info = env.step((2, 4))  # Roll out of range
+    assert term
+
+
 if __name__ == "__main__":
     print("This file should be called with pytest.")
