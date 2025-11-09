@@ -286,11 +286,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # Check legal move before doing a step.
         self._terminated, self._truncated, self._explanation = self._checker.action_is_allowed(action)
 
-        # Game Over if no Tile is on the table anymore.
-        if not self._table_tiles.highest():
-            self._terminated = True
-            self._explanation = GREEN + "No Tile on the table, GAME OVER!" + NO_GREEN
-
+        # Illegal move
         if self._terminated or self._truncated:
             return (
                 self._current_obs(),
@@ -310,6 +306,11 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._current_player_index = 1
             self._play_bot()
             self._current_player_index = 0
+
+        # Game Over if no Tile is on the table anymore.
+        if not self._table_tiles.highest():
+            self._terminated = True
+            self._explanation = GREEN + "No Tile on the table, GAME OVER!" + NO_GREEN
 
         return (
             self._current_obs(),
