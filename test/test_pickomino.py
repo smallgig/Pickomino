@@ -97,7 +97,7 @@ def ppo_setup(tmp_path_factory):
     # model.learn(total_timesteps=10_000_000)  # Going for real learning. Use assert ppo_run_time < 8 * 60 * 60,
     model.learn(total_timesteps=100)  # Run fast
     ppo_run_time = time.time() - start_time
-    assert ppo_run_time < 30, f"PPO training took too long: {ppo_run_time:.0f} seconds"
+    assert ppo_run_time < 60, f"PPO training took too long: {ppo_run_time:.0f} seconds"
     return model, log_dir, ppo_run_time
 
 

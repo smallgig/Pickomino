@@ -1,8 +1,8 @@
 """Class Checker."""
 
 from pickomino_env.src.constants import (  # Coloured printouts, game and action constants.
-    ACTION_INDEX_ROLL,
     ACTION_INDEX_DICE,
+    ACTION_INDEX_ROLL,
     ACTION_ROLL,
     ACTION_STOP,
     GREEN,
@@ -33,9 +33,7 @@ class Checker:
         """Check if a die is available to take."""
         can_take = any(
             rolled > 0 and collected == 0
-            for rolled, collected in zip(
-                self._dice.get_rolled(), self._dice.get_collected()
-            )
+            for rolled, collected in zip(self._dice.get_rolled(), self._dice.get_collected())
         )
 
         self._failed_attempt = not can_take
@@ -48,9 +46,7 @@ class Checker:
 
         return self._failed_attempt, self._explanation
 
-    def set_failed_no_tile_to_take(
-        self, current_player_index: int, action: tuple[int, int]
-    ) -> tuple[bool, str]:
+    def set_failed_no_tile_to_take(self, current_player_index: int, action: tuple[int, int]) -> tuple[bool, str]:
         """Failed: Not able to take a tile with dice sum reached."""
         # Environment takes the highest tile on the table or player stack.
         # Check if any tile can be picked from another player.
@@ -69,27 +65,16 @@ class Checker:
 
             if action[ACTION_INDEX_ROLL] == ACTION_STOP:
                 self._failed_attempt = True
-                self._explanation = (
-                    RED + "Failed: 21 not reached and action stop" + NO_RED
-                )
+                self._explanation = RED + "Failed: 21 not reached and action stop" + NO_RED
 
             if sum(self._dice.get_collected()) == NUM_DICE:
                 self._failed_attempt = True
-                self._explanation = (
-                    RED + "Failed: 21 not reached and no dice left" + NO_RED
-                )
+                self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
 
         # Check if no tile available on the table or from player to take.
-        elif (
-            not self._table_tiles.find_next_lower_tile(self._dice.score()[0])
-            and steal_index is None
-        ):
+        elif not self._table_tiles.find_next_lower_tile(self._dice.score()[0]) and steal_index is None:
             self._failed_attempt = True
-            self._explanation = (
-                RED
-                + "Failed: No tile on table or from another player can be taken"
-                + NO_RED
-            )
+            self._explanation = RED + "Failed: No tile on table or from another player can be taken" + NO_RED
 
         return self._failed_attempt, self._explanation
 
@@ -107,9 +92,7 @@ class Checker:
         self._truncated = False
 
         # Check action values are within range
-        if action[ACTION_INDEX_DICE] not in range(0, 6) or action[
-            ACTION_INDEX_ROLL
-        ] not in range(0, 2):
+        if action[ACTION_INDEX_DICE] not in range(0, 6) or action[ACTION_INDEX_ROLL] not in range(0, 2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
             return self._terminated, self._truncated, self._explanation
@@ -117,34 +100,22 @@ class Checker:
         # Selected Face value was not rolled.
         if self._dice.get_rolled()[action[ACTION_INDEX_DICE]] == 0:
             self._truncated = True
-            self._explanation = (
-                RED + "Truncated: Selected Face value not rolled" + NO_RED
-            )
+            self._explanation = RED + "Truncated: Selected Face value not rolled" + NO_RED
             return self._terminated, self._truncated, self._explanation
 
         # Dice already collected cannot be taken again.
         if self._dice.get_collected()[action[ACTION_INDEX_DICE]] != 0:
             self._truncated = True
-            self._explanation = (
-                RED + "Truncated: Dice already collected cannot be taken again" + NO_RED
-            )
+            self._explanation = RED + "Truncated: Dice already collected cannot be taken again" + NO_RED
             return self._terminated, self._truncated, self._explanation
 
-        remaining_dice = (
-            self._dice.get_rolled().copy()
-        )  # Copy in order not to overwrite the real rolled variable.
-        remaining_dice[action[ACTION_INDEX_DICE]] = (
-            0  # Overwrite with zero for the face just collected.
-        )
+        remaining_dice = self._dice.get_rolled().copy()  # Copy in order not to overwrite the real rolled variable.
+        remaining_dice[action[ACTION_INDEX_DICE]] = 0  # Overwrite with zero for the face just collected.
 
         # Try to roll when no dice left to roll.
         if action[ACTION_INDEX_ROLL] == ACTION_ROLL and not remaining_dice:
             self._truncated = True
-            self._explanation = (
-                RED
-                + "Truncated: No Dice left to roll and roll action selected."
-                + NO_RED
-            )
+            self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
             return self._terminated, self._truncated, self._explanation
 
         return self._terminated, self._truncated, self._explanation

@@ -1,6 +1,5 @@
 """Pickomino game with gymnasium API."""
 
-# Testing push to main without Pull Request violates Rule Set.
 from typing import Any
 
 import gymnasium as gym
@@ -36,32 +35,27 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # The following is an idea for refactoring.
         # Have only on complex variable with the return value of the step function.
         self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
-        self._roll_counter: int = 0  # This is not used.
         self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players) - 1 instead.
         self._you: Player = Player(bot=False, name="You")  # Put this in the players list and remove it from here.
         self._players: list[Player] = []
-        self._create_players()  # Put this function call after the variable initializations.
-        self._remaining_dice: int = NUM_DICE  # Get rid of this. We do not need it.
         self._terminated: bool = False
         self._truncated: bool = False
         self._failed_attempt: bool = False  # Candidate for class Checker.
-        self._explanation: str = "Constructor"  # Why the terminated, truncated or failed attempt is set.
+        self._explanation: str = "Constructor"  # The reason, why the terminated, truncated or failed attempt is set.
         self._current_player_index: int = 0  # 0 for the player, 1 or more for bots.
-        self._last_returned_tile: int = 0  # For info.
-        self._last_picked_tile: int = 0  # For info.
-        self._last_turned_tile: int = 0  # For infor.
         self._dice: Dice = Dice()
         self._table_tiles: TableTiles = (
             TableTiles()
         )  # Consider a complex class Table consisting of table tiles and players tiles.
         self._checker: Checker = Checker(self._dice, self._players, self._table_tiles)
+        self._create_players()  # Do not move this to after the observation_space as Stable Baselines 3 then fails.
         # Define what the AI agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Max 8 dice.
         self.observation_space = gym.spaces.Dict(
             {
-                "dice_collected": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
-                "dice_rolled": gym.spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
+                "dice_collected": gym.spaces.Box(low=0, high=NUM_DICE, shape=(6,), dtype=np.int64),
+                "dice_rolled": gym.spaces.Box(low=0, high=NUM_DICE, shape=(6,), dtype=np.int64),
                 # Flatten the tiles into a 16-length binary vector. Needed for SB3 compatibility.
                 # Nested dicts are not supported by SB3.
                 "tiles_table": gym.spaces.Box(low=0, high=1, shape=(16,), dtype=np.int8),
@@ -121,18 +115,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             dict: Additional information. Useful for debugging but not necessary for learning.
         """
         return_value = {
-            "remaining_dice": self._remaining_dice,
-            "observation_space": self.observation_space,
-            "action_space": self.action_space,
             "dice": self._dice,
             "terminated": self._terminated,
             "tiles_table_vec": self._tiles_vector(),
             "smallest_tile": self._table_tiles.smallest(),
             "explanation": self._explanation,
             "player_stack": self._players[0].show_all(),
-            "last_returned_tile": self._last_returned_tile,
-            "last_picked_tile": self._last_picked_tile,
-            "last_turned_tile": self._last_turned_tile,
         }
         return return_value
 
@@ -141,7 +129,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._dice = Dice()
         self._checker = Checker(self._dice, self._players, self._table_tiles)
         self._failed_attempt = False
-        self._roll_counter = 0
         self._dice.roll()
 
     def _remove_tile_from_player(self) -> int:
@@ -150,7 +137,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             tile_to_return: int = self._players[
                 self._current_player_index
             ].remove_tile()  # Remove the tile from the player.
-            self._last_returned_tile = tile_to_return
             self._table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
             worm_index = tile_to_return - SMALLEST_TILE
             return_value = -self._table_tiles.worm_values[worm_index]  # Reward is MINUS the value of the worm value.
@@ -160,7 +146,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             # Turn the highest tile if there is one.
             if highest:
                 self._table_tiles.set_tile(highest, False)
-                self._last_turned_tile = highest
         return return_value
 
     def reset(
@@ -186,9 +171,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._failed_attempt = False
         self._terminated = False
         self._truncated = False
-        self._last_returned_tile = 0  # For info.
-        self._last_picked_tile = 0  # For info.
-        self._last_turned_tile = 0  # For info.
         self._dice.roll()
         return self._current_obs(), self._get_info()
 
@@ -218,7 +200,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
     def _steal_from_bot(self, steal_index: int) -> int:
         tile_to_return: int = self._players[steal_index].remove_tile()  # Remove the tile from the player.
         self._players[self._current_player_index].add_tile(tile_to_return)
-        self._last_returned_tile = tile_to_return
         worm_index = tile_to_return - SMALLEST_TILE
         return self._table_tiles.worm_values[worm_index]
 
@@ -252,7 +233,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         # Only pick a tile if it is on the table.
         elif self._table_tiles.get_table()[dice_sum]:
-            self._last_picked_tile = dice_sum
             self._players[self._current_player_index].add_tile(dice_sum)  # Add the tile to the player or bot.
             self._table_tiles.set_tile(dice_sum, False)  # Mark the tile as no longer on the table.
             worm_index = dice_sum - SMALLEST_TILE
@@ -263,7 +243,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             # Find the highest tile smaller than the dice sum.
             highest: int = self._table_tiles.find_next_lower_tile(dice_sum)
             if highest:  # Found the highest tile to pick from the table.
-                self._last_picked_tile = highest
                 self._players[self._current_player_index].add_tile(highest)  # Add the tile to the player.
                 self._table_tiles.set_tile(highest, False)  # Mark the tile as no longer on the table.
                 worm_index = highest - SMALLEST_TILE

@@ -60,7 +60,6 @@ class BotTest:
             print(f"Terminated: {game_terminated} Truncated:{game_truncated}")
             print(f'Explanation: {game_info["explanation"]}')
             print("Rolled: ", game_observation["dice_rolled"])
-            print("Last returned tile:", game_info["last_returned_tile"])
 
     def play_automated(self, env: PickominoEnv) -> None:
         """Play automated game."""
@@ -114,7 +113,6 @@ class BotTest:
             game_total = cast(Dice, game_info["dice"]).score()[0]
             print("Terminated:", game_terminated, "          Truncated:", game_truncated)
             print("Player Stack:", game_info["player_stack"])
-            print("Last returned tile:", game_info["last_returned_tile"])
             print("Total reward:", total_reward)
             print()
             if game_terminated:
