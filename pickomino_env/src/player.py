@@ -33,7 +33,7 @@ class Player:
         """Remove the top tile from the player stack."""
         return self.tile_stack.pop()
 
-    def score(self) -> int:
+    def end_score(self) -> int:
         """Return player score at the end of the game."""
         score: int = 0
         table = TableTiles()

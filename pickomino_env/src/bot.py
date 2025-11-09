@@ -4,6 +4,7 @@ import numpy as np
 from numpy.ma.core import argmax
 
 
+# pylint: disable=too-few-public-methods
 class Bot:
     """Bot class."""
 
@@ -12,18 +13,6 @@ class Bot:
     def __init__(self) -> None:
         self.roll_counter: int = 0
         self.current_policy: str = self.HEURISTIC
-
-    def __str__(self) -> str:
-        """Return a string representation."""
-        return f"Bot policy: {self.current_policy}"
-
-    def set_policy(self, policy: str) -> None:
-        """Set the bot policy."""
-        self.current_policy = policy
-
-    def get_policy(self) -> str:
-        """Get the bot policy."""
-        return self.current_policy
 
     def policy(self, rolled: list[int], collected: list[int], smallest: int) -> tuple[int, int]:
         """Policy function."""
@@ -55,7 +44,8 @@ class Bot:
         action_dice = int(argmax(contribution))
 
         # 1. On or after the third roll, take worms if you can.
-        if self.roll_counter >= 3 and not collected[5] and rolled[5]:  # pylint: disable=magic-value-comparison
+        # pylint: disable=magic-value-comparison
+        if self.roll_counter >= 3 and not collected[5] and rolled[5]:
             action_dice = 5
 
         # 3. Quit as soon as you can take a tile.

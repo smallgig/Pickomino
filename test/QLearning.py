@@ -87,7 +87,9 @@ def legal_actions(obs: Dict) -> List[Tuple[int, int]]:
     return acts
 
 
-def epsilon_greedy(Qs: Dict[Tuple, float], actions: List[Tuple[int, int]], eps: float) -> Tuple[int, int]:
+def epsilon_greedy(
+    Qs: Dict[Tuple, float], actions: List[Tuple[int, int]], eps: float
+) -> Tuple[int, int]:
     if not actions:
         return (0, 1)
     if random.random() < eps:
@@ -205,7 +207,9 @@ def train_qlearning(
     # Lernkurven-Plot
     ma = moving_average(episode_returns, ma_window)
     plt.figure()
-    plt.plot(range(1, len(episode_returns) + 1), episode_returns, label="Return/Episode")
+    plt.plot(
+        range(1, len(episode_returns) + 1), episode_returns, label="Return/Episode"
+    )
     plt.plot(range(1, len(ma) + 1), ma, label=f"Moving Avg (window={ma_window})")
     plt.xlabel("Episode")
     plt.ylabel("Return")
