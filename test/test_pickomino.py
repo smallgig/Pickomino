@@ -15,7 +15,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 # For later
 # from stable_baselines3 import SAC # Soft Actor-Critic (SAC) is suitable for continuous action spaces.
 
-import pickomino_env  # Important: activates the registration.
+import pickomino_env  # noqa:F401 # side-effect import, required for environment registration.
 from pickomino_env.src.bot import Bot
 
 # Create environment to test.
