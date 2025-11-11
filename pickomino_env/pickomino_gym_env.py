@@ -30,7 +30,7 @@ from pickomino_env.src.table_tiles import TableTiles
 
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
-    """The environment class."""
+    """The environment class with Gymnasium API."""
 
     def __init__(self, number_of_bots: int) -> None:
         """Construct the environment."""
