@@ -1,5 +1,6 @@
 """Class Checker."""
 
+__all__ = ["Checker"]
 from pickomino_env.src.constants import (  # Coloured printouts, game and action constants.
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
@@ -120,12 +121,3 @@ class Checker:
 
         return self._terminated, self._truncated, self._explanation
         # Get to here:Action allowed try to take a tile.
-
-
-if __name__ == "__main__":
-    print("This is th checker file. It is not meant to be run directly.")
-    test_dice = Dice()
-    test_players: list[Player] = []
-    test_tables_tiles = TableTiles()
-    checker = Checker(test_dice, test_players, test_tables_tiles)
-    checker.set_failed_already_collected()

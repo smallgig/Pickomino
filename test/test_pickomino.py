@@ -15,10 +15,10 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 # For later
 # from stable_baselines3 import SAC # Soft Actor-Critic (SAC) is suitable for continuous action spaces.
 
-import pickomino_env  # Important: activates the registration.
+import pickomino_env  # noqa:F401 # side-effect import, required for environment registration.
 from pickomino_env.src.bot import Bot
 
-# Create environment to test.
+# Create an environment to test.
 env = gym.make("Pickomino-v0", number_of_bots=2)  # base environment
 
 
@@ -41,7 +41,7 @@ def test_step():
     assert reward == 0
     assert not terminated
     assert not truncated
-    assert info["player_stack"] == [42]  # 42 is initial invalid value for testing.
+    assert info["player_stack"] == [42]  # 42 is an initial invalid value for testing.
 
 
 def test_multiple_actions():
@@ -92,12 +92,12 @@ def ppo_setup(tmp_path_factory):
     model = PPO("MultiInputPolicy", par_env)  # Add ', verbose=1' as necessary
 
     start_time = time.time()
-    # 1 step = on action! (not episode!).
+    # 1 step = one action! (not an episode!).
     # model.learn(total_timesteps=500_000)  # Noticeable learning in 15 minutes on my machine.
-    # model.learn(total_timesteps=10_000_000)  # Going for real learning. Use assert ppo_run_time < 8 * 60 * 60,
-    model.learn(total_timesteps=100)  # Run fast
+    # model.learn(total_timesteps=10_000_000)  # Going for real learning. Use assert ppo_run_time < 8 * 60 * 60.
+    model.learn(total_timesteps=10000)  # Run fast
     ppo_run_time = time.time() - start_time
-    assert ppo_run_time < 60, f"PPO training took too long: {ppo_run_time:.0f} seconds"
+    assert ppo_run_time < 12000, f"PPO training took too long: {ppo_run_time:.0f} seconds"
     return model, log_dir, ppo_run_time
 
 

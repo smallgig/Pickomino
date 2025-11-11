@@ -1,5 +1,7 @@
 """Bot class."""
 
+__all__ = ["Bot"]
+
 import numpy as np
 from numpy.ma.core import argmax
 
@@ -53,9 +55,3 @@ class Bot:
             action_roll = 1
 
         return action_dice, action_roll
-
-
-if __name__ == "__main__":
-    print("This is the bot file.")
-    bot = Bot()  # Using the Bot class to avoid pylint messages.
-    print("bot", bot)

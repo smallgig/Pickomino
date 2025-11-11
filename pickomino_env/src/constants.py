@@ -1,5 +1,18 @@
 """Project wide constants."""
 
+__all__ = [
+    "RED",
+    "NO_RED",
+    "GREEN",
+    "NO_GREEN",
+    "SMALLEST_TILE",
+    "LARGEST_TILE",
+    "NUM_DICE",
+    "ACTION_ROLL",
+    "ACTION_STOP",
+    "ACTION_INDEX_ROLL",
+    "ACTION_INDEX_DICE",
+]
 from typing import Final
 
 # Coloured printouts.
@@ -18,11 +31,3 @@ ACTION_INDEX_DICE: Final[int] = 0
 ACTION_INDEX_ROLL: Final[int] = 1
 ACTION_ROLL: Final[int] = 0
 ACTION_STOP: Final[int] = 1
-
-
-if __name__ == "__main__":
-    print("Named constants:")
-    print("RED:", RED, "NO_RED:", NO_RED, "GREEN:", GREEN, "NO_GREEN:", NO_GREEN)
-    print("NUM_DICE:", NUM_DICE, "SMALLEST_TILE:", SMALLEST_TILE, "LARGEST_TILE:", LARGEST_TILE)
-    print("ACTION_INDEX_DICE:", ACTION_INDEX_DICE, "ACTION_INDEX_ROLL:", ACTION_INDEX_ROLL)
-    print("ACTION_ROLL:", ACTION_ROLL, "ACTION_STOP:", ACTION_STOP)

@@ -1,5 +1,7 @@
 """Class player."""
 
+__all__ = ["Player"]
+
 from pickomino_env.src.constants import SMALLEST_TILE
 from pickomino_env.src.table_tiles import TableTiles
 
@@ -40,9 +42,3 @@ class Player:
         for tile in self.tile_stack:
             score += table.worm_values[tile - SMALLEST_TILE]  # List of worm values count from zero.
         return score
-
-
-if __name__ == "__main__":
-    print("This is the player file.")
-    player = Player(True, "Dummy")  # Using the Player class to avoid pylint messages.
-    print(player.show())

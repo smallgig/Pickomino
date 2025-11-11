@@ -1,5 +1,7 @@
 """Pickomino game with gymnasium API."""
 
+__all__ = ["PickominoEnv"]
+
 from typing import Any
 
 import gymnasium as gym
@@ -319,10 +321,3 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._truncated,
             self._get_info(),
         )
-
-
-if __name__ == "__main__":
-    print("This is the pickomino environment file. It is not intended to be used directly. To play run main.py.")
-    env = PickominoEnv(1)
-    game_observation, game_info = env.reset()
-    print(game_observation, game_info)
