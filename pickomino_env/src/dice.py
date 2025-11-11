@@ -1,5 +1,7 @@
 """Class dice."""
 
+__all__ = ["Dice"]
+
 import random as rand
 
 import numpy as np
@@ -70,9 +72,3 @@ class Dice:
         for line in zip(*faces):
             return_value += "   ".join(line) + "\n"
         return return_value
-
-
-if __name__ == "__main__":
-    print("This is the Dice file.")
-    dice = Dice()  # Using the Dice class to avoid pylint messages.
-    print(dice)

@@ -1,5 +1,7 @@
 """Class table tiles."""
 
+__all__ = ["TableTiles"]
+
 
 class TableTiles:
     """Define the tiles on the table."""
@@ -65,9 +67,3 @@ class TableTiles:
             if key < dice_sum and value:
                 lowest = key
         return lowest
-
-
-if __name__ == "__main__":
-    print("This is the table tiles file.")
-    table = TableTiles()  # Using the TableTiles class to avoid pylint messages.
-    print(table.highest())
