@@ -72,7 +72,7 @@ class Checker:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
 
-        # Check if no tile available on the table or from player to take.
+        # Check if no tile available on the table or from a player to take.
         elif not self._table_tiles.find_next_lower_tile(self._dice.score()[0]) and steal_index is None:
             self._failed_attempt = True
             self._explanation = RED + "Failed: No tile on table or from another player can be taken" + NO_RED
