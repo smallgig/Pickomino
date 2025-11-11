@@ -30,7 +30,7 @@ from pickomino_env.src.table_tiles import TableTiles
 
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
-    """The environment class."""
+    """The environment class with Gymnasium API."""
 
     def __init__(self, number_of_bots: int) -> None:
         """Construct the environment."""
@@ -89,8 +89,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             "dice_collected": np.array(self._dice.get_collected()),
             "dice_rolled": np.array(self._dice.get_rolled()),
             "tiles_table": self._tiles_vector(),
-            # pylint: disable=bad-builtin
-            "tile_players": np.array(list(map(lambda p: p.show(), self._players)), dtype=np.int8),
+            "tile_players": np.array([p.show() for p in self._players], dtype=np.int8),
         }
 
     def _get_info(self) -> dict[str, object]:

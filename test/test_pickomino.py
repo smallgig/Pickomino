@@ -95,9 +95,9 @@ def ppo_setup(tmp_path_factory):
     # 1 step = one action! (not an episode!).
     # model.learn(total_timesteps=500_000)  # Noticeable learning in 15 minutes on my machine.
     # model.learn(total_timesteps=10_000_000)  # Going for real learning. Use assert ppo_run_time < 8 * 60 * 60.
-    model.learn(total_timesteps=10000)  # Run fast
+    model.learn(total_timesteps=100)  # Run fast
     ppo_run_time = time.time() - start_time
-    assert ppo_run_time < 12000, f"PPO training took too long: {ppo_run_time:.0f} seconds"
+    assert ppo_run_time < 120, f"PPO training took too long: {ppo_run_time:.0f} seconds"
     return model, log_dir, ppo_run_time
 
 
