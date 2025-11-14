@@ -1,33 +1,28 @@
 
 ## Description
 
-This environment corresponds to the version of the cart-pole problem described by Barto, Sutton, and Anderson in
-["Neuronlike Adaptive Elements That Can Solve Difficult Learning Control Problem"](https://ieeexplore.ieee.org/document/6313077).
-A pole is attached by an un-actuated joint to a cart, which moves along a frictionless track.
-The pendulum is placed upright on the cart and the goal is to balance the pole by applying forces
- in the left and right direction on the cart.
+An environment conforming to the **Gymnasium** API for the dice game **Pickomino (Heckmeck am Bratwurmeck)**
+Goal: train a Reinforcement Learning agent for optimal play (which dice to collect, when to stop).
 
 ## Action Space
 
-The action is a `ndarray` with shape `(1,)` which can take values `{0, 1}` indicating the direction
- of the fixed force the cart is pushed with.
+The Action space is a tuple with two integers.
+Tuple(int, int)
+- 1-6: Dice which u want to take
+- 0-1: Roll or stop
 
-- 0: Push cart to the left
-- 1: Push cart to the right
-
-**Note**: The velocity that is reduced or increased by the applied force is not fixed and it depends on the angle
- the pole is pointing. The center of gravity of the pole varies the amount of energy needed to move the cart underneath it
+**Note**:
 
 ## Observation Space
 
-The observation is a `ndarray` with shape `(4,)` with the values corresponding to the following positions and velocities:
+The observation is a `dict` with shape `(4,)` with the values corresponding to the following dice, table and player:
 
-| Num | Observation           | Min                 | Max               |
-|-----|-----------------------|---------------------|-------------------|
-| 0   | Cart Position         | -4.8                | 4.8               |
-| 1   | Cart Velocity         | -Inf                | Inf               |
-| 2   | Pole Angle            | ~ -0.418 rad (-24°) | ~ 0.418 rad (24°) |
-| 3   | Pole Angular Velocity | -Inf                | Inf               |
+| Num | Observation    | Min | Max | Shape             |
+|-----|----------------|----|-----|--------------------|
+| 0   | dice_collected | 0  | 8   | 6                  |
+| 1   | dice_rolled    | 0  | 8   | 6                  |
+| 2   | tiles_table    | 0  | 1   | 16                 |
+| 3   | tile_player    | 0  | 36  | number_of_bots + 1 |
 
 **Note:** While the ranges above denote the possible values for observation space of each element,
     it is not reflective of the allowed values of the state space in an unterminated episode. Particularly:
@@ -42,14 +37,19 @@ Since the goal is to keep the pole upright for as long as possible, by default, 
 If `sutton_barto_reward=True`, then a reward of `0` is awarded for every non-terminating step and `-1` for the terminating step. As a result, the reward threshold is 0 for v0 and v1.
 
 ## Starting State
-All observations are assigned a uniformly random value in `(-0.05, 0.05)`
+All observations are assigned a uniformly random value in
+* dice_collected = [0, 0, 0, 0, 0, 0]
+* dice_rolled = [3, 0, 1, 2, 0, 2] Random dice, sum = 8
+* tiles_table = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+* tile_player = [0, 0, 0] number_of_bots = 2
 
 ## Episode End
 The episode ends if any one of the following occurs:
 
-1. Termination: Pole Angle is greater than ±12°
-2. Termination: Cart Position is greater than ±2.4 (center of the cart reaches the edge of the display)
-3. Truncation: Episode length is greater than 500 (200 for v0)
+1. Termination: If the table is empty = Game Over
+2. Termination: Action out of allowed range
+3. Truncation: Attempt to break rules, game continues
+4. Failed Attempt: If tile is present put it back on table and get negative reward
 
 ## Arguments
 
