@@ -1,4 +1,4 @@
 pickomino_env.egg-info
 /build/
 /dist/
-test/
+/test/
