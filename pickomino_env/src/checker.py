@@ -1,6 +1,7 @@
 """Class Checker."""
 
 __all__ = ["Checker"]
+
 from pickomino_env.src.constants import (  # Coloured printouts, game and action constants.
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
@@ -48,7 +49,7 @@ class Checker:
         return self._failed_attempt, self._explanation
 
     def set_failed_no_tile_to_take(self, current_player_index: int, action: tuple[int, int]) -> tuple[bool, str]:
-        """Failed: Not able to take a tile with dice sum reached."""
+        """Failed: Not able to take a tile with the dice sum reached."""
         # Environment takes the highest tile on the table or player stack.
         # Check if any tile can be picked from another player.
         # Index from player to steal.
@@ -80,7 +81,7 @@ class Checker:
         return self._failed_attempt, self._explanation
 
     def set_failed_no_worms(self, action: tuple[int, int]) -> tuple[bool, str]:
-        """No worm collected and action stop."""
+        """No worm collected and action is to stop."""
         if not self._dice.score()[1] and action[ACTION_INDEX_ROLL] == ACTION_STOP:
             self._failed_attempt = True
             self._explanation = RED + "Failed: No worm collected" + NO_RED
