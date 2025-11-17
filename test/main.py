@@ -4,14 +4,16 @@ from typing import cast
 
 import numpy as np
 
-from pickomino_env.pickomino_gym_env import PickominoEnv
-from pickomino_env.src.bot import Bot
-from pickomino_env.src.constants import (  # Coloured printouts, game and action constants.
+from pickomino_env.pickomino_gym_env import PickominoEnv  # type: ignore[import-not-found]
+from pickomino_env.src.bot import Bot  # type: ignore[import-not-found]
+
+# Coloured printouts, game and action constants.
+from pickomino_env.src.constants import (  # type: ignore[import-not-found]
     NO_RED,
     RED,
     SMALLEST_TILE,
 )
-from pickomino_env.src.dice import Dice
+from pickomino_env.src.dice import Dice  # type: ignore[import-not-found]
 
 
 class BotTest:
@@ -172,7 +174,7 @@ def print_roll(collected: list[int], rolled: list[int], total: object, dice: obj
 
 
 if __name__ == "__main__":
-    # Keep offering to play until user does not want to play again.
+    # Keep offering to play until the user does not want to play again.
     while True:  # pylint: disable=while-used
         game_bot = BotTest()
         mode_auto: bool = bool(int(input("For automatic play enter '1', for manual enter '0': ")))
