@@ -1,153 +1,69 @@
-# Pickomino
-
-Implements the game [Pickomino](https://www.maartenpoirot.com/pickomino/play_pickomino_en) as an Environment with
-a standard API for Reinforcement Learning.
-
-# Pickomino Gymnasium Environment 🐛🎲
+## Description
 
 An environment conforming to the **Gymnasium** API for the dice game **Pickomino (Heckmeck am Bratwurmeck)**
-Goal: train a Reinforcement Learning agent for optimal play (which dice to collect, when to stop).
+Goal: train a Reinforcement Learning agent for optimal play. That is, decide which face of the dice to collect,
+when to roll and when to stop.
 
-## Content
+## Action Space
 
-* `pickomino_env/pickomino_gym_env.py` – your `PickominoEnv` class
-* `pickomino_env/__init__.py` – **automatic registration** of the environment as `Pickomino-v0`
-* `pyproject.toml` – Package-Metadata & dependencies
+The Action space is a tuple with two integers.
+Tuple(int, int)
 
----
+- 1-6: Face of the dice, which you want to take.
+- 0-1: Roll or stop.
 
-## Installation (developer mode)
+## Observation Space
 
-```bash
-# 1) Optional: virtual environment
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# Linux/Mac: source .venv/bin/activate
+The observation is a `dict` with shape `(4,)` with the values corresponding to the following: dice, table and player.
 
-# 2) Dependencies & Package installation.
-pip install -e .
-```
+| Observation    | Min | Max | Shape               |
+|----------------|-----|-----|---------------------|
+| dice_collected | 0   | 8   | (6,)                |
+| dice_rolled    | 0   | 8   | (6,)                |
+| tiles_table    | 0   | 1   | 16                  |
+| tile_player    | 0   | 36  | number_of_bots + 1  |
 
-> `-e` (editable) link to your work space - change in the code take effect immediately.
+**Note:** There are eight dice to roll and collect. A die has six sides with the number of eyes one through
+five, but a worm instead of a six.
+The values correspond to the number of eyes, with the worm also having the value five (and not six!).
+The 16 tiles are numbered 21 to 36 and have worm values from one to four in spread in four groups.
+The game is for 2 to 7 players. Here your Reinforcement Learning Agent is the first player. The
+other players are computer bots.
+The bots play, according to a heuristic. When you create the environment,
+you have to define the number of bots.
 
----
+For a more detailed description of the rules, see the file pickomino-rulebook.pdf.
+You can play the game online here: https://www.maartenpoirot.com/pickomino/.
+The heuristic used by the bots is described here: https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/.
 
-## Project Structure
+## Rewards
 
-```
-pickomino-env/
-├─ pyproject.toml
-├─ README.md
-└─ pickomino_env/
-   ├─ __init__.py                 # registers "Pickomino-v0" when importet
-   └─ pickomino_gym_env.py        # class PickominoEnv(gym.Env)
-```
+The goal is to collect tiles in a stack. The winner is the player which at the end of the game has the most worms
+on her tiles. For the Reinforcement Learning Agent a reward equal to the value
+(worms) of a tile is given when the tile is picked. In case of a failed attempt
+(see rulebook), a corresponding negative reward is given. When a bot steals your
+tile, no negative reward is given. Hence, the total reward at the end of the game
+can be greater than the score.
 
-Optional: `rl_pickomino_qlearning.py` in the root (Training script).
+## Starting State
 
----
+* dice_collected = [0, 0, 0, 0, 0, 0]
+* dice_rolled = [3, 0, 1, 2, 0, 2] Random dice, sum = 8
+* tiles_table = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+* tile_player = [0, 0, 0] number_of_bots = 2
 
-## Environment usage
+## Episode End
 
-Registration happens automatically when importing from `pickomino_env`.
+The episode ends if any one of the following occurs:
 
-```python
-import gymnasium as gym
-import pickomino_env  # Important: this causes the registration.
+1. Termination: If the table is empty = Game Over.
+2. Termination: Action out of allowed range.
+3. Truncation: Attempt to break rules, the game continues, and you have to give a new valid action.
+4. Failed Attempt: If a tile is present, put it back on the table and get a negative reward.
 
-env = gym.make("Pickomino-v0")  # kwargs overwrites the defaults.
-obs, info = env.reset(seed=42)
-print("Init ok. Example observation:", obs)
-```
+## Arguments
 
-### Observations & Actions (current API)
-
-* **Observation**: `obs = (dice_collected, dice_rolled)`
-  Both are vectors of length 6 (index 0 = die face 1, index 1 = die face 2, ..., index 5 = worm).
-* **Action**: `(face, roll_again)`
-
-    * `face ∈ {0..5}` (5=worm) → collect all rolled dice with this face
-    * `roll_again ∈ {0,1}` → 0 = **roll*, 1 = **stop**
-
----
-
-## Rules (summary)
-
-* 8 dice: `1..5` & **worm**. Worm count **5** towards the sum.
-* You **have to** collect at least  **one worm** and **sum ≥ 21**, in order to pick a tile.
-* When you stop rolling, you pick **the highest available tile ≤ sum**.
-* (or steal the top tile from another player's stack if you have the exact sum).
-* **A failed attempt** (no die can be collected or rules not followed): your top tile is returned to the table.
-* If it is not the highest still available on the table, then the highest tile is turned face down.
-
----
-
-## Typical issues and resolutions
-
-1. **`ValueError: list.remove(x): x not in list`**
-   Cause: `step_tiles()` tries to `tile_table.remove(sum)`.
-   **Fix:** take **max(\[t for t in tile\_table if t ≤ sum])** only if you **stop** rolling
-   (or **no die** left) *and* only with **at least one worm**.
-
-2. **`legal_move` setting `self.terminated` to true, but gives local flag back.**
-   Consistency: set and return **only local** variable **or** explicit `return self.terminated, self.truncated`.
-
-3. **Observation-Space does not fit**
-   For a clean gymnasium:
-
-   ```python
-   import numpy as np
-   from gymnasium import spaces
-   self.observation_space = spaces.Dict({
-       "dice_collected": spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
-       "dice_rolled":    spaces.Box(low=0, high=8, shape=(6,), dtype=np.int64),
-       "player":         spaces.Discrete(num_players),
-   })
-   ```
-
-4. **Stop action**
-   Model as discrete action in the Reinforcement Learning Agent (e.g. ID 12), map to `(face=0, roll_again=0)`.
-
----
-
-## Tests (sanity check)
-
-```python
-import gymnasium as gym, pickomino_env
-env = gym.make("Pickomino-v0")
-obs, info = env.reset(seed=0)
-for _ in range(5):
-    action = (1, 1)   # Collect ones, keep rolling.
-    obs, r, term, trunc, info = env.step(action)
-    print("r=", r, "term=", term, "trunc=", trunc)
-```
-
----
-
-## Development
-
-* Format: `ruff` / `black` recommended
-* Lint: `pip install ruff black`
-* Run: `ruff check . && black .`
-
----
-
-## License
-
-Select a License (e.g. MIT) and add a file `LICENSE`:
-
-```
-MIT License (c) 2025 Jarl, Robin
-```
-
----
-
-## Thanks
-
-* Idea: **Pickomino (Heckmeck am Bratwurmeck)**
-* Reinforcement Learning example: table Q-Learning (simple Baseline; for larger state spaces DQN is recommended.)
-* Karsten and Tanja for their support.
-
----
-
-**We wish success when training!**
+Pickomino does not have rendering yet. But the gymnasium API requires it.
+Hence, do not give a value for `render_mode` as a keyword for `gymnasium.make`.
+When you create the environment, you have to specify the number of bots you want to play
+against (1 to 6)
