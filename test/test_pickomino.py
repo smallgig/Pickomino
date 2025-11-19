@@ -17,7 +17,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 
 # side-effect import, required for environment registration.
 import pickomino_env  # type: ignore[import-not-found] # noqa:F401
-from pickomino_env.src.bot import Bot  # type: ignore[import-not-found]
+from pickomino_env.modules.bot import Bot  # type: ignore[import-not-found]
 
 # Create an environment to test.
 env = gym.make("Pickomino-v0", number_of_bots=2)  # base environment

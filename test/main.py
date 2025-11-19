@@ -5,15 +5,15 @@ from typing import cast
 import numpy as np
 
 from pickomino_env.pickomino_gym_env import PickominoEnv  # type: ignore[import-not-found]
-from pickomino_env.src.bot import Bot  # type: ignore[import-not-found]
+from pickomino_env.modules.bot import Bot  # type: ignore[import-not-found]
 
 # Coloured printouts, game and action constants.
-from pickomino_env.src.constants import (  # type: ignore[import-not-found]
+from pickomino_env.modules.constants import (  # type: ignore[import-not-found]
     NO_RED,
     RED,
     SMALLEST_TILE,
 )
-from pickomino_env.src.dice import Dice  # type: ignore[import-not-found]
+from pickomino_env.modules.dice import Dice  # type: ignore[import-not-found]
 
 
 class BotTest:
