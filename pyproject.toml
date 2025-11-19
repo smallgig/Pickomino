@@ -9,10 +9,10 @@ description = "Pickomino (Heckmeck) Gymnasium environment"
 readme = ""
 requires-python = ">=3.9"
 authors = [{ name = "Jarl and Robin" }]
-dependencies = ["gymnasium>=0.28", "numpy>=1.23"]
+dependencies = ["gymnasium>=1.2.2", "numpy>=2.3.5"]
 
 [tool.setuptools.packages.find]
-where = ["pickomino_env/src", "."]
+where = ["."]
 include = ["pickomino_env*"]
 
 [tool.pydocstyle]
@@ -26,6 +26,7 @@ max-line-length = 119
 pythonpath = ["."]
 
 [tool.coverage.run]
-omit = [
-    "*/pickomino_env/main.py"
-]
+omit = []
+
+[tool.setuptools.package-data]
+"pickomino_env" = ["py.typed"]
