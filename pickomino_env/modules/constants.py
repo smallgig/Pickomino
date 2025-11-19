@@ -13,6 +13,7 @@ __all__ = [
     "ACTION_INDEX_ROLL",
     "ACTION_INDEX_DICE",
 ]
+
 from typing import Final
 
 # Coloured printouts.
