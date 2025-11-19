@@ -2,8 +2,8 @@
 
 __all__ = ["Player"]
 
-from pickomino_env.src.constants import SMALLEST_TILE
-from pickomino_env.src.table_tiles import TableTiles
+from pickomino_env.modules.constants import SMALLEST_TILE
+from pickomino_env.modules.table_tiles import TableTiles
 
 
 class Player:

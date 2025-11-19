@@ -1,7 +1,7 @@
 """Class Checker."""
 
 __all__ = ["Checker"]
-from pickomino_env.src.constants import (  # Coloured printouts, game and action constants.
+from pickomino_env.modules.constants import (  # Coloured printouts, game and action constants.
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
     ACTION_ROLL,
@@ -13,9 +13,9 @@ from pickomino_env.src.constants import (  # Coloured printouts, game and action
     RED,
     SMALLEST_TILE,
 )
-from pickomino_env.src.dice import Dice
-from pickomino_env.src.player import Player
-from pickomino_env.src.table_tiles import TableTiles
+from pickomino_env.modules.dice import Dice
+from pickomino_env.modules.player import Player
+from pickomino_env.modules.table_tiles import TableTiles
 
 
 class Checker:

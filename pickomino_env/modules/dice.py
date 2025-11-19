@@ -6,7 +6,7 @@ import random as rand
 
 import numpy as np
 
-from pickomino_env.src.constants import LARGEST_TILE  # Game constant.
+from pickomino_env.modules.constants import LARGEST_TILE  # Game constant.
 
 
 class Dice:
