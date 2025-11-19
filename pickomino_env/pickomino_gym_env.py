@@ -37,8 +37,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # The following is an idea for refactoring.
         # Have only on complex variable with the return value of the step function.
         self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
-        self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players) - 1 instead.
-        self._you: Player = Player(bot=False, name="You")  # Put this in the players list and remove it from here.
+        self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players)-1 instead.
+        self._you: Player = Player(bot=False, name="You")  # Put this in the player list and remove it from here.
         self._players: list[Player] = []
         self._terminated: bool = False
         self._truncated: bool = False
@@ -50,8 +50,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             TableTiles()
         )  # Consider a complex class Table consisting of table tiles and players tiles.
         self._checker: Checker = Checker(self._dice, self._players, self._table_tiles)
-        self._create_players()  # Do not move this to after the observation_space as Stable Baselines 3 then fails.
-        # Define what the AI agent can observe.
+        self._create_players()  # Do not move this to after the observation space as Stable Baselines 3 then fails.
+        # Define what the AI Agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Max 8 dice.
         self.observation_space = gym.spaces.Dict(
@@ -126,7 +126,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
             worm_index = tile_to_return - SMALLEST_TILE
             return_value = -self._table_tiles.worm_values[worm_index]  # Reward is MINUS the value of the worm value.
-            # If the returned tile is not the highest, turn the highest tile face down, by setting it to False.
+            # If the returned tile is not the highest, turn the highest tile face down by setting it to False.
             # Search for the highest tile to turn.
             highest = self._table_tiles.highest()
             # Turn the highest tile if there is one.
@@ -146,7 +146,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         Returns:
             tuple: (observation, info) for the initial state
         """
-        # IMPORTANT:Must call this first. Seed the random number generator.
+        # IMPORTANT! Must call this first. Seed the random number generator.
         super().reset(seed=seed)
         self._dice = Dice()
         self._checker = Checker(self._dice, self._players, self._table_tiles)
@@ -233,7 +233,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 self._table_tiles.set_tile(highest, False)  # Mark the tile as no longer on the table.
                 worm_index = highest - SMALLEST_TILE
                 return_value = self._table_tiles.worm_values[worm_index]
-            # No smaller tiles are available -> have to return players showing tile if there is one.
+            # No smaller tiles are available -> have to return players top tile if there is one.
             else:
                 return_value = self._remove_tile_from_player()
                 self._explanation = RED + "No available tile on the table to take" + NO_RED
