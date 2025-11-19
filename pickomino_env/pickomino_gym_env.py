@@ -9,9 +9,9 @@ import numpy as np
 from gymnasium.core import RenderFrame
 from numpy import dtype, ndarray
 
-from pickomino_env.src.bot import Bot
-from pickomino_env.src.checker import Checker
-from pickomino_env.src.constants import (  # Coloured printouts, game and action constants.
+from pickomino_env.modules.bot import Bot
+from pickomino_env.modules.checker import Checker
+from pickomino_env.modules.constants import (  # Coloured printouts, game and action constants.
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
     ACTION_ROLL,
@@ -24,9 +24,9 @@ from pickomino_env.src.constants import (  # Coloured printouts, game and action
     RED,
     SMALLEST_TILE,
 )
-from pickomino_env.src.dice import Dice
-from pickomino_env.src.player import Player
-from pickomino_env.src.table_tiles import TableTiles
+from pickomino_env.modules.dice import Dice
+from pickomino_env.modules.player import Player
+from pickomino_env.modules.table_tiles import TableTiles
 
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
