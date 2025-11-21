@@ -12,6 +12,8 @@ __all__ = [
     "ACTION_STOP",
     "ACTION_INDEX_ROLL",
     "ACTION_INDEX_DICE",
+    "RENDER_MODE_HUMAN",
+    "RENDER_MODE_RGB_ARRAY",
 ]
 
 from typing import Final
@@ -32,3 +34,7 @@ ACTION_INDEX_DICE: Final[int] = 0
 ACTION_INDEX_ROLL: Final[int] = 1
 ACTION_ROLL: Final[int] = 0
 ACTION_STOP: Final[int] = 1
+
+# Rendering constants.
+RENDER_MODE_HUMAN: Final[str] = "human"
+RENDER_MODE_RGB_ARRAY: Final[str] = "rgb_array"
