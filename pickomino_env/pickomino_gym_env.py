@@ -7,8 +7,6 @@ from typing import Any
 
 import gymnasium as gym
 import numpy as np
-import pygame
-from numpy import dtype, ndarray
 
 from pickomino_env.modules.bot import Bot
 from pickomino_env.modules.checker import Checker
@@ -30,6 +28,8 @@ from pickomino_env.modules.table_tiles import TableTiles
 # pygame internally uses deprecated pkg_resources
 # See: https://setuptools.pypa.io/en/latest/pkg_resources.html
 warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
+# E402: module level import not at the top of the file. Needed to suppress warning before import.
+import pygame  # noqa: E402 # pylint: disable=wrong-import-position, wrong-import-order
 
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
@@ -96,9 +96,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._clock = pygame.time.Clock()
 
         # Draw background.
-        # self._window.fill((34, 139, 34))  # Dark green instead of white
-        self._window.fill((70, 130, 70))  # Lighter, softer green
-        # self._window.fill((100, 140, 100))  # Muted sage green
+        # self._window.fill((34, 139, 34))  # Dark green instead of white.
+        self._window.fill((70, 130, 70))  # Lighter, softer green.
+        # self._window.fill((100, 140, 100))  # Muted sage green.
 
         # Draw game state.
         self._draw_board()
@@ -140,7 +140,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         for i in range(self._number_of_bots):
             self._players.append(Player(bot=True, name=names[i]))
 
-    def _tiles_vector(self) -> ndarray[Any, dtype[Any]]:
+    def _tiles_vector(self) -> np.ndarray[Any, np.dtype[Any]]:
         """Return tiles table as a flat binary vector of length 16 for indexes 21..36."""
         return np.array(
             [1 if self._table_tiles.get_table()[i] else 0 for i in range(21, 37)],
