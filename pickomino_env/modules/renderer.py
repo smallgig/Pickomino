@@ -9,10 +9,20 @@ from importlib.resources import files
 import numpy as np
 
 from pickomino_env.modules.constants import (
+    BACKGROUND_COLOR,
     LARGEST_TILE,
+    RENDER_FPS,
     RENDER_MODE_HUMAN,
     RENDER_MODE_RGB_ARRAY,
     SMALLEST_TILE,
+    TILE_HEIGHT,
+    TILE_SPACING,
+    TILE_WIDTH,
+    TILES_PER_ROW,
+    TILES_START_X,
+    TILES_START_Y,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
 )
 from pickomino_env.modules.dice import Dice
 from pickomino_env.modules.player import Player
@@ -32,7 +42,7 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
         self._clock: pygame.time.Clock | None = None
 
         # Screen size
-        self._size: tuple[int, int] = (800, 600)  # (width, height)
+        self._size: tuple[int, int] = (WINDOW_WIDTH, WINDOW_HEIGHT)
 
         self._dice: Dice | None = None
         self._players: list[Player] | None = None
@@ -62,16 +72,14 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
             self._clock = pygame.time.Clock()
 
         # Draw background.
-        # self._window.fill((34, 139, 34))  # Dark green instead of white.
-        self._window.fill((70, 130, 70))  # Lighter, softer green.
-        # self._window.fill((100, 140, 100))  # Muted sage green.
+        self._window.fill(BACKGROUND_COLOR)  # Lighter, softer green.
 
         # Draw game state.
         self._draw_board()
 
         pygame.display.flip()
         if self._clock is not None:
-            self._clock.tick(60)  # 60 FPS
+            self._clock.tick(RENDER_FPS)
 
     def _render_rgb_array(self) -> np.ndarray:
         """Return pixel array for recording."""
@@ -87,14 +95,14 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
             return
         # Draw table tiles (21-36 in a grid at bottom)
         tiles = self._tiles.get_table()
-        start_x, start_y = 50, 250  # Was 500, lower number = higher on screen
-        tile_width, tile_height = 80, 160
+        start_x, start_y = TILES_START_X, TILES_START_Y  # Lower number = higher on screen.
+        tile_width, tile_height = TILE_WIDTH, TILE_HEIGHT
         col = 0
 
         for tile_num in range(SMALLEST_TILE, LARGEST_TILE + 1):
-            if tiles[tile_num]:  # Only draw available tiles
-                x = start_x + (col % 8) * (tile_width + 10)
-                y = start_y + (col // 8) * (tile_height + 10)
+            if tiles[tile_num]:  # Only draw available tiles.
+                x = start_x + (col % TILES_PER_ROW) * (tile_width + TILE_SPACING)
+                y = start_y + (col // TILES_PER_ROW) * (tile_height + TILE_SPACING)
 
                 tile_path = self._sprite_dir.joinpath(f"tile_{tile_num}.png")
                 tile_image = pygame.image.load(str(tile_path))

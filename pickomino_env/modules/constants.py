@@ -14,6 +14,7 @@ __all__ = [
     "ACTION_INDEX_DICE",
     "RENDER_MODE_HUMAN",
     "RENDER_MODE_RGB_ARRAY",
+    "RENDER_FPS",
     "WINDOW_WIDTH",
     "WINDOW_HEIGHT",
     "BACKGROUND_COLOR",
@@ -48,17 +49,22 @@ ACTION_STOP: Final[int] = 1
 RENDER_MODE_HUMAN: Final[str] = "human"
 RENDER_MODE_RGB_ARRAY: Final[str] = "rgb_array"
 
+# Rendering frequency.
+RENDER_FPS: Final[int] = 60  # Frames Per Second.
+
 # Rendering window dimensions.
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
+WINDOW_WIDTH: Final[int] = 800
+WINDOW_HEIGHT: Final[int] = 600
 
 # Rendering background color (RGB).
-BACKGROUND_COLOR = (70, 130, 70)  # Nice green.
+# BACKGROUND_COLOR = (100, 140, 100)  # Muted sage green.
+# BACKGROUND_COLOR = (34, 139, 34)  # Dark green.
+BACKGROUND_COLOR: Final[tuple[int, int, int]] = (70, 130, 70)  # Lighter, softer green.
 
 # Tile rendering
-TILE_WIDTH = 80
-TILE_HEIGHT = 160
-TILES_PER_ROW = 8
-TILE_SPACING = 10
-TILES_START_X = 50
-TILES_START_Y = 250
+TILE_WIDTH: Final[int] = 80
+TILE_HEIGHT: Final[int] = 160
+TILES_PER_ROW: Final[int] = 8
+TILE_SPACING: Final[int] = 10
+TILES_START_X: Final[int] = 50
+TILES_START_Y: Final[int] = 250
