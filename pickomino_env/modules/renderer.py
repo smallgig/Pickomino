@@ -4,6 +4,7 @@ __all__ = ["Renderer"]
 # pygame internally uses deprecated pkg_resources
 # See: https://setuptools.pypa.io/en/latest/pkg_resources.html
 import warnings
+from importlib.resources import files
 
 import numpy as np
 
@@ -22,7 +23,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 import pygame  # noqa: E402 # pylint: disable=wrong-import-position, wrong-import-order
 
 
-class Renderer:
+class Renderer:  # pylint: disable=too-many-instance-attributes
     """Class Renderer."""
 
     def __init__(self, render_mode: str | None = None) -> None:
@@ -36,6 +37,7 @@ class Renderer:
         self._dice: Dice | None = None
         self._players: list[Player] | None = None
         self._tiles: TableTiles | None = None
+        self._sprite_dir = files("pickomino_env").joinpath("sprites")
 
     def render(self, dice: Dice, players: list[Player], tiles: TableTiles) -> np.ndarray | list[np.ndarray] | None:
         """Render the environment."""
@@ -94,7 +96,8 @@ class Renderer:
                 x = start_x + (col % 8) * (tile_width + 10)
                 y = start_y + (col // 8) * (tile_height + 10)
 
-                tile_image = pygame.image.load(f"local/sprites/tile_{tile_num}.png")
+                tile_path = self._sprite_dir.joinpath(f"tile_{tile_num}.png")
+                tile_image = pygame.image.load(str(tile_path))
                 self._window.blit(tile_image, (x, y))
             col += 1
 

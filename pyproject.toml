@@ -33,7 +33,7 @@ max-line-length = 119
 pythonpath = ["."]
 
 [tool.coverage.run]
-omit = []
+omit = ["config*.py"]
 
 [tool.setuptools.package-data]
 "pickomino_env" = ["py.typed"]
