@@ -11,6 +11,11 @@ import numpy as np
 from pickomino_env.modules.constants import (
     BACKGROUND_COLOR,
     LARGEST_TILE,
+    PLAYER_HIGHLIGHT_COLOR,
+    PLAYER_NAME_FONT_SIZE,
+    PLAYER_TILE_OFFSET,
+    PLAYER_WIDTH,
+    PLAYERS_START_Y,
     RENDER_FPS,
     RENDER_MODE_HUMAN,
     RENDER_MODE_RGB_ARRAY,
@@ -47,13 +52,21 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
         self._dice: Dice | None = None
         self._players: list[Player] | None = None
         self._tiles: TableTiles | None = None
+        self._current_player_index: int | None = None
         self._sprite_dir = files("pickomino_env").joinpath("sprites")
 
-    def render(self, dice: Dice, players: list[Player], tiles: TableTiles) -> np.ndarray | list[np.ndarray] | None:
+    def render(
+        self,
+        dice: Dice,
+        players: list[Player],
+        tiles: TableTiles,
+        current_player_index: int,
+    ) -> np.ndarray | list[np.ndarray] | None:
         """Render the environment."""
         self._dice = dice
         self._players = players
         self._tiles = tiles
+        self._current_player_index = current_player_index
 
         if self._render_mode is None:
             return None
@@ -89,13 +102,56 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
         surface = pygame.surfarray.array3d(self._window)
         return np.transpose(surface, (1, 0, 2))
 
+    def _draw_players(self) -> None:
+        """Draw player names and their top tile."""
+        if self._window is None or self._players is None:
+            return
+
+        font = pygame.font.Font(None, PLAYER_NAME_FONT_SIZE)
+
+        for index, player in enumerate(self._players):
+            x = index * PLAYER_WIDTH
+
+            # Highlight background for current player
+            if index == self._current_player_index:
+                pygame.draw.rect(
+                    self._window,
+                    PLAYER_HIGHLIGHT_COLOR,
+                    (
+                        x,
+                        PLAYERS_START_Y,
+                        PLAYER_WIDTH,
+                        PLAYER_NAME_FONT_SIZE + PLAYER_TILE_OFFSET,
+                    ),
+                )
+
+            # Draw name
+            name_surface = font.render(player.name, True, (0, 0, 0))
+            name_x = x + (PLAYER_WIDTH - name_surface.get_width()) // 2
+            self._window.blit(name_surface, (name_x, PLAYERS_START_Y + 5))
+
+            # Draw tile sprite
+            current_tile = player.show()
+            if current_tile > 0:
+                tile_path = self._sprite_dir.joinpath(f"tile_{current_tile}.png")
+                tile_image = pygame.image.load(str(tile_path))
+                tile_x = x + (PLAYER_WIDTH - TILE_WIDTH) // 2
+                tile_y = PLAYERS_START_Y + PLAYER_NAME_FONT_SIZE + PLAYER_TILE_OFFSET
+                self._window.blit(tile_image, (tile_x, tile_y))
+
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
         if self._window is None or self._tiles is None:
             return
+
+        self._draw_players()
+
         # Draw table tiles (21-36 in a grid at bottom)
         tiles = self._tiles.get_table()
-        start_x, start_y = TILES_START_X, TILES_START_Y  # Lower number = higher on screen.
+        start_x, start_y = (
+            TILES_START_X,
+            TILES_START_Y,
+        )  # Lower number = higher on screen.
         tile_width, tile_height = TILE_WIDTH, TILE_HEIGHT
         col = 0
 

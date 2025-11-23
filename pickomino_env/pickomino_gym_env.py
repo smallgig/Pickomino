@@ -2,6 +2,7 @@
 
 __all__ = ["PickominoEnv"]
 
+import time
 from typing import Any
 
 import gymnasium as gym
@@ -16,6 +17,7 @@ from pickomino_env.modules.constants import (  # Coloured printouts, game and ac
     ACTION_STOP,
     LARGEST_TILE,
     NUM_DICE,
+    RENDER_DELAY,
     SMALLEST_TILE,
 )
 from pickomino_env.modules.dice import Dice
@@ -61,11 +63,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         )
         # Action space is a tuple. First action: which dice to take. Second action: roll again or not.
         self.action_space = gym.spaces.MultiDiscrete([6, 2])
-        self._renderer = Renderer(render_mode)
+        self._render_mode = render_mode
+        self._renderer = Renderer(self._render_mode)
 
     def render(self) -> np.ndarray | list[np.ndarray] | None:  # type: ignore[override]
         """Render the environment."""
-        return self._renderer.render(self._dice, self._players, self._table_tiles)
+        return self._renderer.render(self._dice, self._players, self._table_tiles, self._current_player_index)
 
     def _create_players(self) -> None:
         names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
@@ -251,6 +254,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                         self._table_tiles.smallest(),
                     )
                     self._step_bot(bot_action)
+                if self._render_mode is not None:
+                    self.render()
+                    time.sleep(RENDER_DELAY)
             bot_action = 0, 0
             self._current_player_index += 1
 
