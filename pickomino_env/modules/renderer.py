@@ -10,10 +10,22 @@ import numpy as np
 
 from pickomino_env.modules.constants import (
     BACKGROUND_COLOR,
+    DICE_FONT_SIZE,
+    DICE_LABEL_COLLECTED,
+    DICE_LABEL_ROLLED,
+    DICE_LABEL_WIDTH,
+    DICE_LABEL_X,
+    DICE_LABELS_OFFSET_Y,
+    DICE_LABELS_SPACING,
+    DICE_NAMES,
+    DICE_SECTION_START_Y,
+    DICE_SPACING,
+    DIE_SIZE,
+    FONT_COLOR,
     LARGEST_TILE,
+    NUM_DIE_FACES,
     PLAYER_HIGHLIGHT_COLOR,
     PLAYER_NAME_FONT_SIZE,
-    PLAYER_TILE_OFFSET,
     PLAYER_WIDTH,
     PLAYERS_START_Y,
     RENDER_FPS,
@@ -24,6 +36,7 @@ from pickomino_env.modules.constants import (
     TILE_SPACING,
     TILE_WIDTH,
     TILES_PER_ROW,
+    TILES_ROW_SPACING,
     TILES_START_X,
     TILES_START_Y,
     WINDOW_HEIGHT,
@@ -54,6 +67,8 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
         self._tiles: TableTiles | None = None
         self._current_player_index: int | None = None
         self._sprite_dir = files("pickomino_env").joinpath("sprites")
+        # Lazy initialization: pygame not initialized during __init__(), so create font on the first render.
+        self._dice_font: pygame.font.Font | None = None
 
     def render(
         self,
@@ -112,17 +127,12 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
         for index, player in enumerate(self._players):
             x = index * PLAYER_WIDTH
 
-            # Highlight background for current player
+            # Highlight background for the current player
             if index == self._current_player_index:
                 pygame.draw.rect(
                     self._window,
                     PLAYER_HIGHLIGHT_COLOR,
-                    (
-                        x,
-                        PLAYERS_START_Y,
-                        PLAYER_WIDTH,
-                        PLAYER_NAME_FONT_SIZE + PLAYER_TILE_OFFSET,
-                    ),
+                    (x, PLAYERS_START_Y, PLAYER_WIDTH, PLAYER_NAME_FONT_SIZE),
                 )
 
             # Draw name
@@ -136,8 +146,72 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
                 tile_path = self._sprite_dir.joinpath(f"tile_{current_tile}.png")
                 tile_image = pygame.image.load(str(tile_path))
                 tile_x = x + (PLAYER_WIDTH - TILE_WIDTH) // 2
-                tile_y = PLAYERS_START_Y + PLAYER_NAME_FONT_SIZE + PLAYER_TILE_OFFSET
+                tile_y = PLAYERS_START_Y + PLAYER_NAME_FONT_SIZE
                 self._window.blit(tile_image, (tile_x, tile_y))
+
+    def _draw_dice(self) -> None:
+        """Draw the dice section with counts."""
+        if self._window is None or self._dice is None:
+            return
+
+        # Lazy initialization: pygame not initialized during __init__(), so create font on rendering.
+        self._dice_font = pygame.font.Font(None, DICE_FONT_SIZE)
+
+        y: int = DICE_SECTION_START_Y
+
+        # Draw dice images
+        for index, die_name in enumerate(DICE_NAMES):
+            x: int = DICE_LABEL_WIDTH + index * DICE_SPACING + (DICE_SPACING - DIE_SIZE) // 2
+            die_path = self._sprite_dir.joinpath(f"{die_name}.png")
+            die_image = pygame.image.load(str(die_path))
+            die_image = pygame.transform.scale(die_image, (DIE_SIZE, DIE_SIZE))
+            self._window.blit(die_image, (x, y))
+
+        self._draw_dice_counts(0)  # Collected.
+        self._draw_dice_counts(1)  # Rolled.
+
+    def _draw_dice_counts(self, row_index: int) -> None:
+        """Draw the label and counts."""
+        if self._dice is None or self._window is None or self._dice_font is None:
+            return
+
+        # Draw labels.
+        labels_y: int = DICE_SECTION_START_Y + DIE_SIZE + DICE_LABELS_OFFSET_Y + row_index * DICE_LABELS_SPACING
+        if row_index == 0:
+            label: str = DICE_LABEL_COLLECTED
+            counts: list[int] = self._dice.get_collected()
+        else:
+            label = DICE_LABEL_ROLLED
+            counts = self._dice.get_rolled()
+
+        label_surface = self._dice_font.render(label, True, FONT_COLOR)
+        self._window.blit(label_surface, (DICE_LABEL_X, labels_y))
+
+        # Draw counts.
+        for index in range(NUM_DIE_FACES):
+            x = DICE_LABEL_WIDTH + index * DICE_SPACING + (DICE_SPACING - DIE_SIZE) // 2
+            count_text = self._dice_font.render(str(counts[index]), True, FONT_COLOR)
+            text_width = count_text.get_width()
+            count_text_x = x + (DIE_SIZE - text_width) // 2
+            self._window.blit(count_text, (count_text_x, labels_y))
+
+    def _draw_tiles(self) -> None:
+        """Draw table tiles (21-36 in a grid at bottom)."""
+        if self._window is None or self._tiles is None:
+            return
+
+        tiles = self._tiles.get_table()
+        col = 0
+
+        for tile_num in range(SMALLEST_TILE, LARGEST_TILE + 1):
+            if tiles[tile_num]:  # Only draw available tiles.
+                x = TILES_START_X + (col % TILES_PER_ROW) * (TILE_WIDTH + TILE_SPACING)
+                y = TILES_START_Y + (col // TILES_PER_ROW) * (TILE_HEIGHT + TILES_ROW_SPACING)
+
+                tile_path = self._sprite_dir.joinpath(f"tile_{tile_num}.png")
+                tile_image = pygame.image.load(str(tile_path))
+                self._window.blit(tile_image, (x, y))
+            col += 1
 
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
@@ -145,25 +219,8 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
             return
 
         self._draw_players()
-
-        # Draw table tiles (21-36 in a grid at bottom)
-        tiles = self._tiles.get_table()
-        start_x, start_y = (
-            TILES_START_X,
-            TILES_START_Y,
-        )  # Lower number = higher on screen.
-        tile_width, tile_height = TILE_WIDTH, TILE_HEIGHT
-        col = 0
-
-        for tile_num in range(SMALLEST_TILE, LARGEST_TILE + 1):
-            if tiles[tile_num]:  # Only draw available tiles.
-                x = start_x + (col % TILES_PER_ROW) * (tile_width + TILE_SPACING)
-                y = start_y + (col // TILES_PER_ROW) * (tile_height + TILE_SPACING)
-
-                tile_path = self._sprite_dir.joinpath(f"tile_{tile_num}.png")
-                tile_image = pygame.image.load(str(tile_path))
-                self._window.blit(tile_image, (x, y))
-            col += 1
+        self._draw_dice()
+        self._draw_tiles()
 
     def close(self) -> None:
         """Close game."""
