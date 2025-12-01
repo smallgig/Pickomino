@@ -1,9 +1,13 @@
 """Bot class."""
 
+from __future__ import annotations
+
 __all__ = ["Bot"]
 
 import numpy as np
 from numpy.ma.core import argmax
+
+from pickomino_env.modules.constants import MIN_ROLLS_FOR_WORM_STRATEGY
 
 
 # pylint: disable=too-few-public-methods
@@ -13,17 +17,28 @@ class Bot:
     HEURISTIC = "heuristic"
 
     def __init__(self) -> None:
+        """Initialize Bots."""
         self.roll_counter: int = 0
         self.current_policy: str = self.HEURISTIC
 
-    def policy(self, rolled: list[int], collected: list[int], smallest: int) -> tuple[int, int]:
+    def policy(
+        self,
+        rolled: list[int],
+        collected: list[int],
+        smallest: int,
+    ) -> tuple[int, int]:
         """Policy function."""
         action = 0, 0
         if self.current_policy == self.HEURISTIC:
             action = self._heuristic_policy(rolled, collected, smallest)
         return action
 
-    def _heuristic_policy(self, rolled: list[int], collected: list[int], smallest: int) -> tuple[int, int]:
+    def _heuristic_policy(
+        self,
+        rolled: list[int],
+        collected: list[int],
+        smallest: int,
+    ) -> tuple[int, int]:
         """Heuristic Strategy.
 
         1. On or after the third roll, take worms if you can.
@@ -46,8 +61,7 @@ class Bot:
         action_dice = int(argmax(contribution))
 
         # 1. On or after the third roll, take worms if you can.
-        # pylint: disable=magic-value-comparison
-        if self.roll_counter >= 3 and not collected[5] and rolled[5]:
+        if self.roll_counter >= MIN_ROLLS_FOR_WORM_STRATEGY and not collected[5] and rolled[5]:
             action_dice = 5
 
         # 3. Quit as soon as you can take a tile.

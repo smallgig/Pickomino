@@ -25,9 +25,12 @@ include = ["pickomino_env*"]
 [tool.pydocstyle]
 convention = "numpy"
 
+[tool.black]
+line-length = 120
+
 [flake8]
 ignore = ["E203", "W503", "E128", "E129"]  # Black wins, not read :-( switch to ruff
-max-line-length = 119
+max-line-length = 120
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -37,3 +40,15 @@ omit = ["config*.py"]
 
 [tool.setuptools.package-data]
 "pickomino_env" = ["py.typed"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+exclude = [
+    "tests/",
+    "local/"
+]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["EM101"]  # Exception message assignment is unnecessary.

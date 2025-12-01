@@ -1,5 +1,7 @@
 """Class player."""
 
+from __future__ import annotations
+
 __all__ = ["Player"]
 
 from pickomino_env.modules.constants import SMALLEST_TILE
@@ -9,7 +11,7 @@ from pickomino_env.modules.table_tiles import TableTiles
 class Player:
     """Player class with his tiles and name."""
 
-    def __init__(self, bot: bool, name: str) -> None:
+    def __init__(self, *, bot: bool, name: str) -> None:
         """Initialize a player."""
         self.name: str = name
         self.tile_stack: list[int] = []

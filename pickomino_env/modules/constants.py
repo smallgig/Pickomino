@@ -1,48 +1,51 @@
 """Project wide constants."""
 
+from __future__ import annotations
+
 __all__ = [
-    "RED",
-    "NO_RED",
-    "GREEN",
-    "NO_GREEN",
-    "SMALLEST_TILE",
-    "LARGEST_TILE",
-    "NUM_DICE",
-    "NUM_DIE_FACES",
+    "ACTION_INDEX_DICE",
+    "ACTION_INDEX_ROLL",
     "ACTION_ROLL",
     "ACTION_STOP",
-    "ACTION_INDEX_ROLL",
-    "ACTION_INDEX_DICE",
-    "RENDER_MODE_HUMAN",
-    "RENDER_MODE_RGB_ARRAY",
-    "RENDER_FPS",
-    "RENDER_DELAY",
-    "WINDOW_WIDTH",
-    "WINDOW_HEIGHT",
     "BACKGROUND_COLOR",
-    "FONT_COLOR",
-    "PLAYERS_START_Y",
-    "PLAYER_NAME_FONT_SIZE",
-    "PLAYER_HIGHLIGHT_COLOR",
-    "PLAYER_WIDTH",
-    "DICE_NAMES",
-    "DICE_SECTION_START_Y",
-    "DIE_SIZE",
-    "DICE_LABEL_WIDTH",
-    "DICE_SPACING",
-    "DICE_LABEL_COLLECTED",
-    "DICE_LABEL_ROLLED",
+    "DICE_FONT_SIZE",
     "DICE_LABELS_OFFSET_Y",
     "DICE_LABELS_SPACING",
+    "DICE_LABEL_COLLECTED",
+    "DICE_LABEL_ROLLED",
+    "DICE_LABEL_WIDTH",
     "DICE_LABEL_X",
-    "DICE_FONT_SIZE",
-    "TILE_WIDTH",
-    "TILE_HEIGHT",
+    "DICE_NAMES",
+    "DICE_SECTION_START_Y",
+    "DICE_SPACING",
+    "DIE_SIZE",
+    "FONT_COLOR",
+    "GREEN",
+    "LARGEST_TILE",
+    "MIN_ROLLS_FOR_WORM_STRATEGY",
+    "NO_GREEN",
+    "NO_RED",
+    "NUM_DICE",
+    "NUM_DIE_FACES",
+    "PLAYERS_START_Y",
+    "PLAYER_HIGHLIGHT_COLOR",
+    "PLAYER_NAME_FONT_SIZE",
+    "PLAYER_WIDTH",
+    "RED",
+    "RENDER_DELAY",
+    "RENDER_FPS",
+    "RENDER_MODE_HUMAN",
+    "RENDER_MODE_RGB_ARRAY",
+    "SMALLEST_TILE",
     "TILES_PER_ROW",
-    "TILE_SPACING",
     "TILES_ROW_SPACING",
     "TILES_START_X",
     "TILES_START_Y",
+    "TILE_HEIGHT",
+    "TILE_SPACING",
+    "TILE_WIDTH",
+    "WINDOW_HEIGHT",
+    "WINDOW_WIDTH",
 ]
 
 from typing import Final
@@ -64,6 +67,9 @@ ACTION_INDEX_DICE: Final[int] = 0
 ACTION_INDEX_ROLL: Final[int] = 1
 ACTION_ROLL: Final[int] = 0
 ACTION_STOP: Final[int] = 1
+
+# Bot strategy.
+MIN_ROLLS_FOR_WORM_STRATEGY: Final[int] = 3
 
 # Rendering mode constants.
 RENDER_MODE_HUMAN: Final[str] = "human"

@@ -1,5 +1,9 @@
 """Class Checker."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 __all__ = ["Checker"]
 
 from pickomino_env.modules.constants import (  # Coloured printouts, game and action constants.
@@ -14,15 +18,18 @@ from pickomino_env.modules.constants import (  # Coloured printouts, game and ac
     RED,
     SMALLEST_TILE,
 )
-from pickomino_env.modules.dice import Dice
-from pickomino_env.modules.player import Player
-from pickomino_env.modules.table_tiles import TableTiles
+
+if TYPE_CHECKING:
+    from pickomino_env.modules.dice import Dice
+    from pickomino_env.modules.player import Player
+    from pickomino_env.modules.table_tiles import TableTiles
 
 
 class Checker:
     """Class Checker."""
 
-    def __init__(self, dice: Dice, players: list[Player], table_tiles: TableTiles):
+    def __init__(self, dice: Dice, players: list[Player], table_tiles: TableTiles) -> None:
+        """Initialize Checker."""
         self._failed_attempt = False
         self._terminated = False
         self._truncated = False
@@ -35,7 +42,10 @@ class Checker:
         """Check if a die is available to take."""
         can_take = any(
             rolled > 0 and collected == 0
-            for rolled, collected in zip(self._dice.get_rolled(), self._dice.get_collected())
+            for rolled, collected in zip(
+                self._dice.get_rolled(),
+                self._dice.get_collected(),
+            )
         )
 
         self._failed_attempt = not can_take
@@ -48,7 +58,11 @@ class Checker:
 
         return self._failed_attempt, self._explanation
 
-    def set_failed_no_tile_to_take(self, current_player_index: int, action: tuple[int, int]) -> tuple[bool, str]:
+    def set_failed_no_tile_to_take(
+        self,
+        current_player_index: int,
+        action: tuple[int, int],
+    ) -> tuple[bool, str]:
         """Failed: Not able to take a tile with the dice sum reached."""
         # Environment takes the highest tile on the table or player stack.
         # Check if any tile can be picked from another player.
@@ -76,8 +90,8 @@ class Checker:
         # Check if no tile available on the table or from a player to take.
         elif (
             not self._table_tiles.get_table()[self._dice.score()[0]]
-            and not self._table_tiles.find_next_lower_tile(self._dice.score()[0])  # noqa: W503 remove & switch to ruff.
-            and steal_index is None  # noqa: W503 remove after switching to ruff.
+            and not self._table_tiles.find_next_lower_tile(self._dice.score()[0])
+            and steal_index is None
         ):
             self._failed_attempt = True
             self._explanation = RED + "Failed: No tile on table or from another player can be taken" + NO_RED
@@ -101,7 +115,7 @@ class Checker:
         self._truncated = False
 
         # Check action values are within range
-        if action[ACTION_INDEX_DICE] not in range(0, 6) or action[ACTION_INDEX_ROLL] not in range(0, 2):
+        if action[ACTION_INDEX_DICE] not in range(6) or action[ACTION_INDEX_ROLL] not in range(2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
             return self._terminated, self._truncated, self._explanation
