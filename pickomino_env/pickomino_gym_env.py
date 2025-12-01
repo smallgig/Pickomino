@@ -1,4 +1,5 @@
 """Pickomino game with gymnasium API."""
+"""Pickomino game with gymnasium API."""
 
 __all__ = ["PickominoEnv"]
 
@@ -267,6 +268,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         # Stop immediately if action was not allowed or similar.
         if self._terminated or self._truncated:
+            self._soft_reset()
             return
 
         # Collect and roll the dice.
