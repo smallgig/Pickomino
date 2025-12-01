@@ -47,4 +47,8 @@ exclude = [
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["EM101"]  # Exception message assignment is unnecessary.
+ignore = [
+    "EM101", # Exception message assignment is unnecessary.
+    "D203", # Conflicts with D211 (no blank line before class wins)
+    "D213", # Conflicts with D212 (first line summary wins)
+]
