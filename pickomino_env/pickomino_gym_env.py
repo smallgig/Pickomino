@@ -1,5 +1,4 @@
 """Pickomino game with gymnasium API."""
-"""Pickomino game with gymnasium API."""
 
 __all__ = ["PickominoEnv"]
 
