@@ -3,7 +3,7 @@
 max-line-length=120
 
 # Libraries have no-member
-generated-member=cv2
+generated-member=cv2, pygame
 
 [MESSAGES CONTROL]
 # Enable some checkers that are not activated by default:

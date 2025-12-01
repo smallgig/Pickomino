@@ -48,7 +48,7 @@ class Checker:
         return self._failed_attempt, self._explanation
 
     def set_failed_no_tile_to_take(self, current_player_index: int, action: tuple[int, int]) -> tuple[bool, str]:
-        """Failed: Not able to take a tile with dice sum reached."""
+        """Failed: Not able to take a tile with the dice sum reached."""
         # Environment takes the highest tile on the table or player stack.
         # Check if any tile can be picked from another player.
         # Index from player to steal.
@@ -80,7 +80,10 @@ class Checker:
         return self._failed_attempt, self._explanation
 
     def set_failed_no_worms(self, action: tuple[int, int]) -> tuple[bool, str]:
-        """No worm collected and action stop."""
+        """Set failed attempt for no worm collected.
+
+        No worm collected, but the action is to stop.
+        """
         if not self._dice.score()[1] and action[ACTION_INDEX_ROLL] == ACTION_STOP:
             self._failed_attempt = True
             self._explanation = RED + "Failed: No worm collected" + NO_RED
@@ -111,7 +114,7 @@ class Checker:
             return self._terminated, self._truncated, self._explanation
 
         remaining_dice = self._dice.get_rolled().copy()  # Copy in order not to overwrite the real rolled variable.
-        remaining_dice[action[ACTION_INDEX_DICE]] = 0  # Overwrite with zero for the face just collected.
+        remaining_dice[action[ACTION_INDEX_DICE]] = 0  # Overwrite with zero for the last face collected.
 
         # Try to roll when no dice left to roll.
         if action[ACTION_INDEX_ROLL] == ACTION_ROLL and not remaining_dice:

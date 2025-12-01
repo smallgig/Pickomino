@@ -2,12 +2,11 @@
 
 __all__ = ["PickominoEnv"]
 
+import time
 from typing import Any
 
 import gymnasium as gym
 import numpy as np
-from gymnasium.core import RenderFrame
-from numpy import dtype, ndarray
 
 from pickomino_env.modules.bot import Bot
 from pickomino_env.modules.checker import Checker
@@ -16,23 +15,21 @@ from pickomino_env.modules.constants import (  # Coloured printouts, game and ac
     ACTION_INDEX_ROLL,
     ACTION_ROLL,
     ACTION_STOP,
-    GREEN,
     LARGEST_TILE,
-    NO_GREEN,
-    NO_RED,
     NUM_DICE,
-    RED,
+    RENDER_DELAY,
     SMALLEST_TILE,
 )
 from pickomino_env.modules.dice import Dice
 from pickomino_env.modules.player import Player
+from pickomino_env.modules.renderer import Renderer
 from pickomino_env.modules.table_tiles import TableTiles
 
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
     """The environment class with Gymnasium API."""
 
-    def __init__(self, number_of_bots: int) -> None:
+    def __init__(self, number_of_bots: int, render_mode: str | None = None) -> None:
         """Construct the environment."""
         # The following is an idea for refactoring.
         # Have only on complex variable with the return value of the step function.
@@ -66,10 +63,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         )
         # Action space is a tuple. First action: which dice to take. Second action: roll again or not.
         self.action_space = gym.spaces.MultiDiscrete([6, 2])
+        self._render_mode = render_mode
+        self._renderer = Renderer(self._render_mode)
 
-    def render(self) -> RenderFrame | list[RenderFrame] | None:
+    def render(self) -> np.ndarray | list[np.ndarray] | None:  # type: ignore[override]
         """Render the environment."""
-        # pass
+        return self._renderer.render(self._dice, self._players, self._table_tiles, self._current_player_index)
 
     def _create_players(self) -> None:
         names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
@@ -77,7 +76,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         for i in range(self._number_of_bots):
             self._players.append(Player(bot=True, name=names[i]))
 
-    def _tiles_vector(self) -> ndarray[Any, dtype[Any]]:
+    def _tiles_vector(self) -> np.ndarray[Any, np.dtype[Any]]:
         """Return tiles table as a flat binary vector of length 16 for indexes 21..36."""
         return np.array(
             [1 if self._table_tiles.get_table()[i] else 0 for i in range(21, 37)],
@@ -146,7 +145,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         Returns:
             tuple: (observation, info) for the initial state
         """
-        # IMPORTANT! Must call this first. Seed the random number generator.
+        # IMPORTANT. Must call this first. Seed the random number generator.
         super().reset(seed=seed)
         self._dice = Dice()
         self._checker = Checker(self._dice, self._players, self._table_tiles)
@@ -236,7 +235,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             # No smaller tiles are available -> have to return players top tile if there is one.
             else:
                 return_value = self._remove_tile_from_player()
-                self._explanation = RED + "No available tile on the table to take" + NO_RED
+                self._explanation = "No available tile on the table to take"
 
         self._soft_reset()
         return return_value
@@ -255,6 +254,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                         self._table_tiles.smallest(),
                     )
                     self._step_bot(bot_action)
+                if self._render_mode is not None:
+                    self.render()
+                    time.sleep(RENDER_DELAY)
             bot_action = 0, 0
             self._current_player_index += 1
 
@@ -278,7 +280,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # Game over check.
         if not self._table_tiles.highest():
             self._terminated = True
-            self._explanation = f"{GREEN}No Tile on the table, game over.{NO_GREEN}"
+            self._explanation = "No Tile on the table, game over."
 
     def step(self, action: tuple[int, int]) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         """Take a step in the environment."""
@@ -311,7 +313,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # Game Over if no Tile is on the table anymore.
         if not self._table_tiles.highest():
             self._terminated = True
-            self._explanation = GREEN + "No Tile on the table, GAME OVER!" + NO_GREEN
+            self._explanation = "No Tile on the table, GAME OVER!"
 
         return (
             self._current_obs(),

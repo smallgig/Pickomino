@@ -4,12 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pickomino-env"
-version = "0.1.0"
+version = "1.0.0"
 description = "Pickomino (Heckmeck) Gymnasium environment"
 readme = ""
 requires-python = ">=3.9"
 authors = [{ name = "Jarl and Robin" }]
-dependencies = ["gymnasium>=1.2.2", "numpy>=2.3.5"]
+dependencies = [
+    "gymnasium>=1.2.2",
+    "numpy>=2.3.5",
+    "pygame>=2.6.1",
+    # pygame uses deprecated pkg_resources (setuptools issue)
+    # See: https://setuptools.pypa.io/en/latest/pkg_resources.html
+    "setuptools<81"
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -26,7 +33,7 @@ max-line-length = 119
 pythonpath = ["."]
 
 [tool.coverage.run]
-omit = []
+omit = ["config*.py"]
 
 [tool.setuptools.package-data]
 "pickomino_env" = ["py.typed"]
