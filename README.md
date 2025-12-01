@@ -11,7 +11,7 @@ Tuple(int, int)
 
 Action = [dice_face (1-6), action_type (0=roll, 1=stop)].
 
-- 1-6: Face of the dice, which you want to take.
+- 1-6: Face of the dice, which you want to take, where 6 is the worm.
 - 0-1: Roll or stop.
 
 ## Observation Space
@@ -80,3 +80,9 @@ against (1 to 6)
 import gymnasium as gym
 env = gym.make("Pickomino-v0", render_mode=None, number_of_bots=2)
 ```
+
+## Development
+
+This project uses
+![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)
+for linting and formatting.
