@@ -22,11 +22,6 @@ repos:
     hooks:
       - id: black
         args: [ "--line-length=120" ]
-  - repo: https://github.com/pycqa/isort
-    rev: 7.0.0
-    hooks:
-      - id: isort
-        args: [ "--profile", "black" ]
   - repo: https://github.com/pycqa/pylint
     rev: v4.0.2
     hooks:
@@ -38,13 +33,12 @@ repos:
       - id: mypy
         args: [ "--strict" ]
         additional_dependencies: [ "types-requests", "types-PyYAML", "gymnasium", "numpy", "pygame" ]
-        # After publishing to PyPI, add: "pickomino-env" above.
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.3.0
+        # After publishing to PyPI, add: 'pickomino-env' above.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.7
     hooks:
-      - id: flake8
-        args: [ "--docstring-convention=numpy", "--max-line-length=120", "--ignore=D406,D407, W503" ]
-        additional_dependencies: [ "flake8-bugbear", "flake8-docstrings", "pydocstyle>=6.3.0" ]
+      - id: ruff
+      - id: ruff-format
   - repo: local
     hooks:
       - id: pytest
@@ -57,12 +51,3 @@ repos:
         additional_dependencies: [ "pytest==8.4.2" ]
         pass_filenames: false
         stages: [ pre-push ]  # Only run on push instead of every commit.
-
-  # We need to check this first! ruff would replace flake8-bugbear and might conflict with Black
-  # flake8-bugbear is deprecated, so we want to use ruff instead
-  # - repo: https://github.com/astral-sh/ruff-pre-commit
-  #  rev: 0.14.1
-  #  hooks:
-  #    - id: ruff
-  #      args: ["--fix"]
-  #    - id: ruff-format

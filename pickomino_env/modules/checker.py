@@ -78,7 +78,6 @@ class Checker:
         )
         # pylint: disable=confusing-consecutive-elif
         if self._dice.score()[0] < SMALLEST_TILE:
-
             if action[ACTION_INDEX_ROLL] == ACTION_STOP:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and action stop" + NO_RED
