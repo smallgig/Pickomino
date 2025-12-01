@@ -1,13 +1,15 @@
 ## Description
 
 An environment conforming to the **Gymnasium** API for the dice game **Pickomino (Heckmeck am Bratwurmeck)**
-Goal: train a Reinforcement Learning agent for optimal play. That is, decide which face of the dice to collect,
+Goal: train a Reinforcement Learning agent for optimal play. That is, decide, which face of the dice to collect,
 when to roll and when to stop.
 
 ## Action Space
 
 The Action space is a tuple with two integers.
 Tuple(int, int)
+
+Action = [dice_face (1-6), action_type (0=roll, 1=stop)].
 
 - 1-6: Face of the dice, which you want to take.
 - 0-1: Roll or stop.
@@ -16,12 +18,12 @@ Tuple(int, int)
 
 The observation is a `dict` with shape `(4,)` with the values corresponding to the following: dice, table and player.
 
-| Observation    | Min | Max | Shape               |
-|----------------|-----|-----|---------------------|
-| dice_collected | 0   | 8   | (6,)                |
-| dice_rolled    | 0   | 8   | (6,)                |
-| tiles_table    | 0   | 1   | 16                  |
-| tile_player    | 0   | 36  | number_of_bots + 1  |
+| Observation    | Min | Max | Shape              |
+|----------------|-----|-----|--------------------|
+| dice_collected | 0   | 8   | (6,)               |
+| dice_rolled    | 0   | 8   | (6,)               |
+| tiles_table    | 0   | 1   | (16,)              |
+| tile_player    | 0   | 36  | number_of_bots + 1 |
 
 **Note:** There are eight dice to roll and collect. A die has six sides with the number of eyes one through
 five, but a worm instead of a six.
@@ -63,7 +65,18 @@ The episode ends if any one of the following occurs:
 
 ## Arguments
 
-Pickomino does not have rendering yet. But the gymnasium API requires it.
-Hence, do not give a value for `render_mode` as a keyword for `gymnasium.make`.
+For visualisation set render_mode = "human", None for training.
+
 When you create the environment, you have to specify the number of bots you want to play
 against (1 to 6)
+
+## Setup
+
+`pip install pickomino-env`
+
+## Usage example
+
+```python
+import gymnasium as gym
+env = gym.make("Pickomino-v0", render_mode=None, number_of_bots=2)
+```
