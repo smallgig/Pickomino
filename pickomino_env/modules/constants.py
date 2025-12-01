@@ -77,15 +77,14 @@ RENDER_DELAY: Final[float] = 0.5
 WINDOW_WIDTH: Final[int] = 800
 WINDOW_HEIGHT: Final[int] = 600
 
-# Rendering background color (RGB).
-# BACKGROUND_COLOR = (100, 140, 100)  # Muted sage green.
-# BACKGROUND_COLOR = (34, 139, 34)  # Dark green.
+# Rendering background color Red, Green, Blue (RGB).
+# Muted sage green (100, 140, 100). Dark green (34, 139, 34).
 BACKGROUND_COLOR: Final[tuple[int, int, int]] = (70, 130, 70)  # Lighter, softer green.
 FONT_COLOR: Final[tuple[int, int, int]] = (0, 0, 0)  # Black
 
 # Player rendering.
 PLAYERS_START_Y: Final[int] = 20
-PLAYER_NAME_FONT_SIZE: Final[int] = 20
+PLAYER_NAME_FONT_SIZE: Final[int] = 28
 PLAYER_HIGHLIGHT_COLOR: Final[tuple[int, int, int]] = (65, 105, 225)  # Blue
 PLAYER_WIDTH: Final[int] = 120
 
@@ -98,7 +97,7 @@ DICE_NAMES: Final[tuple[str, ...]] = (
     "dice_5",
     "dice_worm",
 )
-DICE_SECTION_START_Y: Final[int] = 150
+DICE_SECTION_START_Y: Final[int] = 180
 DIE_SIZE: Final[int] = 100
 # Horizontal space reserved for left labels (affecting dice positioning).
 DICE_LABEL_WIDTH: Final[int] = 100
@@ -108,16 +107,16 @@ DICE_SPACING: Final[int] = (WINDOW_WIDTH - DICE_LABEL_WIDTH) // NUM_DIE_FACES
 DICE_LABEL_COLLECTED: Final[str] = "Collected:"
 DICE_LABEL_ROLLED: Final[str] = "Rolled:"
 DICE_LABELS_OFFSET_Y: Final[int] = 5  # Distance from dice image bottom to labels.
-# Vertical gab between the "Collected" and "Rolled" rows.
+# Vertical gab between the 'Collected' and 'Rolled' rows.
 DICE_LABELS_SPACING: Final[int] = 30
 DICE_LABEL_X: Final[int] = 10
 DICE_FONT_SIZE: Final[int] = 30
 
 # Tile rendering.
-TILE_WIDTH: Final[int] = 37
-TILE_HEIGHT: Final[int] = 89
+TILE_WIDTH: Final[int] = 60  # 37
+TILE_HEIGHT: Final[int] = 100  # 89
 TILES_PER_ROW: Final[int] = 8
-TILE_SPACING: Final[int] = 15
-TILES_ROW_SPACING: Final[int] = 15
-TILES_START_X: Final[int] = 50
-TILES_START_Y: Final[int] = 320
+TILE_SPACING: Final[int] = 10
+TILES_ROW_SPACING: Final[int] = 10
+TILES_START_X: Final[int] = 150
+TILES_START_Y: Final[int] = 380

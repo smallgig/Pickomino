@@ -177,10 +177,10 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
 
         # Draw labels.
         labels_y: int = DICE_SECTION_START_Y + DIE_SIZE + DICE_LABELS_OFFSET_Y + row_index * DICE_LABELS_SPACING
-        if row_index == 0:
+        if row_index == 0:  # Collected.
             label: str = DICE_LABEL_COLLECTED
             counts: list[int] = self._dice.get_collected()
-        else:
+        else:  # Rolled.
             label = DICE_LABEL_ROLLED
             counts = self._dice.get_rolled()
 
