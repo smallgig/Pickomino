@@ -1,6 +1,7 @@
 """Class Checker."""
 
 __all__ = ["Checker"]
+
 from pickomino_env.modules.constants import (  # Coloured printouts, game and action constants.
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
@@ -73,7 +74,11 @@ class Checker:
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
 
         # Check if no tile available on the table or from a player to take.
-        elif not self._table_tiles.find_next_lower_tile(self._dice.score()[0]) and steal_index is None:
+        elif (
+            not self._table_tiles.get_table()[self._dice.score()[0]]
+            and not self._table_tiles.find_next_lower_tile(self._dice.score()[0])  # noqa: W503 remove & switch to ruff.
+            and steal_index is None  # noqa: W503 remove after switching to ruff.
+        ):
             self._failed_attempt = True
             self._explanation = RED + "Failed: No tile on table or from another player can be taken" + NO_RED
 
