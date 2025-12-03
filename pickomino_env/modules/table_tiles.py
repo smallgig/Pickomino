@@ -1,5 +1,7 @@
 """Class table tiles."""
 
+from __future__ import annotations
+
 __all__ = ["TableTiles"]
 
 
@@ -28,9 +30,9 @@ class TableTiles:
         }
         self.worm_values: list[int] = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4]
 
-    def set_tile(self, tile_number: int, truth_value: bool) -> None:
+    def set_tile(self, *, tile_number: int, is_available: bool) -> None:
         """Set one Tile."""
-        self._tile_table[tile_number] = truth_value
+        self._tile_table[tile_number] = is_available
 
     def get_table(self) -> dict[int, bool]:
         """Get the tile table."""
@@ -38,9 +40,7 @@ class TableTiles:
 
     def is_empty(self) -> bool:
         """Check if the table is empty."""
-        if self._tile_table.values():
-            return False
-        return True
+        return not self._tile_table.values()
 
     def highest(self) -> int:
         """Get the highest tile on the table."""

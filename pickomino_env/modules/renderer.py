@@ -1,5 +1,9 @@
 """Renderer using pygame."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 __all__ = ["Renderer"]
 # pygame internally uses deprecated pkg_resources
 # See: https://setuptools.pypa.io/en/latest/pkg_resources.html
@@ -42,19 +46,22 @@ from pickomino_env.modules.constants import (
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
 )
-from pickomino_env.modules.dice import Dice
-from pickomino_env.modules.player import Player
-from pickomino_env.modules.table_tiles import TableTiles
+
+if TYPE_CHECKING:
+    from pickomino_env.modules.dice import Dice
+    from pickomino_env.modules.player import Player
+    from pickomino_env.modules.table_tiles import TableTiles
 
 warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 # E402: module level import not at the top of the file. Needed to suppress warning before import.
-import pygame  # noqa: E402 # pylint: disable=wrong-import-position, wrong-import-order
+import pygame  # noqa: RUF100, E402 # pylint: disable=wrong-import-position, wrong-import-order
 
 
 class Renderer:  # pylint: disable=too-many-instance-attributes
     """Class Renderer."""
 
     def __init__(self, render_mode: str | None = None) -> None:
+        """Initialize Renderer."""
         self._render_mode: str | None = render_mode
         self._window: pygame.Surface | None = None
         self._clock: pygame.time.Clock | None = None
@@ -113,7 +120,9 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
         """Return pixel array for recording."""
         # Like _render_human. But capture as an array.
         if self._window is None:
-            raise RuntimeError("Window not initialised.")
+            raise RuntimeError(  # noqa: RUF100, TRY003 message variable unnecessary.
+                "Window not initialised.",
+            )
         surface = pygame.surfarray.array3d(self._window)
         return np.transpose(surface, (1, 0, 2))
 
@@ -136,7 +145,7 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
                 )
 
             # Draw name
-            name_surface = font.render(player.name, True, (0, 0, 0))
+            name_surface = font.render(player.name, True, FONT_COLOR)  # noqa: RUF100, FBT003 API constraint.
             name_x = x + (PLAYER_WIDTH - name_surface.get_width()) // 2
             self._window.blit(name_surface, (name_x, PLAYERS_START_Y + 5))
 
@@ -184,13 +193,17 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
             label = DICE_LABEL_ROLLED
             counts = self._dice.get_rolled()
 
-        label_surface = self._dice_font.render(label, True, FONT_COLOR)
+        label_surface = self._dice_font.render(label, True, FONT_COLOR)  # noqa: RUF100, FBT003 API constraint.
         self._window.blit(label_surface, (DICE_LABEL_X, labels_y))
 
         # Draw counts.
         for index in range(NUM_DIE_FACES):
             x = DICE_LABEL_WIDTH + index * DICE_SPACING + (DICE_SPACING - DIE_SIZE) // 2
-            count_text = self._dice_font.render(str(counts[index]), True, FONT_COLOR)
+            count_text = self._dice_font.render(
+                str(counts[index]),
+                True,  # noqa: RUF100, FBT003 API constraint.
+                FONT_COLOR,
+            )
             text_width = count_text.get_width()
             count_text_x = x + (DIE_SIZE - text_width) // 2
             self._window.blit(count_text, (count_text_x, labels_y))
@@ -201,9 +214,8 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
             return
 
         tiles = self._tiles.get_table()
-        col = 0
 
-        for tile_num in range(SMALLEST_TILE, LARGEST_TILE + 1):
+        for col, tile_num in enumerate(range(SMALLEST_TILE, LARGEST_TILE + 1)):
             if tiles[tile_num]:  # Only draw available tiles.
                 x = TILES_START_X + (col % TILES_PER_ROW) * (TILE_WIDTH + TILE_SPACING)
                 y = TILES_START_Y + (col // TILES_PER_ROW) * (TILE_HEIGHT + TILES_ROW_SPACING)
@@ -211,7 +223,6 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
                 tile_path = self._sprite_dir.joinpath(f"tile_{tile_num}.png")
                 tile_image = pygame.image.load(str(tile_path))
                 self._window.blit(tile_image, (x, y))
-            col += 1
 
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
