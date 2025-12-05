@@ -42,5 +42,5 @@ class Player:
         score: int = 0
         table = TableTiles()
         for tile in self.tile_stack:
-            score += table.worm_values[tile - SMALLEST_TILE]  # List of worm values count from zero.
+            score += table.worm_values[tile - SMALLEST_TILE]  # List of worm DICE_VALUES count from zero.
         return score

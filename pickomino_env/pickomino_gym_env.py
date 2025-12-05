@@ -129,7 +129,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         """
         return {
-            "dice": self._dice,
+            "dice_collected": list(self._dice.get_collected()),
+            "dice_rolled": list(self._dice.get_rolled()),
             "terminated": self._terminated,
             "tiles_table_vec": self._tiles_vector(),
             "smallest_tile": self._table_tiles.smallest(),
@@ -176,12 +177,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             options: Additional configuration (unused in this example)
 
         Returns:
-            tuple: (observation, info) for the initial state
+            observation, info for the initial state
 
         """
         # IMPORTANT. Must call this first. Seed the random number generator.
         super().reset(seed=seed)
-        self._dice = Dice()
+        self._dice = Dice(random_generator=self.np_random)
         self._checker = Checker(self._dice, self._players, self._table_tiles)
         self._you = Player(bot=False, name="You")
         self._players = []
@@ -375,3 +376,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._truncated,
             self._get_info(),
         )
+
+    def close(self) -> None:
+        """Close the environment and renderer."""
+        if self._renderer is not None:
+            self._renderer.close()
