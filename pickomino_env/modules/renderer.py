@@ -106,6 +106,12 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
             self._window = pygame.display.set_mode(self._size)
             self._clock = pygame.time.Clock()
 
+        # Check for window close event
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.close()
+                return
+
         # Draw background.
         self._window.fill(BACKGROUND_COLOR)  # Lighter, softer green.
 

@@ -23,7 +23,7 @@ where = ["."]
 include = ["pickomino_env*"]
 
 [tool.pydocstyle]
-convention = "numpy"
+convention = "google"
 
 [tool.black]
 line-length = 120
@@ -65,6 +65,7 @@ ignore = [
     "EM101", # Exception message assignment is unnecessary.
     "D203", # Conflicts with D211 (no blank line before class wins)
     "D213", # Conflicts with D212 (first line summary wins)
+    "D413", # Allow no blank line after docstring (Google style).
 ]
 
 [tool.pylint.master]
