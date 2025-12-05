@@ -25,9 +25,8 @@ include = ["pickomino_env*"]
 [tool.pydocstyle]
 convention = "numpy"
 
-[flake8]
-ignore = ["E203", "W503", "E128", "E129"]  # Black wins, not read :-( switch to ruff
-max-line-length = 119
+[tool.black]
+line-length = 120
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -38,53 +37,18 @@ omit = ["config*.py"]
 [tool.setuptools.package-data]
 "pickomino_env" = ["py.typed"]
 
-[tool.pylint.format]
-max-line-length = 120
-
-[tool.pylint."messages control"]
-enable = [
-    "bad-inline-option",
-    "deprecated-pragma",
-    "file-ignored",
-    "use-symbolic-message-instead",
-    "useless-suppression",
-]
-disable = ["consider-using-assignment-expr"] # Assignments in a boolean expression is a bad idea
-include-naming-hints = true
-
-[tool.pylint.master]
-fail-on = ["I"]
-load-plugins = [
-    "pylint.extensions.bad_builtin",
-    "pylint.extensions.broad_try_clause",
-    "pylint.extensions.check_elif",
-    "pylint.extensions.code_style",
-    "pylint.extensions.comparison_placement",
-    "pylint.extensions.confusing_elif",
-    "pylint.extensions.consider_refactoring_into_while_condition",
-    "pylint.extensions.consider_ternary_expression",
-    "pylint.extensions.dict_init_mutate",
-    "pylint.extensions.docparams",
-    "pylint.extensions.docstyle",
-    "pylint.extensions.dunder",
-    "pylint.extensions.eq_without_hash",
-    "pylint.extensions.empty_comment",
-    "pylint.extensions.for_any_all",
-    "pylint.extensions.magic_value",
-    "pylint.extensions.mccabe",
-    "pylint.extensions.no_self_use",
-    "pylint.extensions.overlapping_exceptions",
-    "pylint.extensions.private_import",
-    "pylint.extensions.redefined_loop_name",
-    "pylint.extensions.redefined_variable_type",
-    "pylint.extensions.set_membership",
-    "pylint.extensions.typing",
-    "pylint.extensions.while_used"
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+exclude = [
+    "tests/",
+    "local/"
 ]
 
-[tool.pylint.variables]
-generated-members = ["cv2", "pygame"]
-allow-global-unused-variables = false
-
-[tool.pylint.string]
-check-quote-consistency = true
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "EM101", # Exception message assignment is unnecessary.
+    "D203", # Conflicts with D211 (no blank line before class wins)
+    "D213", # Conflicts with D212 (first line summary wins)
+]
