@@ -113,7 +113,7 @@ class Checker:
         self._terminated = False
         self._truncated = False
 
-        # Check action DICE_VALUES are within range
+        # Check action values are within range
         if action[ACTION_INDEX_DICE] not in range(6) or action[ACTION_INDEX_ROLL] not in range(2):
             self._terminated = True
             self._explanation = RED + "Terminated: Action index not in range" + NO_RED
