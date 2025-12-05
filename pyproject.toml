@@ -23,7 +23,7 @@ where = ["."]
 include = ["pickomino_env*"]
 
 [tool.pydocstyle]
-convention = "numpy"
+convention = "google"
 
 [flake8]
 ignore = ["E203", "W503", "E128", "E129"]  # Black wins, not read :-( switch to ruff

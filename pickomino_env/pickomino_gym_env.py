@@ -25,6 +25,32 @@ from pickomino_env.modules.player import Player
 from pickomino_env.modules.renderer import Renderer
 from pickomino_env.modules.table_tiles import TableTiles
 
+# Template Google convention file docstring.
+# """Brief module description.
+
+# This module handles X feature for the environment.
+# """
+
+# Template Google convention class docstring.
+# class Renderer:
+#     """Render the game board and state.
+
+#     Attributes:
+#         window: Pygame window surface.
+#         tiles: Game tiles handler.
+#     """
+
+# Template Google convention method docstring.
+# def step(self, action: int) -> dict:
+#     """Execute one environment step.
+
+#     Args:
+#         action: Agent's chosen action.
+
+#     Returns:
+#         Observation dict with the step result.
+#     """
+
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
     """The environment class with Gymnasium API."""
