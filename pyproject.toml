@@ -135,5 +135,3 @@ reportMissingImports = "none"
 
 # reportAttributeAccessIssue = "none" # pyright provides false positives
 # reportArgumentType = "none"         # pyright provides false positives
-
-# reportPrivateUsage = "error"
