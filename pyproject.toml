@@ -7,7 +7,7 @@ name = "pickomino-env"
 version = "1.0.0"
 description = "Pickomino (Heckmeck) Gymnasium environment"
 readme = ""
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 authors = [{ name = "Jarl and Robin" }]
 dependencies = [
     "gymnasium>=1.2.2",
@@ -104,3 +104,43 @@ allow-global-unused-variables = false
 
 [tool.pylint.string]
 check-quote-consistency = true
+
+[tool.pyright]
+include = ["pickomino_env/**"]
+exclude = ["tests/**", "**/__pycache__"]
+strict = []
+
+typeCheckingMode = "strict"
+pythonVersion = "3.8"
+pythonPlatform = "All"
+
+# This is required as the CI pre-commit does not download the module (numpy, pygame, ...)
+#   Therefore, we have to ignore missing imports.
+reportMissingImports = "none"
+
+# Cannot infer types from unresolved imports in pre-commit environment
+# reportUnknownVariableType = "none"
+# reportUnknownMemberType = "none"
+
+# typeshedPath = "typeshed"
+# nableTypeIgnoreComments = true
+
+# This is required as the CI pre-commit does not download the module (here: numpy, pygame, ...)
+#   Therefore, we have to ignore missing imports.
+# reportMissingImports = "none"
+# Some modules are missing type stubs, which is an issue when running pyright locally.
+# reportMissingTypeStubs = false
+# For warning and error, will raise an error when running pyright locally.
+# reportInvalidTypeVarUse = "none"
+
+# reportAttributeAccessIssue = "none" # pyright provides false positives
+# reportArgumentType = "none"         # pyright provides false positives
+
+# reportPrivateUsage = "error"
+
+# reportIndexIssue = "error"           # TODO fix one by one
+# reportReturnType = "error"           # TODO fix one by one
+# reportCallIssue = "error"            # TODO fix one by one
+# reportOperatorIssue = "error"        # TODO fix one by one
+# reportOptionalMemberAccess = "error" # TODO fix one by one
+# reportAssignmentType = "error"       # TODO fix one by one
