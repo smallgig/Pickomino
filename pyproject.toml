@@ -137,10 +137,3 @@ reportMissingImports = "none"
 # reportArgumentType = "none"         # pyright provides false positives
 
 # reportPrivateUsage = "error"
-
-# reportIndexIssue = "error"           # TODO fix one by one
-# reportReturnType = "error"           # TODO fix one by one
-# reportCallIssue = "error"            # TODO fix one by one
-# reportOperatorIssue = "error"        # TODO fix one by one
-# reportOptionalMemberAccess = "error" # TODO fix one by one
-# reportAssignmentType = "error"       # TODO fix one by one
