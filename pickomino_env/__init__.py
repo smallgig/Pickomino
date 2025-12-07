@@ -1,6 +1,6 @@
 """Gymnasium Environment for the game Pickomino, Heckmeck in German."""
 
-from gymnasium.envs.registration import register
+from gymnasium.envs.registration import register  # pyright: ignore[reportUnknownVariableType]
 
 # Only register. Gymnasium loads the class with gym.make()
 register(
