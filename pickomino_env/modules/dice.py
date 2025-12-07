@@ -4,8 +4,6 @@ from __future__ import annotations
 
 __all__ = ["Dice"]
 
-import random as rand
-
 import numpy as np
 
 from pickomino_env.modules.constants import LARGEST_TILE  # Game constant.
@@ -18,8 +16,9 @@ class Dice:
     This example means that three threes, four fours and one worm die face have been collected.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, random_generator: np.random.Generator | None = None) -> None:
         """Initialize Dice."""
+        self._random_generator = random_generator or np.random.default_rng()
         self.values: list[int] = [1, 2, 3, 4, 5, 5]  # Worm has value 5.
         self._n_dice: int = 8
         self._collected: list[int] = [
@@ -50,7 +49,7 @@ class Dice:
         self._rolled = [0, 0, 0, 0, 0, 0]
 
         for _ in range(self._n_dice - sum(self._collected)):
-            self._rolled[rand.randint(0, 5)] += 1  # noqa: RUF100, S311 Game dice doesn't need cryptographic random.
+            self._rolled[self._random_generator.integers(0, 6)] += 1
 
         return self._rolled
 
