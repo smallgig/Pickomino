@@ -5,7 +5,6 @@ from __future__ import annotations
 __all__ = ["Bot"]
 
 import numpy as np
-from numpy.ma.core import argmax
 
 from pickomino_env.modules.constants import MIN_ROLLS_FOR_WORM_STRATEGY
 
@@ -58,7 +57,7 @@ class Bot:
                 rolled[ind] = 0
         # 2. Otherwise, take the die side that contributes the most points.
         contribution = np.multiply(rolled, values)
-        action_dice = int(argmax(contribution))
+        action_dice = int(np.argmax(contribution))  # pyright:ignore[reportUnknownMemberType, reportUnknownArgumentType]
 
         # 1. On or after the third roll, take worms if you can.
         if self.roll_counter >= MIN_ROLLS_FOR_WORM_STRATEGY and not collected[5] and rolled[5]:

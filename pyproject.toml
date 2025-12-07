@@ -118,6 +118,13 @@ pythonPlatform = "All"
 #   Therefore, we have to ignore missing imports.
 reportMissingImports = "none"
 
+# reportUnknownVariableType = "none"
+# reportUnknownMemberType = "none"
+reportUnknownParameterType = "none"
+# reportUnknownArgumentType = "none"
+
+# reportArgumentType = "none"         # pyright provides false positives
+
 # Cannot infer types from unresolved imports in pre-commit environment
 # reportUnknownVariableType = "none"
 # reportUnknownMemberType = "none"
@@ -132,6 +139,3 @@ reportMissingImports = "none"
 # reportMissingTypeStubs = false
 # For warning and error, will raise an error when running pyright locally.
 # reportInvalidTypeVarUse = "none"
-
-# reportAttributeAccessIssue = "none" # pyright provides false positives
-# reportArgumentType = "none"         # pyright provides false positives

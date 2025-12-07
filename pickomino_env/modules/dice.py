@@ -18,7 +18,7 @@ class Dice:
 
     def __init__(self, random_generator: np.random.Generator | None = None) -> None:
         """Initialize Dice."""
-        self._random_generator = random_generator or np.random.default_rng()
+        self._random_generator = random_generator or np.random.default_rng()  # pyright: ignore[reportUnknownMemberType]
         self.values: list[int] = [1, 2, 3, 4, 5, 5]  # Worm has value 5.
         self._n_dice: int = 8
         self._collected: list[int] = [
@@ -49,7 +49,7 @@ class Dice:
         self._rolled = [0, 0, 0, 0, 0, 0]
 
         for _ in range(self._n_dice - sum(self._collected)):
-            self._rolled[self._random_generator.integers(0, 6)] += 1
+            self._rolled[self._random_generator.integers(0, 6)] += 1  # pyright:ignore[reportUnknownMemberType]
 
         return self._rolled
 
@@ -59,7 +59,7 @@ class Dice:
         has_worms = self._collected[-1] > 0
         # Multiply the frequency of each die face with its value
         current_score = int(
-            np.dot(self.values, self._collected) if self._collected else 0,
+            np.dot(self.values, self._collected) if self._collected else 0,  # pyright: ignore[reportUnknownMemberType]
         )
         # Using the dice sum as an index in [21..36], higher rolls can only pick 36 or lower.
         current_score = int(min(current_score, LARGEST_TILE))
