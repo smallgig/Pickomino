@@ -107,7 +107,7 @@ check-quote-consistency = true
 
 [tool.pyright]
 include = ["pickomino_env/**"]
-exclude = ["tests/**", "**/__pycache__"]
+exclude = ["test/**", "**/__pycache__"]
 strict = []
 
 typeCheckingMode = "strict"
