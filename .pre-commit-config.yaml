@@ -64,3 +64,16 @@ repos:
         additional_dependencies: [ "pytest==8.4.2" ]
         pass_filenames: false
         stages: [ pre-push ]  # Only run on push instead of every commit.
+      - id: xenon
+        name: xenon
+        language: python
+        entry: xenon
+        pass_filenames: false
+        types: [ python ]
+        additional_dependencies: [ "xenon==0.9.3" ]
+        args:
+          - --max-absolute=B
+          - --max-modules=A
+          - --max-average=A
+          - --exclude=**/checker.py  # Remove once the checker module is refactored.
+          - pickomino_env/
