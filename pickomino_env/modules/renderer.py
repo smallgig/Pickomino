@@ -96,7 +96,7 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
         if self._render_mode == RENDER_MODE_HUMAN:
             self._render_human()
         elif self._render_mode == RENDER_MODE_RGB_ARRAY:
-            return self._render_rgb_array()
+            return self._render_rgb_array()  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         return None
 
     def _render_human(self) -> None:
@@ -105,6 +105,12 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
             pygame.init()
             self._window = pygame.display.set_mode(self._size)
             self._clock = pygame.time.Clock()
+
+        # Check for window close event
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.close()
+                return
 
         # Draw background.
         self._window.fill(BACKGROUND_COLOR)  # Lighter, softer green.
@@ -123,8 +129,10 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
             raise RuntimeError(  # noqa: RUF100, TRY003 message variable unnecessary.
                 "Window not initialised.",
             )
-        surface = pygame.surfarray.array3d(self._window)
-        return np.transpose(surface, (1, 0, 2))
+        surface = pygame.surfarray.array3d(  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
+            self._window,
+        )
+        return np.transpose(surface, (1, 0, 2))  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
 
     def _draw_players(self) -> None:
         """Draw player names and their top tile."""

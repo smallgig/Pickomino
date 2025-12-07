@@ -93,7 +93,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
     def render(self) -> np.ndarray | list[np.ndarray] | None:  # type: ignore[override]
         """Render the environment."""
-        return self._renderer.render(
+        return self._renderer.render(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
             self._dice,
             self._players,
             self._table_tiles,
@@ -108,17 +108,20 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
     def _tiles_vector(self) -> np.ndarray[Any, np.dtype[Any]]:
         """Return tiles table as a flat binary vector of length 16 for indexes 21..36."""
-        return np.array(
+        return np.array(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
             [1 if self._table_tiles.get_table()[i] else 0 for i in range(21, 37)],
             dtype=np.int8,
         )
 
     def _current_obs(self) -> dict[str, object]:
         return {
-            "dice_collected": np.array(self._dice.get_collected()),
-            "dice_rolled": np.array(self._dice.get_rolled()),
+            "dice_collected": np.array(self._dice.get_collected()),  # pyright: ignore[reportUnknownMemberType]
+            "dice_rolled": np.array(self._dice.get_rolled()),  # pyright: ignore[reportUnknownMemberType]
             "tiles_table": self._tiles_vector(),
-            "tile_players": np.array([p.show() for p in self._players], dtype=np.int8),
+            "tile_players": np.array(  # pyright: ignore[reportUnknownMemberType]
+                [p.show() for p in self._players],
+                dtype=np.int8,
+            ),
         }
 
     def _get_info(self) -> dict[str, object]:
@@ -129,7 +132,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         """
         return {
-            "dice": self._dice,
+            "dice_collected": list(self._dice.get_collected()),
+            "dice_rolled": list(self._dice.get_rolled()),
             "terminated": self._terminated,
             "tiles_table_vec": self._tiles_vector(),
             "smallest_tile": self._table_tiles.smallest(),
@@ -176,12 +180,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             options: Additional configuration (unused in this example)
 
         Returns:
-            tuple: (observation, info) for the initial state
+            observation, info for the initial state
 
         """
         # IMPORTANT. Must call this first. Seed the random number generator.
         super().reset(seed=seed)
-        self._dice = Dice()
+        self._dice = Dice(random_generator=self.np_random)
         self._checker = Checker(self._dice, self._players, self._table_tiles)
         self._you = Player(bot=False, name="You")
         self._players = []
@@ -305,7 +309,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                     )
                     self._step_bot(bot_action)
                 if self._render_mode is not None:
-                    self.render()
+                    self.render()  # pyright: ignore[reportUnknownMemberType]
                     time.sleep(RENDER_DELAY)
             bot_action = 0, 0
             self._current_player_index += 1
@@ -375,3 +379,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             self._truncated,
             self._get_info(),
         )
+
+    def close(self) -> None:
+        """Close the environment and renderer."""
+        self._renderer.close()

@@ -1,6 +1,7 @@
 #file: noinspection YAMLSchemaValidation
 # Keeping repository quality high.
-exclude: ^test/
+exclude: ^(test/|examples/)
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -41,6 +42,18 @@ repos:
       - id: ruff-format
   - repo: local
     hooks:
+      - id: pyright
+        name: pyright
+        language: python
+        entry: >
+          python -c "import subprocess, sys;
+          subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', '.']);
+          sys.exit(subprocess.call([sys.executable, '-m', 'pyright']))"
+        pass_filenames: false
+        types: [ python ]
+        additional_dependencies: [ "pyright==1.1.407" ]
+        args:
+          - --project=pyproject.toml
       - id: pytest
         name: pytest
         language: python
@@ -51,3 +64,16 @@ repos:
         additional_dependencies: [ "pytest==8.4.2" ]
         pass_filenames: false
         stages: [ pre-push ]  # Only run on push instead of every commit.
+      - id: xenon
+        name: xenon
+        language: python
+        entry: xenon
+        pass_filenames: false
+        types: [ python ]
+        additional_dependencies: [ "xenon==0.9.3" ]
+        args:
+          - --max-absolute=B
+          - --max-modules=A
+          - --max-average=A
+          - --exclude=**/checker.py  # Remove once the checker module is refactored.
+          - pickomino_env/
