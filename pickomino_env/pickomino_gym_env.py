@@ -11,7 +11,6 @@ import gymnasium as gym
 import numpy as np
 
 from pickomino_env.modules.bot import Bot
-from pickomino_env.modules.checker import Checker
 from pickomino_env.modules.constants import (  # Coloured printouts, game and action constants.
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
@@ -22,10 +21,8 @@ from pickomino_env.modules.constants import (  # Coloured printouts, game and ac
     RENDER_DELAY,
     SMALLEST_TILE,
 )
-from pickomino_env.modules.dice import Dice
-from pickomino_env.modules.player import Player
+from pickomino_env.modules.game import Game
 from pickomino_env.modules.renderer import Renderer
-from pickomino_env.modules.table_tiles import TableTiles
 
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
@@ -37,21 +34,22 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # Have only on complex variable with the return value of the step function.
         self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
         self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players)-1 instead.
-        self._you: Player = Player(
+        self._game: Game = Game()
+        self._you: Game.Player = Game.Player(
             bot=False,
             name="You",
         )  # Put this in the player list and remove it from here.
-        self._players: list[Player] = []
+        self._players: list[Game.Player] = []
         self._terminated: bool = False
         self._truncated: bool = False
         self._failed_attempt: bool = False  # Candidate for class Checker.
         self._explanation: str = "Constructor"  # The reason, why the terminated, truncated or failed attempt is set.
         self._current_player_index: int = 0  # 0 for the player, 1 or more for bots.
-        self._dice: Dice = Dice()
-        self._table_tiles: TableTiles = (
-            TableTiles()
+        self._dice: Game.Dice = Game.Dice()
+        self._table_tiles: Game.TableTiles = (
+            Game.TableTiles()
         )  # Consider a complex class Table consisting of table tiles and players tiles.
-        self._checker: Checker = Checker(self._dice, self._players, self._table_tiles)
+        self._checker: Game.Checker = Game.Checker(self._dice, self._players, self._table_tiles)
         self._create_players()  # Do not move this to after the observation space as Stable Baselines 3 then fails.
         # Define what the AI Agent can observe.
         # Dict space gives us structured, human-readable observations.
@@ -104,7 +102,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         self._players.append(self._you)
         for i in range(self._number_of_bots):
-            self._players.append(Player(bot=True, name=names[i]))
+            self._players.append(Game.Player(bot=True, name=names[i]))
 
     def _tiles_vector(self) -> np.ndarray[Any, np.dtype[Any]]:
         """Return tiles table as a flat binary vector of length 16 for indexes 21..36."""
@@ -145,8 +143,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
     def _soft_reset(self) -> None:
         """Clear collected and rolled and roll again."""
-        self._dice = Dice()
-        self._checker = Checker(self._dice, self._players, self._table_tiles)
+        self._dice = Game.Dice()
+        self._checker = Game.Checker(self._dice, self._players, self._table_tiles)
         self._failed_attempt = False
         self._dice.roll()
 
@@ -185,12 +183,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         """
         # IMPORTANT. Must call this first. Seed the random number generator.
         super().reset(seed=seed)
-        self._dice = Dice(random_generator=self.np_random)
-        self._checker = Checker(self._dice, self._players, self._table_tiles)
-        self._you = Player(bot=False, name="You")
+        self._dice = Game.Dice(random_generator=self.np_random)
+        self._checker = Game.Checker(self._dice, self._players, self._table_tiles)
+        self._you = Game.Player(bot=False, name="You")
         self._players = []
         self._create_players()
-        self._table_tiles = TableTiles()
+        self._table_tiles = Game.TableTiles()
         self._failed_attempt = False
         self._terminated = False
         self._truncated = False
