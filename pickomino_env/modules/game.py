@@ -75,10 +75,7 @@ class Game:  # pylint: disable=too-few-public-methods
             # Check if there is at least one worm
             has_worms = self._collected[-1] > 0
             # Multiply the frequency of each die face with its value
-            current_score = int(
-                np.dot(self.values, self._collected) if self._collected else 0,
-                # pyright: ignore[reportUnknownMemberType]
-            )
+            current_score = int(np.dot(self.values, self._collected))  # pyright: ignore[reportUnknownMemberType]
             # Using the dice sum as an index in [21..36], higher rolls can only pick 36 or lower.
             current_score = int(min(current_score, LARGEST_TILE))
             return current_score, has_worms
