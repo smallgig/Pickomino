@@ -46,6 +46,8 @@ __all__ = [
     "TILE_WIDTH",
     "WINDOW_HEIGHT",
     "WINDOW_WIDTH",
+    "WORM_INDEX",
+    "WORM_VALUE",
 ]
 
 from typing import Final
@@ -61,6 +63,8 @@ SMALLEST_TILE: Final[int] = 21
 LARGEST_TILE: Final[int] = 36
 NUM_DICE: Final[int] = 8
 NUM_DIE_FACES: Final[int] = 6
+WORM_INDEX: Final[int] = 5
+WORM_VALUE: Final[int] = 5
 
 # Action constants.
 ACTION_INDEX_DICE: Final[int] = 0
