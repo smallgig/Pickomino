@@ -141,7 +141,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             "bot_scores": [player.end_score() for player in self._players[1:]],
         }
 
-    def _soft_reset(self) -> None:
+    def _end_of_turn_reset(self) -> None:
         """Clear collected and rolled and roll again."""
         self._dice = Game.Dice()
         self._checker = Game.Checker(self._dice, self._players, self._table_tiles)
@@ -242,7 +242,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # A failed attempt or 21 was not reached. Return the tile to the table.
         if self._failed_attempt:
             return_value = self._remove_tile_from_player()
-            self._soft_reset()
+            self._end_of_turn_reset()
             return return_value
         # Environment takes the highest tile on the table.
         # Check if any tile can be picked from another player.
@@ -289,7 +289,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
                 return_value = self._remove_tile_from_player()
                 self._explanation = "No available tile on the table to take"
 
-        self._soft_reset()
+        self._end_of_turn_reset()
         return return_value
 
     def _play_bot(self) -> None:
@@ -319,7 +319,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
 
         # Stop immediately if action was not allowed or similar.
         if self._terminated or self._truncated:
-            self._soft_reset()
+            self._end_of_turn_reset()
             return
 
         # Collect and roll the dice.
@@ -328,7 +328,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         # Stopp rolling, move tile.
         if self._action[ACTION_INDEX_ROLL] == ACTION_STOP or self._failed_attempt:
             self._step_tiles()
-            self._soft_reset()
+            self._end_of_turn_reset()
 
         # Game over check.
         if not self._table_tiles.highest():
