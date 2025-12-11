@@ -69,8 +69,8 @@ class Bot:
         if self.roll_counter >= MIN_ROLLS_FOR_WORM_STRATEGY and not collected[WORM_INDEX] and rolled[WORM_INDEX]:
             action_dice = WORM_INDEX
 
-        # 3. Quit as soon as you can take a tile.
-        if sum(np.multiply(collected, values)) + contribution[action_dice] >= smallest:
+        # 3. Quit as soon as you can take a tile: dice sum for a visible tile reached and worm collected.
+        if sum(np.multiply(collected, values)) + contribution[action_dice] >= smallest and collected[WORM_INDEX]:
             action_roll = ACTION_STOP
 
         return action_dice, action_roll
