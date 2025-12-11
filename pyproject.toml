@@ -117,25 +117,6 @@ pythonPlatform = "All"
 # This is required as the CI pre-commit does not download the module (numpy, pygame, ...)
 #   Therefore, we have to ignore missing imports.
 reportMissingImports = "none"
-
-# reportUnknownVariableType = "none"
-# reportUnknownMemberType = "none"
-reportUnknownParameterType = "none"
-# reportUnknownArgumentType = "none"
-
-# reportArgumentType = "none"         # pyright provides false positives
-
 # Cannot infer types from unresolved imports in pre-commit environment
-# reportUnknownVariableType = "none"
-# reportUnknownMemberType = "none"
-
-# typeshedPath = "typeshed"
-# nableTypeIgnoreComments = true
-
-# This is required as the CI pre-commit does not download the module (here: numpy, pygame, ...)
-#   Therefore, we have to ignore missing imports.
-# reportMissingImports = "none"
-# Some modules are missing type stubs, which is an issue when running pyright locally.
-# reportMissingTypeStubs = false
-# For warning and error, will raise an error when running pyright locally.
-# reportInvalidTypeVarUse = "none"
+reportUnknownMemberType = "none"
+reportUnknownParameterType = "none"

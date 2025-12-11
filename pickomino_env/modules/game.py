@@ -1,11 +1,12 @@
 """Class Game."""
 
+# ruff: noqa: I001
+
 from __future__ import annotations
 
-__all__ = ["Game"]
-
 import numpy as np
-from pickomino_env.modules.constants import (  # Coloured printouts, game and action constants.
+
+from pickomino_env.modules.constants import (
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
     ACTION_ROLL,
@@ -19,13 +20,14 @@ from pickomino_env.modules.constants import (  # Coloured printouts, game and ac
     SMALLEST_TILE,
 )
 
+__all__ = ["Game"]
 
-class Game:
+
+class Game:  # pylint: disable=too-few-public-methods
     """Class Game."""
 
     class Dice:
-        """Class Dice.
-        Represents a collection of die face frequencies.
+        """Class Dice. Represents a collection of die face frequencies.
 
         An example for eight dice with six faces is: [0, 0, 3, 4, 0, 1]
         This example means that three threes, four fours and one worm die face have been collected.
@@ -33,7 +35,7 @@ class Game:
 
         def __init__(self, random_generator: np.random.Generator | None = None) -> None:
             """Initialize Dice."""
-            self._random_generator = random_generator or np.random.default_rng()  # pyright: ignore[reportUnknownMemberType]
+            self._random_generator = random_generator or np.random.default_rng()
             self.values: list[int] = [1, 2, 3, 4, 5, 5]  # Worm has value 5.
             self._n_dice: int = 8
             self._collected: list[int] = [
@@ -182,7 +184,7 @@ class Game:
             """Show all tiles on the player stack."""
             if self.tile_stack:
                 return self.tile_stack
-            return [42]  # Invalid value helps debugging.
+            return [0]  # Zero indicates the stack is empty.
 
         def add_tile(self, tile: int) -> None:
             """Add a tile to the player stack."""
