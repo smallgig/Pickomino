@@ -11,7 +11,7 @@ import gymnasium as gym
 import numpy as np
 
 from pickomino_env.modules.bot import Bot
-from pickomino_env.modules.constants import (  # Coloured printouts, game and action constants.
+from pickomino_env.modules.constants import (  # Coloured printouts, game and action constants. ###
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
     ACTION_ROLL,
