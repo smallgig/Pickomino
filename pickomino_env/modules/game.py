@@ -321,6 +321,11 @@ class Game:  # pylint: disable=too-few-public-methods
         """Initialize Game."""
         self.dice: Game.Dice = Game.Dice()
         self.table_tiles: Game.TableTiles = Game.TableTiles()
-        self.player: Game.Player = Game.Player(bot=False, name="You")
+        self.you: Game.Player = Game.Player(bot=False, name="You")
         self.players: list[Game.Player] = []
         self.checker = Game.Checker(self.dice, self.players, self.table_tiles)
+        self.terminated: bool = False
+        self.truncated: bool = False
+        self.failed_attempt: bool = False  # Candidate for class Checker.
+        self.explanation: str = "Constructor"  # The reason, why the terminated, truncated or failed attempt is set.
+        self.current_player_index: int = 0  # 0 for the player, 1 or more for bots.
