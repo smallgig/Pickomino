@@ -48,9 +48,7 @@ from pickomino_env.modules.constants import (
 )
 
 if TYPE_CHECKING:
-    from pickomino_env.modules.dice import Dice
-    from pickomino_env.modules.player import Player
-    from pickomino_env.modules.table_tiles import TableTiles
+    from pickomino_env.modules.game import Game
 
 warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 # E402: module level import not at the top of the file. Needed to suppress warning before import.
@@ -69,9 +67,9 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
         # Screen size
         self._size: tuple[int, int] = (WINDOW_WIDTH, WINDOW_HEIGHT)
 
-        self._dice: Dice | None = None
-        self._players: list[Player] | None = None
-        self._tiles: TableTiles | None = None
+        self._dice: Game.Dice | None = None
+        self._players: list[Game.Player] | None = None
+        self._tiles: Game.TableTiles | None = None
         self._current_player_index: int | None = None
         self._sprite_dir = files("pickomino_env").joinpath("sprites")
         # Lazy initialization: pygame not initialized during __init__(), so create font on the first render.
@@ -79,9 +77,9 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
 
     def render(
         self,
-        dice: Dice,
-        players: list[Player],
-        tiles: TableTiles,
+        dice: Game.Dice,
+        players: list[Game.Player],
+        tiles: Game.TableTiles,
         current_player_index: int,
     ) -> np.ndarray | list[np.ndarray] | None:
         """Render the environment."""

@@ -75,5 +75,4 @@ repos:
           - --max-absolute=B
           - --max-modules=A
           - --max-average=A
-          - --exclude=**/checker.py  # Remove once the checker module is refactored.
           - pickomino_env/

@@ -6,7 +6,13 @@ __all__ = ["Bot"]
 
 import numpy as np
 
-from pickomino_env.modules.constants import MIN_ROLLS_FOR_WORM_STRATEGY
+from pickomino_env.modules.constants import (
+    ACTION_ROLL,
+    ACTION_STOP,
+    MIN_ROLLS_FOR_WORM_STRATEGY,
+    WORM_INDEX,
+    WORM_VALUE,
+)
 
 
 # pylint: disable=too-few-public-methods
@@ -27,7 +33,7 @@ class Bot:
         smallest: int,
     ) -> tuple[int, int]:
         """Policy function."""
-        action = 0, 0
+        action = ACTION_ROLL, WORM_INDEX
         if self.current_policy == self.HEURISTIC:
             action = self._heuristic_policy(rolled, collected, smallest)
         return action
@@ -44,9 +50,9 @@ class Bot:
         2. Otherwise, take the die side that contributes the most points.
         3. Quit as soon as you can take a tile.
         """
-        action_roll = 0
+        action_roll = ACTION_ROLL
         self.roll_counter += 1
-        values = [1, 2, 3, 4, 5, 5]
+        values = [1, 2, 3, 4, 5, WORM_VALUE]
 
         if sum(collected):
             self.roll_counter = 0
@@ -60,11 +66,11 @@ class Bot:
         action_dice = int(np.argmax(contribution))  # pyright:ignore[reportUnknownMemberType, reportUnknownArgumentType]
 
         # 1. On or after the third roll, take worms if you can.
-        if self.roll_counter >= MIN_ROLLS_FOR_WORM_STRATEGY and not collected[5] and rolled[5]:
-            action_dice = 5
+        if self.roll_counter >= MIN_ROLLS_FOR_WORM_STRATEGY and not collected[WORM_INDEX] and rolled[WORM_INDEX]:
+            action_dice = WORM_INDEX
 
-        # 3. Quit as soon as you can take a tile.
-        if sum(np.multiply(collected, values)) + contribution[action_dice] >= smallest:
-            action_roll = 1
+        # 3. Quit as soon as you can take a tile: dice sum for a visible tile reached and worm collected.
+        if sum(np.multiply(collected, values)) + contribution[action_dice] >= smallest and collected[WORM_INDEX]:
+            action_roll = ACTION_STOP
 
         return action_dice, action_roll
