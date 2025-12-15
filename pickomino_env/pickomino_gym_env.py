@@ -25,7 +25,7 @@ from pickomino_env.modules.game import Game
 from pickomino_env.modules.renderer import Renderer
 
 
-class PickominoEnv(gym.Env):  # type: ignore[type-arg] #
+class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     """The environment class with Gymnasium API."""
 
     def __init__(self, number_of_bots: int, render_mode: str | None = None) -> None:
