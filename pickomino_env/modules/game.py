@@ -23,7 +23,7 @@ from pickomino_env.modules.constants import (
 __all__ = ["Game"]
 
 
-class Game:  # pylint: disable=too-few-public-methods
+class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance-attributes.
     """Class Game."""
 
     class Dice:

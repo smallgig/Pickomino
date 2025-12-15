@@ -25,7 +25,7 @@ from pickomino_env.modules.game import Game
 from pickomino_env.modules.renderer import Renderer
 
 
-class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-many-instance-attributes.
+class PickominoEnv(gym.Env):  # type: ignore[type-arg] #
     """The environment class with Gymnasium API."""
 
     def __init__(self, number_of_bots: int, render_mode: str | None = None) -> None:
@@ -141,7 +141,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
             ].remove_tile()  # Remove the tile from the player.
             self._game.table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
             worm_index = tile_to_return - SMALLEST_TILE
-            return_value = -self._game.table_tiles.worm_values[worm_index]  # Reward is MINUS the value of the worm value.
+            return_value = -self._game.table_tiles.worm_values[
+                worm_index
+            ]  # Reward is MINUS the value of the worm value.
             # If the returned tile is not the highest, turn the highest tile face down by setting it to False.
             # Search for the highest tile to turn.
             highest = self._game.table_tiles.highest()
@@ -293,7 +295,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
     def _step_bot(self, action: tuple[int, int]) -> None:
         """Step the bot."""
         self._action = action
-        self._game.terminated, self._game.truncated, self._game.explanation = self._game.checker.action_is_allowed(action)
+        self._game.terminated, self._game.truncated, self._game.explanation = self._game.checker.action_is_allowed(
+            action,
+        )
 
         # Stop immediately if action was not allowed or similar.
         if self._game.terminated or self._game.truncated:
@@ -321,7 +325,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] # pylint: disable=too-man
         self._action = action
         reward = 0
         # Check legal move before doing a step.
-        self._game.terminated, self._game.truncated, self._game.explanation = self._game.checker.action_is_allowed(action)
+        self._game.terminated, self._game.truncated, self._game.explanation = self._game.checker.action_is_allowed(
+            action,
+        )
 
         # Illegal move
         if self._game.terminated or self._game.truncated:
