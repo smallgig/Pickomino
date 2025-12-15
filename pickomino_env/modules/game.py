@@ -317,9 +317,9 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
             return self._terminated, self._truncated, self._explanation
             # Get to here:Action allowed try to take a tile.
 
-    def __init__(self) -> None:
+    def __init__(self, random_generator: np.random.Generator | None = None) -> None:
         """Initialize Game."""
-        self.dice: Game.Dice = Game.Dice()
+        self.dice: Game.Dice = Game.Dice(random_generator)
         self.table_tiles: Game.TableTiles = Game.TableTiles()
         self.you: Game.Player = Game.Player(bot=False, name="You")
         self.players: list[Game.Player] = []

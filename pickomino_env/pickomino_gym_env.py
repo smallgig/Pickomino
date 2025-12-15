@@ -170,7 +170,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg] #
         """
         # IMPORTANT. Must call this first. Seed the random number generator.
         super().reset(seed=seed)
-        self._game = Game()
+        self._game = Game(random_generator=self.np_random)
         self._create_players()
         self._game.dice.roll()
         return self._current_obs(), self._get_info()
