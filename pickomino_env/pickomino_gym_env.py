@@ -295,8 +295,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     def _step_bot(self, action: tuple[int, int]) -> None:
         """Step the bot."""
         self._action = action
-        self._game.terminated, self._game.truncated, self._game.explanation = self._game.rule_checker.action_is_allowed(
-            action,
+        self._game.terminated, self._game.truncated, self._game.explanation = (
+            self._game.action_checker.action_is_allowed(action)
         )
 
         # Stop immediately if action was not allowed or similar.
@@ -325,8 +325,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         self._action = action
         reward = 0
         # Check legal move before doing a step.
-        self._game.terminated, self._game.truncated, self._game.explanation = self._game.rule_checker.action_is_allowed(
-            action,
+        self._game.terminated, self._game.truncated, self._game.explanation = (
+            self._game.action_checker.action_is_allowed(action)
         )
 
         # Illegal move

@@ -282,6 +282,16 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
 
             return self._failed_attempt, self._explanation
 
+    class ActionChecker:
+        """Class ActionChecker."""
+
+        def __init__(self, dice: Game.Dice) -> None:
+            """Initialize ActionChecker."""
+            self._terminated = False
+            self._truncated = False
+            self._explanation = ""
+            self._dice = dice
+
         def action_is_allowed(self, action: tuple[int, int]) -> tuple[bool, bool, str]:
             """Check if action is allowed."""
             self._terminated = False
@@ -323,6 +333,7 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
         self.table_tiles: Game.TableTiles = Game.TableTiles()
         self.you: Game.Player = Game.Player(bot=False, name="You")
         self.players: list[Game.Player] = []
+        self.action_checker = Game.ActionChecker(self.dice)
         self.rule_checker = Game.RuleChecker(self.dice, self.players, self.table_tiles)
         self.terminated: bool = False
         self.truncated: bool = False
