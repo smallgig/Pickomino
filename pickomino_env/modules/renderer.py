@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 __all__ = ["Renderer"]
 # pygame internally uses deprecated pkg_resources
 # See: https://setuptools.pypa.io/en/latest/pkg_resources.html
@@ -46,16 +44,14 @@ from pickomino_env.modules.constants import (
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
 )
-
-if TYPE_CHECKING:
-    from pickomino_env.modules.game import Game
+from pickomino_env.modules.game import Game
 
 warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 # E402: module level import not at the top of the file. Needed to suppress warning before import.
 import pygame  # noqa: RUF100, E402 # pylint: disable=wrong-import-position, wrong-import-order
 
 
-class Renderer:  # pylint: disable=too-many-instance-attributes
+class Renderer:
     """Class Renderer."""
 
     def __init__(self, render_mode: str | None = None) -> None:
@@ -67,10 +63,7 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
         # Screen size
         self._size: tuple[int, int] = (WINDOW_WIDTH, WINDOW_HEIGHT)
 
-        self._dice: Game.Dice | None = None
-        self._players: list[Game.Player] | None = None
-        self._tiles: Game.TableTiles | None = None
-        self._current_player_index: int | None = None
+        self._game: Game = Game()
         self._sprite_dir = files("pickomino_env").joinpath("sprites")
         # Lazy initialization: pygame not initialized during __init__(), so create font on the first render.
         self._dice_font: pygame.font.Font | None = None
@@ -83,10 +76,10 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
         current_player_index: int,
     ) -> np.ndarray | list[np.ndarray] | None:
         """Render the environment."""
-        self._dice = dice
-        self._players = players
-        self._tiles = tiles
-        self._current_player_index = current_player_index
+        self._game.dice = dice
+        self._game.players = players
+        self._game.table_tiles = tiles
+        self._game.current_player_index = current_player_index
 
         if self._render_mode is None:
             return None
@@ -134,16 +127,16 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
 
     def _draw_players(self) -> None:
         """Draw player names and their top tile."""
-        if self._window is None or self._players is None:
+        if self._window is None:
             return
 
         font = pygame.font.Font(None, PLAYER_NAME_FONT_SIZE)
 
-        for index, player in enumerate(self._players):
+        for index, player in enumerate(self._game.players):
             x = index * PLAYER_WIDTH
 
             # Highlight background for the current player
-            if index == self._current_player_index:
+            if index == self._game.current_player_index:
                 pygame.draw.rect(
                     self._window,
                     PLAYER_HIGHLIGHT_COLOR,
@@ -166,7 +159,7 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
 
     def _draw_dice(self) -> None:
         """Draw the dice section with counts."""
-        if self._window is None or self._dice is None:
+        if self._window is None:
             return
 
         # Lazy initialization: pygame not initialized during __init__(), so create font on rendering.
@@ -187,17 +180,17 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
 
     def _draw_dice_counts(self, row_index: int) -> None:
         """Draw the label and counts."""
-        if self._dice is None or self._window is None or self._dice_font is None:
+        if self._window is None or self._dice_font is None:
             return
 
         # Draw labels.
         labels_y: int = DICE_SECTION_START_Y + DIE_SIZE + DICE_LABELS_OFFSET_Y + row_index * DICE_LABELS_SPACING
         if row_index == 0:  # Collected.
             label: str = DICE_LABEL_COLLECTED
-            counts: list[int] = self._dice.get_collected()
+            counts: list[int] = self._game.dice.get_collected()
         else:  # Rolled.
             label = DICE_LABEL_ROLLED
-            counts = self._dice.get_rolled()
+            counts = self._game.dice.get_rolled()
 
         label_surface = self._dice_font.render(label, True, FONT_COLOR)  # noqa: RUF100, FBT003 API constraint.
         self._window.blit(label_surface, (DICE_LABEL_X, labels_y))
@@ -216,10 +209,10 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
 
     def _draw_tiles(self) -> None:
         """Draw table tiles (21-36 in a grid at bottom)."""
-        if self._window is None or self._tiles is None:
+        if self._window is None:
             return
 
-        tiles = self._tiles.get_table()
+        tiles = self._game.table_tiles.get_table()
 
         for col, tile_num in enumerate(range(SMALLEST_TILE, LARGEST_TILE + 1)):
             if tiles[tile_num]:  # Only draw available tiles.
@@ -232,7 +225,7 @@ class Renderer:  # pylint: disable=too-many-instance-attributes
 
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
-        if self._window is None or self._tiles is None:
+        if self._window is None:
             return
 
         self._draw_players()
