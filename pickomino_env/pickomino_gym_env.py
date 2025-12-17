@@ -32,7 +32,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         """Construct the environment."""
         # The following is an idea for refactoring.
         # Have only on complex variable with the return value of the step function.
-        self._action: tuple[int, int] = 0, 0  # Candidate for class Checker.
+        self._action: tuple[int, int] = 0, 0  # Candidate for class RuleChecker.
         self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players)-1 instead.
         self._game: Game = Game()
         self._create_players()  # Do not move this to after the observation space as Stable Baselines 3 then fails.
@@ -129,7 +129,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     def _end_of_turn_reset(self) -> None:
         """Clear collected and rolled and roll again."""
         self._game.dice = Game.Dice()
-        self._game.checker = Game.Checker(self._game.dice, self._game.players, self._game.table_tiles)
+        self._game.rule_checker = Game.RuleChecker(self._game.dice, self._game.players, self._game.table_tiles)
+        self._game.action_checker = Game.ActionChecker(self._game.dice)
         self._game.failed_attempt = False
         self._game.dice.roll()
 
@@ -180,27 +181,27 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
         :param: action: The action to take: which dice to collect.
         """
-        self._game.failed_attempt, self._game.explanation = self._game.checker.set_failed_already_collected()
+        self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_already_collected()
 
         self._game.dice.collect(self._action[ACTION_INDEX_DICE])
 
-        self._game.failed_attempt, self._game.explanation = self._game.checker.set_failed_no_tile_to_take(
+        self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_no_tile_to_take(
             self._game.current_player_index,
             self._action,
         )
-        self._game.failed_attempt, self._game.explanation = self._game.checker.set_failed_no_worms(
+        self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_no_worms(
             self._action,
         )
 
         # Action is to roll
         if self._action[ACTION_INDEX_ROLL] == ACTION_ROLL:
             self._game.dice.roll()
-            self._game.failed_attempt, self._game.explanation = self._game.checker.set_failed_already_collected()
-            self._game.failed_attempt, self._game.explanation = self._game.checker.set_failed_no_tile_to_take(
+            self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_already_collected()
+            self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_no_tile_to_take(
                 self._game.current_player_index,
                 self._action,
             )
-            self._game.failed_attempt, self._game.explanation = self._game.checker.set_failed_no_worms(
+            self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_no_worms(
                 self._action,
             )
 
@@ -295,8 +296,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     def _step_bot(self, action: tuple[int, int]) -> None:
         """Step the bot."""
         self._action = action
-        self._game.terminated, self._game.truncated, self._game.explanation = self._game.checker.action_is_allowed(
-            action,
+        self._game.terminated, self._game.truncated, self._game.explanation = (
+            self._game.action_checker.action_is_allowed(action)
         )
 
         # Stop immediately if action was not allowed or similar.
@@ -325,8 +326,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         self._action = action
         reward = 0
         # Check legal move before doing a step.
-        self._game.terminated, self._game.truncated, self._game.explanation = self._game.checker.action_is_allowed(
-            action,
+        self._game.terminated, self._game.truncated, self._game.explanation = (
+            self._game.action_checker.action_is_allowed(action)
         )
 
         # Illegal move

@@ -199,11 +199,11 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
                 score += table.worm_values[tile - SMALLEST_TILE]  # List of worm values count from zero.
             return score
 
-    class Checker:
-        """Class Checker."""
+    class RuleChecker:
+        """Class RuleChecker."""
 
         def __init__(self, dice: Game.Dice, players: list[Game.Player], table_tiles: Game.TableTiles) -> None:
-            """Initialize Checker."""
+            """Initialize RuleChecker."""
             self._failed_attempt = False
             self._terminated = False
             self._truncated = False
@@ -282,6 +282,16 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
 
             return self._failed_attempt, self._explanation
 
+    class ActionChecker:
+        """Class ActionChecker."""
+
+        def __init__(self, dice: Game.Dice) -> None:
+            """Initialize ActionChecker."""
+            self._terminated = False
+            self._truncated = False
+            self._explanation = ""
+            self._dice = dice
+
         def action_is_allowed(self, action: tuple[int, int]) -> tuple[bool, bool, str]:
             """Check if action is allowed."""
             self._terminated = False
@@ -323,9 +333,10 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
         self.table_tiles: Game.TableTiles = Game.TableTiles()
         self.you: Game.Player = Game.Player(bot=False, name="You")
         self.players: list[Game.Player] = []
-        self.checker = Game.Checker(self.dice, self.players, self.table_tiles)
+        self.action_checker = Game.ActionChecker(self.dice)
+        self.rule_checker = Game.RuleChecker(self.dice, self.players, self.table_tiles)
         self.terminated: bool = False
         self.truncated: bool = False
-        self.failed_attempt: bool = False  # Candidate for class Checker.
+        self.failed_attempt: bool = False  # Candidate for class RuleChecker.
         self.explanation: str = "Constructor"  # The reason, why the terminated, truncated or failed attempt is set.
         self.current_player_index: int = 0  # 0 for the player, 1 or more for bots.
