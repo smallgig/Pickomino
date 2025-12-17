@@ -130,6 +130,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         """Clear collected and rolled and roll again."""
         self._game.dice = Game.Dice()
         self._game.rule_checker = Game.RuleChecker(self._game.dice, self._game.players, self._game.table_tiles)
+        self._game.action_checker = Game.ActionChecker(self._game.dice)
         self._game.failed_attempt = False
         self._game.dice.roll()
 
