@@ -21,6 +21,7 @@ from pickomino_env.modules.constants import (  # Coloured printouts, game and ac
     RENDER_DELAY,
     SMALLEST_TILE,
 )
+from pickomino_env.modules.dice import Dice
 from pickomino_env.modules.game import Game
 from pickomino_env.modules.renderer import Renderer
 
@@ -128,7 +129,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     def _end_of_turn_reset(self) -> None:
         """Clear collected and rolled and roll again."""
-        self._game.dice = Game.Dice()
+        self._game.dice = Dice()
         self._game.rule_checker = Game.RuleChecker(self._game.dice, self._game.players, self._game.table_tiles)
         self._game.action_checker = Game.ActionChecker(self._game.dice)
         self._game.failed_attempt = False

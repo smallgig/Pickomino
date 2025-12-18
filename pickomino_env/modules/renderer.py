@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-__all__ = ["Renderer"]
-# pygame internally uses deprecated pkg_resources
-# See: https://setuptools.pypa.io/en/latest/pkg_resources.html
 import warnings
 from importlib.resources import files
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -46,6 +44,13 @@ from pickomino_env.modules.constants import (
 )
 from pickomino_env.modules.game import Game
 
+if TYPE_CHECKING:
+    from pickomino_env.modules.dice import Dice
+
+__all__ = ["Renderer"]
+
+# pygame internally uses deprecated pkg_resources
+# See: https://setuptools.pypa.io/en/latest/pkg_resources.html
 warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 # E402: module level import not at the top of the file. Needed to suppress warning before import.
 import pygame  # noqa: RUF100, E402 # pylint: disable=wrong-import-position, wrong-import-order
@@ -70,7 +75,7 @@ class Renderer:
 
     def render(
         self,
-        dice: Game.Dice,
+        dice: Dice,
         players: list[Game.Player],
         tiles: Game.TableTiles,
         current_player_index: int,
