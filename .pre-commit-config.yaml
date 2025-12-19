@@ -76,3 +76,11 @@ repos:
           - --max-modules=A
           - --max-average=A
           - pickomino_env/
+      - id: radon-maintainability
+        name: radon maintainability
+        entry: radon mi
+        language: python
+        types: [ python ]
+        args: [ "--min", "A", "--exclude", "test/", "pickomino_env" ]
+        additional_dependencies: [ "radon==6.0.1" ]
+        pass_filenames: false
