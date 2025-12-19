@@ -10,8 +10,9 @@ from typing import Any
 import gymnasium as gym
 import numpy as np
 
+from pickomino_env.modules.action_checker import ActionChecker
 from pickomino_env.modules.bot import Bot
-from pickomino_env.modules.constants import (  # Coloured printouts, game and action constants.
+from pickomino_env.modules.constants import (  # Game and action constants.
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
     ACTION_ROLL,
@@ -133,7 +134,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         """Clear collected and rolled and roll again."""
         self._game.dice = Dice()
         self._game.rule_checker = RuleChecker(self._game.dice, self._game.players, self._game.tiles)
-        self._game.action_checker = Game.ActionChecker(self._game.dice)
+        self._game.action_checker = ActionChecker(self._game.dice)
         self._game.failed_attempt = False
         self._game.dice.roll()
 
@@ -278,7 +279,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         """Play a bot if there is one."""
         bot = Bot()
         bot_action: tuple[int, int] = 0, 0
-        for player in self._game.players[1:]:
+        for player in self._game.players[1:]:  # Player 0 is you, from 1 and onwards are the bots.
             if player.bot:
                 # pylint: disable=while-used
                 while bot_action[1] == 0 and not self._game.terminated and not self._game.failed_attempt:
