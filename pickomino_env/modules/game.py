@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from pickomino_env.modules.dice import Dice
+from pickomino_env.modules.tiles import Tiles
 from pickomino_env.modules.constants import (
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
@@ -28,69 +29,6 @@ __all__ = ["Game"]
 
 class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance-attributes.
     """Class Game."""
-
-    class TableTiles:
-        """Define the tiles on the table."""
-
-        def __init__(self) -> None:
-            """Construct the table tiles."""
-            self._tile_table: dict[int, bool] = {
-                21: True,
-                22: True,
-                23: True,
-                24: True,
-                25: True,
-                26: True,
-                27: True,
-                28: True,
-                29: True,
-                30: True,
-                31: True,
-                32: True,
-                33: True,
-                34: True,
-                35: True,
-                36: True,
-            }
-            self.worm_values: list[int] = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4]
-
-        def set_tile(self, *, tile_number: int, is_available: bool) -> None:
-            """Set one Tile."""
-            self._tile_table[tile_number] = is_available
-
-        def get_table(self) -> dict[int, bool]:
-            """Get the tile table."""
-            return self._tile_table
-
-        def is_empty(self) -> bool:
-            """Check if the table is empty."""
-            return not self._tile_table.values()
-
-        def highest(self) -> int:
-            """Get the highest tile on the table."""
-            highest = 0
-            if not self.is_empty():
-                for key, value in self._tile_table.items():
-                    if value:
-                        highest = key
-            return highest
-
-        def smallest(self) -> int:
-            """Get the smallest tile on the table."""
-            smallest = 0
-            if not self.is_empty():
-                for key, value in reversed(self._tile_table.items()):
-                    if value:
-                        smallest = key
-            return smallest
-
-        def find_next_lower_tile(self, dice_sum: int) -> int:
-            """Find the next lower tile than the dice sum."""
-            lowest = 0
-            for key, value in self._tile_table.items():
-                if key < dice_sum and value:
-                    lowest = key
-            return lowest
 
     class Player:
         """Player class with his tiles and name."""
@@ -124,15 +62,15 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
         def end_score(self) -> int:
             """Return player score at the end of the game."""
             score: int = 0
-            table = Game.TableTiles()
+            tiles = Tiles()
             for tile in self.tile_stack:
-                score += table.worm_values[tile - SMALLEST_TILE]  # List of worm values count from zero.
+                score += tiles.worm_values[tile - SMALLEST_TILE]  # List of worm values count from zero.
             return score
 
     class RuleChecker:
         """Class RuleChecker."""
 
-        def __init__(self, dice: Dice, players: list[Game.Player], table_tiles: Game.TableTiles) -> None:
+        def __init__(self, dice: Dice, players: list[Game.Player], table_tiles: Tiles) -> None:
             """Initialize RuleChecker."""
             self._failed_attempt = False
             self._terminated = False
@@ -192,8 +130,8 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
 
             # Check if no tile available on the table or from a player to take.
             elif (
-                not self._table_tiles.get_table()[self._dice.score()[0]]
-                and not self._table_tiles.find_next_lower_tile(self._dice.score()[0])
+                not self._table_tiles.get_tiles()[self._dice.score()[0]]
+                and not self._table_tiles.find_next_lower(self._dice.score()[0])
                 and steal_index is None
             ):
                 self._failed_attempt = True
@@ -260,7 +198,7 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
     def __init__(self, random_generator: np.random.Generator | None = None) -> None:
         """Initialize Game."""
         self.dice: Dice = Dice(random_generator)
-        self.table_tiles: Game.TableTiles = Game.TableTiles()
+        self.table_tiles: Tiles = Tiles()
         self.you: Game.Player = Game.Player(bot=False, name="You")
         self.players: list[Game.Player] = []
         self.action_checker = Game.ActionChecker(self.dice)

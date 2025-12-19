@@ -46,6 +46,7 @@ from pickomino_env.modules.game import Game
 
 if TYPE_CHECKING:
     from pickomino_env.modules.dice import Dice
+    from pickomino_env.modules.tiles import Tiles
 
 __all__ = ["Renderer"]
 
@@ -77,7 +78,7 @@ class Renderer:
         self,
         dice: Dice,
         players: list[Game.Player],
-        tiles: Game.TableTiles,
+        tiles: Tiles,
         current_player_index: int,
     ) -> np.ndarray | list[np.ndarray] | None:
         """Render the environment."""
@@ -217,7 +218,7 @@ class Renderer:
         if self._window is None:
             return
 
-        tiles = self._game.table_tiles.get_table()
+        tiles = self._game.table_tiles.get_tiles()
 
         for col, tile_num in enumerate(range(SMALLEST_TILE, LARGEST_TILE + 1)):
             if tiles[tile_num]:  # Only draw available tiles.

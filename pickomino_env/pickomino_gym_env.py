@@ -93,7 +93,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     def _tiles_vector(self) -> np.ndarray[Any, np.dtype[Any]]:
         """Return tiles table as a flat binary vector of length 16 for indexes 21..36."""
         return np.array(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
-            [1 if self._game.table_tiles.get_table()[i] else 0 for i in range(21, 37)],
+            [1 if self._game.table_tiles.get_tiles()[i] else 0 for i in range(21, 37)],
             dtype=np.int8,
         )
 
@@ -141,7 +141,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             tile_to_return: int = self._game.players[
                 self._game.current_player_index
             ].remove_tile()  # Remove the tile from the player.
-            self._game.table_tiles.get_table()[tile_to_return] = True  # Return the tile to the table.
+            self._game.table_tiles.get_tiles()[tile_to_return] = True  # Return the tile to the table.
             worm_index = tile_to_return - SMALLEST_TILE
             return_value = -self._game.table_tiles.worm_values[
                 worm_index
@@ -241,7 +241,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             return_value = self._steal_from_bot(steal_index)
 
         # Only pick a tile if it is on the table.
-        elif self._game.table_tiles.get_table()[dice_sum]:
+        elif self._game.table_tiles.get_tiles()[dice_sum]:
             self._game.players[self._game.current_player_index].add_tile(
                 dice_sum,
             )  # Add the tile to the player or bot.
@@ -255,7 +255,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         else:
             # Pick the highest of the tiles smaller than the unavailable tile
             # Find the highest tile smaller than the dice sum.
-            highest: int = self._game.table_tiles.find_next_lower_tile(dice_sum)
+            highest: int = self._game.table_tiles.find_next_lower(dice_sum)
             if highest:  # Found the highest tile to pick from the table.
                 self._game.players[self._game.current_player_index].add_tile(
                     highest,
