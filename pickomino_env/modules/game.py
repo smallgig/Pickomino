@@ -1,4 +1,4 @@
-"""Class Game."""
+"""Class Game to abstract details from the environment."""
 
 from __future__ import annotations
 
