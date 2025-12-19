@@ -23,6 +23,7 @@ from pickomino_env.modules.constants import (  # Coloured printouts, game and ac
 )
 from pickomino_env.modules.dice import Dice
 from pickomino_env.modules.game import Game
+from pickomino_env.modules.player import Player
 from pickomino_env.modules.renderer import Renderer
 
 
@@ -80,7 +81,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         return self._renderer.render(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
             self._game.dice,
             self._game.players,
-            self._game.table_tiles,
+            self._game.tiles,
             self._game.current_player_index,
         )
 
@@ -88,12 +89,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         self._game.players.append(self._game.you)
         for i in range(self._number_of_bots):
-            self._game.players.append(Game.Player(bot=True, name=names[i]))
+            self._game.players.append(Player(bot=True, name=names[i]))
 
     def _tiles_vector(self) -> np.ndarray[Any, np.dtype[Any]]:
         """Return tiles table as a flat binary vector of length 16 for indexes 21..36."""
         return np.array(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
-            [1 if self._game.table_tiles.get_tiles()[i] else 0 for i in range(21, 37)],
+            [1 if self._game.tiles.get_tiles()[i] else 0 for i in range(21, 37)],
             dtype=np.int8,
         )
 
@@ -120,7 +121,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             "dice_rolled": list(self._game.dice.get_rolled()),
             "terminated": self._game.terminated,
             "tiles_table_vec": self._tiles_vector(),
-            "smallest_tile": self._game.table_tiles.smallest(),
+            "smallest_tile": self._game.tiles.smallest(),
             "explanation": self._game.explanation,
             "player_stack": self._game.players[0].show_all(),
             "player_score": self._game.players[0].end_score(),
@@ -130,7 +131,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     def _end_of_turn_reset(self) -> None:
         """Clear collected and rolled and roll again."""
         self._game.dice = Dice()
-        self._game.rule_checker = Game.RuleChecker(self._game.dice, self._game.players, self._game.table_tiles)
+        self._game.rule_checker = Game.RuleChecker(self._game.dice, self._game.players, self._game.tiles)
         self._game.action_checker = Game.ActionChecker(self._game.dice)
         self._game.failed_attempt = False
         self._game.dice.roll()
@@ -141,17 +142,15 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             tile_to_return: int = self._game.players[
                 self._game.current_player_index
             ].remove_tile()  # Remove the tile from the player.
-            self._game.table_tiles.get_tiles()[tile_to_return] = True  # Return the tile to the table.
+            self._game.tiles.get_tiles()[tile_to_return] = True  # Return the tile to the table.
             worm_index = tile_to_return - SMALLEST_TILE
-            return_value = -self._game.table_tiles.worm_values[
-                worm_index
-            ]  # Reward is MINUS the value of the worm value.
+            return_value = -self._game.tiles.worm_values[worm_index]  # Reward is MINUS the value of the worm value.
             # If the returned tile is not the highest, turn the highest tile face down by setting it to False.
             # Search for the highest tile to turn.
-            highest = self._game.table_tiles.highest()
+            highest = self._game.tiles.highest()
             # Turn the highest tile if there is one.
             if highest:
-                self._game.table_tiles.set_tile(tile_number=highest, is_available=False)
+                self._game.tiles.set_tile(tile_number=highest, is_available=False)
         return return_value
 
     def reset(
@@ -210,7 +209,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         tile_to_return: int = self._game.players[steal_index].remove_tile()  # Remove the tile from the player.
         self._game.players[self._game.current_player_index].add_tile(tile_to_return)
         worm_index = tile_to_return - SMALLEST_TILE
-        return self._game.table_tiles.worm_values[worm_index]
+        return self._game.tiles.worm_values[worm_index]
 
     def _step_tiles(self) -> int:
         """Pick or return a tile.
@@ -241,31 +240,31 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             return_value = self._steal_from_bot(steal_index)
 
         # Only pick a tile if it is on the table.
-        elif self._game.table_tiles.get_tiles()[dice_sum]:
+        elif self._game.tiles.get_tiles()[dice_sum]:
             self._game.players[self._game.current_player_index].add_tile(
                 dice_sum,
             )  # Add the tile to the player or bot.
-            self._game.table_tiles.set_tile(
+            self._game.tiles.set_tile(
                 tile_number=dice_sum,
                 is_available=False,
             )  # Mark the tile as no longer on the table.
             worm_index = dice_sum - SMALLEST_TILE
-            return_value = self._game.table_tiles.worm_values[worm_index]
+            return_value = self._game.tiles.worm_values[worm_index]
         # Tile is not available on the table
         else:
             # Pick the highest of the tiles smaller than the unavailable tile
             # Find the highest tile smaller than the dice sum.
-            highest: int = self._game.table_tiles.find_next_lower(dice_sum)
+            highest: int = self._game.tiles.find_next_lower(dice_sum)
             if highest:  # Found the highest tile to pick from the table.
                 self._game.players[self._game.current_player_index].add_tile(
                     highest,
                 )  # Add the tile to the player.
-                self._game.table_tiles.set_tile(
+                self._game.tiles.set_tile(
                     tile_number=highest,
                     is_available=False,
                 )  # Mark the tile as no longer on the table.
                 worm_index = highest - SMALLEST_TILE
-                return_value = self._game.table_tiles.worm_values[worm_index]
+                return_value = self._game.tiles.worm_values[worm_index]
             # No smaller tiles are available -> have to return players top tile if there is one.
             else:
                 return_value = self._remove_tile_from_player()
@@ -285,7 +284,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                     bot_action = bot.policy(
                         self._game.dice.get_rolled(),
                         self._game.dice.get_collected(),
-                        self._game.table_tiles.smallest(),
+                        self._game.tiles.smallest(),
                     )
                     self._step_bot(bot_action)
                 if self._render_mode is not None:
@@ -315,7 +314,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self._end_of_turn_reset()
 
         # Game over check.
-        if not self._game.table_tiles.highest():
+        if not self._game.tiles.highest():
             self._game.terminated = True
             self._game.explanation = "No Tile on the table, game over."
 
@@ -352,7 +351,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self._game.current_player_index = 0
 
         # Game Over if no Tile is on the table anymore.
-        if not self._game.table_tiles.highest():
+        if not self._game.tiles.highest():
             self._game.terminated = True
             self._game.explanation = "No Tile on the table, GAME OVER!"
 

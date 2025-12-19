@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from pickomino_env.modules.dice import Dice
 from pickomino_env.modules.tiles import Tiles
+from pickomino_env.modules.player import Player
 from pickomino_env.modules.constants import (
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
@@ -30,47 +31,10 @@ __all__ = ["Game"]
 class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance-attributes.
     """Class Game."""
 
-    class Player:
-        """Player class with his tiles and name."""
-
-        def __init__(self, *, bot: bool, name: str) -> None:
-            """Initialize a player."""
-            self.name: str = name
-            self.tile_stack: list[int] = []
-            self.bot: bool = bot
-
-        def show(self) -> int:
-            """Show the tile from the player stack."""
-            if self.tile_stack:
-                return self.tile_stack[-1]
-            return 0
-
-        def show_all(self) -> list[int]:
-            """Show all tiles on the player stack."""
-            if self.tile_stack:
-                return self.tile_stack
-            return [0]  # Zero indicates the stack is empty.
-
-        def add_tile(self, tile: int) -> None:
-            """Add a tile to the player stack."""
-            self.tile_stack.append(tile)
-
-        def remove_tile(self) -> int:
-            """Remove the top tile from the player stack."""
-            return self.tile_stack.pop()
-
-        def end_score(self) -> int:
-            """Return player score at the end of the game."""
-            score: int = 0
-            tiles = Tiles()
-            for tile in self.tile_stack:
-                score += tiles.worm_values[tile - SMALLEST_TILE]  # List of worm values count from zero.
-            return score
-
     class RuleChecker:
         """Class RuleChecker."""
 
-        def __init__(self, dice: Dice, players: list[Game.Player], table_tiles: Tiles) -> None:
+        def __init__(self, dice: Dice, players: list[Player], table_tiles: Tiles) -> None:
             """Initialize RuleChecker."""
             self._failed_attempt = False
             self._terminated = False
@@ -198,11 +162,11 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
     def __init__(self, random_generator: np.random.Generator | None = None) -> None:
         """Initialize Game."""
         self.dice: Dice = Dice(random_generator)
-        self.table_tiles: Tiles = Tiles()
-        self.you: Game.Player = Game.Player(bot=False, name="You")
-        self.players: list[Game.Player] = []
+        self.tiles: Tiles = Tiles()
+        self.you: Player = Player(bot=False, name="You")
+        self.players: list[Player] = []
         self.action_checker = Game.ActionChecker(self.dice)
-        self.rule_checker = Game.RuleChecker(self.dice, self.players, self.table_tiles)
+        self.rule_checker = Game.RuleChecker(self.dice, self.players, self.tiles)
         self.terminated: bool = False
         self.truncated: bool = False
         self.failed_attempt: bool = False  # Candidate for class RuleChecker.
