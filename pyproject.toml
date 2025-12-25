@@ -18,6 +18,9 @@ dependencies = [
     "setuptools<81"
 ]
 
+[project.optional-dependencies]
+test = ["matplotlib", "pytest", "pytest-cov", "stable_baselines3"]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pickomino_env*"]

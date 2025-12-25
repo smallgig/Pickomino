@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-__all__ = ["Renderer"]
-# pygame internally uses deprecated pkg_resources
-# See: https://setuptools.pypa.io/en/latest/pkg_resources.html
 import warnings
 from importlib.resources import files
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -46,6 +44,15 @@ from pickomino_env.modules.constants import (
 )
 from pickomino_env.modules.game import Game
 
+if TYPE_CHECKING:
+    from pickomino_env.modules.dice import Dice
+    from pickomino_env.modules.player import Player
+    from pickomino_env.modules.tiles import Tiles
+
+__all__ = ["Renderer"]
+
+# pygame internally uses deprecated pkg_resources
+# See: https://setuptools.pypa.io/en/latest/pkg_resources.html
 warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 # E402: module level import not at the top of the file. Needed to suppress warning before import.
 import pygame  # noqa: RUF100, E402 # pylint: disable=wrong-import-position, wrong-import-order
@@ -70,15 +77,15 @@ class Renderer:
 
     def render(
         self,
-        dice: Game.Dice,
-        players: list[Game.Player],
-        tiles: Game.TableTiles,
+        dice: Dice,
+        players: list[Player],
+        tiles: Tiles,
         current_player_index: int,
     ) -> np.ndarray | list[np.ndarray] | None:
         """Render the environment."""
         self._game.dice = dice
         self._game.players = players
-        self._game.table_tiles = tiles
+        self._game.tiles = tiles
         self._game.current_player_index = current_player_index
 
         if self._render_mode is None:
@@ -212,7 +219,7 @@ class Renderer:
         if self._window is None:
             return
 
-        tiles = self._game.table_tiles.get_table()
+        tiles = self._game.tiles.get_tiles()
 
         for col, tile_num in enumerate(range(SMALLEST_TILE, LARGEST_TILE + 1)):
             if tiles[tile_num]:  # Only draw available tiles.
