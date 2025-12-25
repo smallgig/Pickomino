@@ -2,3 +2,11 @@ pickomino_env.egg-info
 /build/
 /dist/
 /test/
+/local/
+/.idea/
+__pycache__/
+*.pyc
+.coverage
+*.docx
+*_backup/
+htmlcov/
