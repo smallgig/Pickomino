@@ -125,3 +125,5 @@ reportMissingImports = "none"
 # Cannot infer types from unresolved imports in pre-commit environment
 reportUnknownMemberType = "none"
 reportUnknownParameterType = "none"
+reportUnnecessaryIsInstance = "none"
+reportUnknownArgumentType = "none"

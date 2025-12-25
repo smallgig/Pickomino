@@ -7,6 +7,7 @@ __all__ = [
     "ACTION_INDEX_ROLL",
     "ACTION_ROLL",
     "ACTION_STOP",
+    "ACTION_TUPLE_LENGTH",
     "BACKGROUND_COLOR",
     "DICE_FONT_SIZE",
     "DICE_LABELS_OFFSET_Y",
@@ -73,6 +74,7 @@ ACTION_INDEX_DICE: Final[int] = 0
 ACTION_INDEX_ROLL: Final[int] = 1
 ACTION_ROLL: Final[int] = 0
 ACTION_STOP: Final[int] = 1
+ACTION_TUPLE_LENGTH: Final[int] = 2
 
 # Bot strategy.
 MIN_ROLLS_FOR_WORM_STRATEGY: Final[int] = 3
