@@ -18,6 +18,7 @@ from pickomino_env.modules.constants import (  # Game and action constants.
     ACTION_ROLL,
     ACTION_STOP,
     LARGEST_TILE,
+    MAX_BOTS,
     NUM_DICE,
     RENDER_DELAY,
     SMALLEST_TILE,
@@ -34,8 +35,13 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     def __init__(self, number_of_bots: int, render_mode: str | None = None) -> None:
         """Construct the environment."""
-        # The following is an idea for refactoring.
-        # Have only on complex variable with the return value of the step function.
+        # Check inputs.
+        if number_of_bots < 1 or number_of_bots > MAX_BOTS:
+            raise ValueError(f"number_of_bots must be between 1 and {MAX_BOTS}, got {number_of_bots}.")
+        valid_modes: set[str | None] = {None, "human", "rgb_array"}
+        if render_mode not in valid_modes:
+            raise ValueError(f"render_mode must be on of {valid_modes}, got '{render_mode}'")
+
         self._action: tuple[int, int] = 0, 0  # Candidate for class RuleChecker.
         self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players)-1 instead.
         self._game: Game = Game()
@@ -163,14 +169,28 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Start a new episode.
 
+        Reset the environment to an initial state. Includes reinitializing the game,
+        players and rolling the initial dice.
+
         Args:
-            seed: Random seed for reproducible episodes
-            options: Additional configuration (unused in this example)
+            seed: Random seed for reproducible episodes. If None, the environment's Pseudo-Random Number Generator
+            (PRNG) is not reset.
+            options: Additional configuration options, unused.
 
         Returns:
-            observation, info for the initial state
+            observation: Initial observation (dice_collected, dice_rolled, tiles_table, tile_players)
+            info: Additional information meant for debugging.
 
+        Raises:
+            ValueError: If seed is not an int or None, or if options is not a dict or None.
         """
+        # Check inputs.
+        # Runtime validation: user-facing API boundary, enforce types despite annotations.
+        if seed is not None and (not isinstance(seed, int) or seed < 0):  # pyright: ignore[reportUnnecessaryIsInstance]
+            raise ValueError(f"seed must be a non-negative integer or None, got {seed}")
+        if options is not None and not isinstance(options, dict):  # pyright: ignore[reportUnnecessaryIsInstance]
+            raise ValueError(f"options must be a dict or None, got {type(options).__name__}")
+
         # IMPORTANT. Must call this first. Seed the random number generator.
         super().reset(seed=seed)
         self._game = Game(random_generator=self.np_random)

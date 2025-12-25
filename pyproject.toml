@@ -10,7 +10,7 @@ readme = ""
 requires-python = ">=3.8"
 authors = [{ name = "Jarl and Robin" }]
 dependencies = [
-    "gymnasium>=1.2.2",
+    "gymnasium>=1.2.3",
     "numpy>=2.3.5",
     "pygame>=2.6.1",
     # pygame uses deprecated pkg_resources (setuptools issue)
@@ -65,10 +65,12 @@ include-naming-hints = true
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "EM101", # Exception message assignment is unnecessary.
+    "EM101", # Gymnasium uses descriptive f-strings directly in exeptions. (raise ValueError(f"<message>"))
+    "EM102", # EM101. EM102, TRY003 conflict with this standard.
+    "TRY003",
     "D203", # Conflicts with D211 (no blank line before class wins)
     "D213", # Conflicts with D212 (first line summary wins)
-    "D413", # Allow no blank line after docstring (Google style).
+    "D413", # No blank line after docstring allowed (Google style).
 ]
 
 [tool.pylint.master]
@@ -117,7 +119,7 @@ typeCheckingMode = "strict"
 pythonVersion = "3.8"
 pythonPlatform = "All"
 
-# This is required as the CI pre-commit does not download the module (numpy, pygame, ...)
+# This is required as the CI pre-commit does not download the module (numpy, pygame, and more).
 #   Therefore, we have to ignore missing imports.
 reportMissingImports = "none"
 # Cannot infer types from unresolved imports in pre-commit environment

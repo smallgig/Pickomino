@@ -22,6 +22,7 @@ __all__ = [
     "FONT_COLOR",
     "GREEN",
     "LARGEST_TILE",
+    "MAX_BOTS",
     "MIN_ROLLS_FOR_WORM_STRATEGY",
     "NO_GREEN",
     "NO_RED",
@@ -63,6 +64,7 @@ SMALLEST_TILE: Final[int] = 21
 LARGEST_TILE: Final[int] = 36
 NUM_DICE: Final[int] = 8
 NUM_DIE_FACES: Final[int] = 6
+MAX_BOTS: Final[int] = 6
 WORM_INDEX: Final[int] = 5
 WORM_VALUE: Final[int] = 5
 
