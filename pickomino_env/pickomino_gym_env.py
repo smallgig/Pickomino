@@ -86,6 +86,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     def render(self) -> np.ndarray | list[np.ndarray] | None:  # type: ignore[override]
         """Render the environment."""
+        if self._render_mode is None:
+            raise ValueError(
+                "render() called with render_mode=None."
+                "Specify render_mode when creating environment: "
+                "e.g. gymnasium.make('Pickomino-v0', render_mode='human')",
+            )
         return self._renderer.render(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
             self._game.dice,
             self._game.players,

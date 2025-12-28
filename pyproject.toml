@@ -33,6 +33,9 @@ line-length = 120
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+markers = [
+    "slow: marks tests as slow (skipped in pre-commit, run in CI",
+]
 
 [tool.coverage.run]
 omit = ["config*.py"]
