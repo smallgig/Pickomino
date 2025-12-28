@@ -47,12 +47,14 @@ class RuleChecker:
         )
 
         self._failed_attempt = not can_take
-        self._explanation = (
-            GREEN + "Good case" + NO_GREEN
-            if can_take
-            else RED + f"Failed: Collected was {self._dice.get_collected()}\n"
-            f"No possible rolled dice to taken in {self._dice.get_rolled()}" + NO_RED
-        )
+
+        if can_take:
+            self._explanation = GREEN + "Good case" + NO_GREEN
+        else:
+            self._explanation = (
+                RED + f"Failed: Collected was {self._dice.get_collected()}\n"
+                f"No possible rolled dice to taken in {self._dice.get_rolled()}" + NO_RED
+            )
 
         return self._failed_attempt, self._explanation
 
