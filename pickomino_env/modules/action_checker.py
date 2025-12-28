@@ -28,42 +28,47 @@ class ActionChecker:
 
     def __init__(self, dice: Dice) -> None:
         """Initialize ActionChecker."""
+        self._action: tuple[object, object] = (0, 0)  # Dummy initialisation.
         self._terminated = False
         self._truncated = False
         self._explanation = ""
         self._dice = dice
 
-    @staticmethod
-    def _validate_dice_index(dice_index: object) -> None:
+    def _validate_dice_index(self) -> None:
         """Validate action[0] (dice_index)."""
+        dice_index = self._action[ACTION_INDEX_DICE]
         if not isinstance(dice_index, (int, np.integer)):
             raise TypeError(f"action[0] must be an integer, got {type(dice_index).__name__}")
         if dice_index < 0 or dice_index > NUM_DIE_FACES - 1:
             raise ValueError(f"action[0] must be 0-{NUM_DIE_FACES - 1}, got {dice_index}")
 
-    @staticmethod
-    def _validate_roll_action(roll_action: object) -> None:
+    def _validate_roll_action(self) -> None:
         """Validate action[1] (roll action)."""
+        roll_action = self._action[ACTION_INDEX_ROLL]
         if not isinstance(roll_action, (int, np.integer)):
             raise TypeError(f"action[1] must be an integer, got {type(roll_action).__name__}")
         if roll_action not in {ACTION_STOP, ACTION_ROLL}:
             raise ValueError(f"action[1] must be {ACTION_ROLL} or {ACTION_STOP}, got {roll_action}")
 
-    @staticmethod
-    def validate(action: object) -> None:
-        """Validate action parameter."""
+    def check(self, action: object) -> tuple[bool, bool, str]:
+        """Validate action and check if allowed given game state."""
         # Convert the numpy array to tuple if needed.
         if hasattr(action, "tolist"):
             action = tuple(action.tolist())  # pyright: ignore[reportUnknownVariableType, reportAttributeAccessIssue]
 
-        # Check structure
+        # Check structure, must be a tuple of length 2.
         if not isinstance(action, tuple) or len(action) != ACTION_TUPLE_LENGTH:
             raise ValueError(f"action must be a tuple of length {ACTION_TUPLE_LENGTH}, got {type(action).__name__}")
 
+        # Store validated action.
+        self._action = cast("tuple[object,object]", action)
+
         # Validate each element
-        dice_index, roll_action = cast("tuple[object,object]", action)
-        ActionChecker._validate_dice_index(dice_index)
-        ActionChecker._validate_roll_action(roll_action)
+        self._validate_dice_index()
+        self._validate_roll_action()
+
+        # After validation cast to the correct type and heck game state.
+        return self.is_allowed(cast("tuple[int,int]", self._action))
 
     def is_allowed(self, action: tuple[int, int]) -> tuple[bool, bool, str]:
         """Check if action is allowed."""

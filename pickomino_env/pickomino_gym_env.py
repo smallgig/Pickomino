@@ -42,7 +42,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         if render_mode not in valid_modes:
             raise ValueError(f"render_mode must be on of {valid_modes}, got '{render_mode}'")
 
-        self._action: tuple[int, int] = 0, 0  # Candidate for class RuleChecker.
+        self._action: tuple[int, int] = 0, 0
         self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players)-1 instead.
         self._game: Game = Game()
         self._create_players()  # Do not move this to after the observation space as Stable Baselines 3 then fails.
@@ -352,13 +352,11 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         action: tuple[int, int],
     ) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         """Take a step in the environment."""
-        # Check inputs.
-        self._game.action_checker.validate(action)
-
         self._action = action
         reward = 0
-        # Check legal move before doing a step.
-        self._game.terminated, self._game.truncated, self._game.explanation = self._game.action_checker.is_allowed(
+
+        # Validate action and check if allowed before doing a step.
+        self._game.terminated, self._game.truncated, self._game.explanation = self._game.action_checker.check(
             action,
         )
 
