@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     from pickomino_env.modules.player import Player
     from pickomino_env.modules.tiles import Tiles
 
-
 __all__ = ["RuleChecker"]
 
 

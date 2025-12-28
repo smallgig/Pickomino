@@ -5,7 +5,7 @@ from __future__ import annotations
 __all__ = ["PickominoEnv"]
 
 import time
-from typing import Any, cast
+from typing import Any
 
 import gymnasium as gym
 import numpy as np
@@ -17,11 +17,9 @@ from pickomino_env.modules.constants import (
     ACTION_INDEX_ROLL,
     ACTION_ROLL,
     ACTION_STOP,
-    ACTION_TUPLE_LENGTH,
     LARGEST_TILE,
     MAX_BOTS,
     NUM_DICE,
-    NUM_DIE_FACES,
     RENDER_DELAY,
     SMALLEST_TILE,
 )
@@ -163,11 +161,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                 self._game.tiles.set_tile(tile_number=highest, is_available=False)
         return return_value
 
+    # noqa: RUF100, ARG002 external API constraint.
     def reset(
         self,
         *,
         seed: int | None = None,
-        options: dict[str, Any] | None = None,  # noqa: RUF100, ARG002 external API constraint.
+        options: dict[str, Any] | None = None,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Start a new episode.
 
@@ -320,8 +319,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     def _step_bot(self, action: tuple[int, int]) -> None:
         """Step the bot."""
         self._action = action
-        self._game.terminated, self._game.truncated, self._game.explanation = (
-            self._game.action_checker.action_is_allowed(action)
+        self._game.terminated, self._game.truncated, self._game.explanation = self._game.action_checker.is_allowed(
+            action,
         )
 
         # Stop immediately if action was not allowed or similar.
@@ -342,36 +341,19 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self._game.terminated = True
             self._game.explanation = "No Tile on the table, game over."
 
-    @staticmethod
-    def _validate_action(action: object) -> None:
-        """Validate action parameter."""
-        # Convert the numpy array to tuple if needed.
-        if hasattr(action, "tolist"):
-            action = tuple(action.tolist())  # pyright: ignore[reportUnknownVariableType, reportAttributeAccessIssue]
-
-        if not isinstance(action, tuple) or len(action) != ACTION_TUPLE_LENGTH:
-            raise ValueError(f"action must be a tuple of length {ACTION_TUPLE_LENGTH}, got {type(action).__name__}")
-
-        action_typed = cast("tuple[object, object]", action)
-        dice_index, roll_action = action_typed
-        if not isinstance(dice_index, (int, np.integer)) or dice_index < 0 or dice_index > NUM_DIE_FACES - 1:
-            raise ValueError(f"action[0] (dice_index) must be 0-{NUM_DIE_FACES - 1}, got {dice_index}")
-        if not isinstance(roll_action, (int, np.integer)) or roll_action not in {ACTION_STOP, ACTION_ROLL}:
-            raise ValueError(f"action[1] (roll_action) must be {ACTION_ROLL} or {ACTION_STOP}, got {roll_action}")
-
     def step(
         self,
         action: tuple[int, int],
     ) -> tuple[dict[str, Any], int, bool, bool, dict[str, object]]:
         """Take a step in the environment."""
         # Check inputs.
-        self._validate_action(action)
+        self._game.action_checker.validate(action)
 
         self._action = action
         reward = 0
         # Check legal move before doing a step.
-        self._game.terminated, self._game.truncated, self._game.explanation = (
-            self._game.action_checker.action_is_allowed(action)
+        self._game.terminated, self._game.truncated, self._game.explanation = self._game.action_checker.is_allowed(
+            action,
         )
 
         # Illegal move

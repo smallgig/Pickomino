@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
+
+import numpy as np
 
 from pickomino_env.modules.constants import (
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
     ACTION_ROLL,
+    ACTION_STOP,
+    ACTION_TUPLE_LENGTH,
     NO_RED,
+    NUM_DIE_FACES,
     RED,
 )
 
@@ -18,7 +23,6 @@ if TYPE_CHECKING:
 __all__ = ["ActionChecker"]
 
 
-# pylint: disable=too-few-public-methods
 class ActionChecker:
     """Class ActionChecker."""
 
@@ -29,16 +33,42 @@ class ActionChecker:
         self._explanation = ""
         self._dice = dice
 
-    def action_is_allowed(self, action: tuple[int, int]) -> tuple[bool, bool, str]:
+    @staticmethod
+    def _validate_dice_index(dice_index: object) -> None:
+        """Validate action[0] (dice_index)."""
+        if not isinstance(dice_index, (int, np.integer)):
+            raise TypeError(f"action[0] must be an integer, got {type(dice_index).__name__}")
+        if dice_index < 0 or dice_index > NUM_DIE_FACES - 1:
+            raise ValueError(f"action[0] must be 0-{NUM_DIE_FACES - 1}, got {dice_index}")
+
+    @staticmethod
+    def _validate_roll_action(roll_action: object) -> None:
+        """Validate action[1] (roll action)."""
+        if not isinstance(roll_action, (int, np.integer)):
+            raise TypeError(f"action[1] must be an integer, got {type(roll_action).__name__}")
+        if roll_action not in {ACTION_STOP, ACTION_ROLL}:
+            raise ValueError(f"action[1] must be {ACTION_ROLL} or {ACTION_STOP}, got {roll_action}")
+
+    @staticmethod
+    def validate(action: object) -> None:
+        """Validate action parameter."""
+        # Convert the numpy array to tuple if needed.
+        if hasattr(action, "tolist"):
+            action = tuple(action.tolist())  # pyright: ignore[reportUnknownVariableType, reportAttributeAccessIssue]
+
+        # Check structure
+        if not isinstance(action, tuple) or len(action) != ACTION_TUPLE_LENGTH:
+            raise ValueError(f"action must be a tuple of length {ACTION_TUPLE_LENGTH}, got {type(action).__name__}")
+
+        # Validate each element
+        dice_index, roll_action = cast("tuple[object,object]", action)
+        ActionChecker._validate_dice_index(dice_index)
+        ActionChecker._validate_roll_action(roll_action)
+
+    def is_allowed(self, action: tuple[int, int]) -> tuple[bool, bool, str]:
         """Check if action is allowed."""
         self._terminated = False
         self._truncated = False
-
-        # Check action values are within range
-        if action[ACTION_INDEX_DICE] not in range(6) or action[ACTION_INDEX_ROLL] not in range(2):
-            self._terminated = True
-            self._explanation = RED + "Terminated: Action index not in range" + NO_RED
-            return self._terminated, self._truncated, self._explanation
 
         # Selected Face value was not rolled.
         if self._dice.get_rolled()[action[ACTION_INDEX_DICE]] == 0:
@@ -62,4 +92,3 @@ class ActionChecker:
             return self._terminated, self._truncated, self._explanation
 
         return self._terminated, self._truncated, self._explanation
-        # Get to here:Action allowed try to take a tile.
