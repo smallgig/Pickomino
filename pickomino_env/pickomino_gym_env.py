@@ -12,12 +12,13 @@ import numpy as np
 
 from pickomino_env.modules.action_checker import ActionChecker
 from pickomino_env.modules.bot import Bot
-from pickomino_env.modules.constants import (  # Game and action constants.
+from pickomino_env.modules.constants import (
     ACTION_INDEX_DICE,
     ACTION_INDEX_ROLL,
     ACTION_ROLL,
     ACTION_STOP,
     LARGEST_TILE,
+    MAX_BOTS,
     NUM_DICE,
     RENDER_DELAY,
     SMALLEST_TILE,
@@ -34,9 +35,14 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     def __init__(self, number_of_bots: int, render_mode: str | None = None) -> None:
         """Construct the environment."""
-        # The following is an idea for refactoring.
-        # Have only on complex variable with the return value of the step function.
-        self._action: tuple[int, int] = 0, 0  # Candidate for class RuleChecker.
+        # Check inputs.
+        if number_of_bots < 1 or number_of_bots > MAX_BOTS:
+            raise ValueError(f"number_of_bots must be between 1 and {MAX_BOTS}, got {number_of_bots}.")
+        valid_modes: set[str | None] = {None, "human", "rgb_array"}
+        if render_mode not in valid_modes:
+            raise ValueError(f"render_mode must be on of {valid_modes}, got '{render_mode}'")
+
+        self._action: tuple[int, int] = 0, 0
         self._number_of_bots: int = number_of_bots  # Remove this and use len(self._players)-1 instead.
         self._game: Game = Game()
         self._create_players()  # Do not move this to after the observation space as Stable Baselines 3 then fails.
@@ -80,6 +86,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     def render(self) -> np.ndarray | list[np.ndarray] | None:  # type: ignore[override]
         """Render the environment."""
+        if self._render_mode is None:
+            raise ValueError(
+                "render() called with render_mode=None."
+                "Specify render_mode when creating environment: "
+                "e.g. gymnasium.make('Pickomino-v0', render_mode='human')",
+            )
         return self._renderer.render(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
             self._game.dice,
             self._game.players,
@@ -155,22 +167,37 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                 self._game.tiles.set_tile(tile_number=highest, is_available=False)
         return return_value
 
+    # noqa: RUF100, ARG002 external API constraint.
     def reset(
         self,
         *,
         seed: int | None = None,
-        options: dict[str, Any] | None = None,  # noqa: RUF100, ARG002 external API constraint.
+        options: dict[str, Any] | None = None,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Start a new episode.
 
+        Reset the environment to an initial state. Includes reinitializing the game,
+        players and rolling the initial dice.
+
         Args:
-            seed: Random seed for reproducible episodes
-            options: Additional configuration (unused in this example)
+            seed: Random seed for reproducible episodes. If None, the environment's Pseudo-Random Number Generator
+            (PRNG) is not reset.
+            options: Additional configuration options, unused.
 
         Returns:
-            observation, info for the initial state
+            observation: Initial observation (dice_collected, dice_rolled, tiles_table, tile_players)
+            info: Additional information meant for debugging.
 
+        Raises:
+            ValueError: If seed is not an int or None, or if options is not a dict or None.
         """
+        # Check inputs.
+        # Runtime validation: user-facing API boundary, enforce types despite annotations.
+        if seed is not None and (not isinstance(seed, int) or seed < 0):  # pyright: ignore[reportUnnecessaryIsInstance]
+            raise ValueError(f"seed must be a non-negative integer or None, got {seed}")
+        if options is not None and not isinstance(options, dict):  # pyright: ignore[reportUnnecessaryIsInstance]
+            raise ValueError(f"options must be a dict or None, got {type(options).__name__}")
+
         # IMPORTANT. Must call this first. Seed the random number generator.
         super().reset(seed=seed)
         self._game = Game(random_generator=self.np_random)
@@ -298,8 +325,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     def _step_bot(self, action: tuple[int, int]) -> None:
         """Step the bot."""
         self._action = action
-        self._game.terminated, self._game.truncated, self._game.explanation = (
-            self._game.action_checker.action_is_allowed(action)
+        self._game.terminated, self._game.truncated, self._game.explanation = self._game.action_checker.is_allowed(
+            action,
         )
 
         # Stop immediately if action was not allowed or similar.
@@ -327,9 +354,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         """Take a step in the environment."""
         self._action = action
         reward = 0
-        # Check legal move before doing a step.
-        self._game.terminated, self._game.truncated, self._game.explanation = (
-            self._game.action_checker.action_is_allowed(action)
+
+        # Validate action and check if allowed before doing a step.
+        self._game.terminated, self._game.truncated, self._game.explanation = self._game.action_checker.check(
+            action,
         )
 
         # Illegal move

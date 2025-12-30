@@ -7,6 +7,7 @@ __all__ = [
     "ACTION_INDEX_ROLL",
     "ACTION_ROLL",
     "ACTION_STOP",
+    "ACTION_TUPLE_LENGTH",
     "BACKGROUND_COLOR",
     "DICE_FONT_SIZE",
     "DICE_LABELS_OFFSET_Y",
@@ -22,6 +23,7 @@ __all__ = [
     "FONT_COLOR",
     "GREEN",
     "LARGEST_TILE",
+    "MAX_BOTS",
     "MIN_ROLLS_FOR_WORM_STRATEGY",
     "NO_GREEN",
     "NO_RED",
@@ -63,6 +65,7 @@ SMALLEST_TILE: Final[int] = 21
 LARGEST_TILE: Final[int] = 36
 NUM_DICE: Final[int] = 8
 NUM_DIE_FACES: Final[int] = 6
+MAX_BOTS: Final[int] = 6
 WORM_INDEX: Final[int] = 5
 WORM_VALUE: Final[int] = 5
 
@@ -71,6 +74,7 @@ ACTION_INDEX_DICE: Final[int] = 0
 ACTION_INDEX_ROLL: Final[int] = 1
 ACTION_ROLL: Final[int] = 0
 ACTION_STOP: Final[int] = 1
+ACTION_TUPLE_LENGTH: Final[int] = 2
 
 # Bot strategy.
 MIN_ROLLS_FOR_WORM_STRATEGY: Final[int] = 3
