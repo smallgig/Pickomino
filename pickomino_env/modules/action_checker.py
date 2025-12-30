@@ -1,4 +1,4 @@
-"""Provide a method to check that an action is allowed."""
+"""Provide a method to check that an input action is valid."""
 
 from __future__ import annotations
 
