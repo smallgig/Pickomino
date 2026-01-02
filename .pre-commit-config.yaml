@@ -1,6 +1,6 @@
 #file: noinspection YAMLSchemaValidation
 # Keeping repository quality high.
-exclude: ^(test/|examples/)
+exclude: ^(tests/|examples/)
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -84,6 +84,6 @@ repos:
         entry: radon mi
         language: python
         types: [ python ]
-        args: [ "--min", "A", "--exclude", "test/", "pickomino_env" ]
+        args: [ "--min", "A", "--exclude", "tests/", "pickomino_env" ]
         additional_dependencies: [ "radon==6.0.1" ]
         pass_filenames: false
