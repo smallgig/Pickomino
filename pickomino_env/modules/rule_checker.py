@@ -82,6 +82,8 @@ class RuleChecker:
     def _check_no_tile_available(self, current_player_index: int) -> None:
         """Check if no tile can be taken."""
         if self._dice.score()[0] < SMALLEST_TILE:
+            self._failed_attempt = True
+            self._explanation = "Failed: Score is under 21 no tile can be taken."
             return
 
         steal_index = next(
