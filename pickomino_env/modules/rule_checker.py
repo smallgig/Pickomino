@@ -68,7 +68,7 @@ class RuleChecker:
 
         return self._failed_attempt, self._explanation
 
-    def _check_below_minimum_score(self, action: tuple[int, int]) -> bool:
+    def _check_below_minimum_score(self, action: tuple[int, int]) -> None:
         """Check if score is below minimum."""
         if self._dice.score()[0] < SMALLEST_TILE:
             if action[ACTION_INDEX_ROLL] == ACTION_STOP:
@@ -77,12 +77,11 @@ class RuleChecker:
             if sum(self._dice.get_collected()) == NUM_DICE:
                 self._failed_attempt = True
                 self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
-        return self._failed_attempt
 
-    def _check_no_tile_available(self, current_player_index: int) -> bool:
+    def _check_no_tile_available(self, current_player_index: int) -> None:
         """Check if no tile can be taken."""
         if self._dice.score()[0] < SMALLEST_TILE:
-            return True
+            return None
 
         steal_index = next(
             (
@@ -101,7 +100,6 @@ class RuleChecker:
             self._failed_attempt = True
             self._explanation = RED + "Failed: No tile on table or from another player can be taken" + NO_RED
 
-        return self._failed_attempt
 
     def set_failed_no_worms(self, action: tuple[int, int]) -> tuple[bool, str]:
         """Set failed attempt for no worm collected.
