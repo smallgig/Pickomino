@@ -84,8 +84,6 @@ class RuleChecker:
         # causing bots to prematurely fail turns. Verify if this check is
         # redundant with _check_below_minimum_score() above before merging.
         if self._dice.score()[0] < SMALLEST_TILE:
-            self._failed_attempt = True
-            self._explanation = "Failed: Score is under 21 no tile can be taken."
             return
 
         steal_index = next(
