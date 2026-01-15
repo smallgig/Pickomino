@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["matplotlib", "pytest", "pytest-cov", "stable_baselines3"]
+test = ["matplotlib", "pytest", "pytest-cov", "pytest-timeout", "stable_baselines3"]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -35,6 +35,7 @@ line-length = 120
 pythonpath = ["."]
 markers = [
     "slow: marks tests as slow (skipped in pre-commit, run in CI",
+    "timeout: timeout decorator for tests",
 ]
 
 [tool.coverage.run]
