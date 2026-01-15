@@ -45,9 +45,12 @@ from pickomino_env.modules.constants import (
 from pickomino_env.modules.game import Game
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray  # pyright: ignore[reportUnknownVariableType]
+
     from pickomino_env.modules.dice import Dice
     from pickomino_env.modules.player import Player
     from pickomino_env.modules.tiles import Tiles
+
 
 __all__ = ["Renderer"]
 
@@ -81,7 +84,7 @@ class Renderer:
         players: list[Player],
         tiles: Tiles,
         current_player_index: int,
-    ) -> np.ndarray | list[np.ndarray] | None:
+    ) -> NDArray[np.uint8] | None:  # pyright: ignore[reportInvalidTypeForm]
         """Render the environment."""
         self._game.dice = dice
         self._game.players = players
@@ -120,7 +123,7 @@ class Renderer:
         if self._clock is not None:
             self._clock.tick(RENDER_FPS)
 
-    def _render_rgb_array(self) -> np.ndarray:
+    def _render_rgb_array(self) -> NDArray[np.uint8]:  # pyright: ignore[reportInvalidTypeForm]
         """Return pixel array for recording."""
         # Like _render_human. But capture as an array.
         if self._window is None:

@@ -64,7 +64,6 @@ enable = [
     "useless-suppression",
 ]
 disable = ["consider-using-assignment-expr"] # Assignments in a boolean expression is a bad idea
-include-naming-hints = true
 
 [tool.ruff.lint]
 select = ["ALL"]
