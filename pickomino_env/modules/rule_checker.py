@@ -68,7 +68,7 @@ class RuleChecker:
         return self._failed_attempt, self._explanation
 
     def _check_below_minimum_score(self, action: tuple[int, int]) -> None:
-        """Check if score is below minimum."""
+        """Check if the score is below the minimum."""
         if self._dice.score()[0] < SMALLEST_TILE:
             if action[ACTION_INDEX_ROLL] == ACTION_STOP:
                 self._failed_attempt = True
@@ -79,6 +79,10 @@ class RuleChecker:
 
     def _check_no_tile_available(self, current_player_index: int) -> None:
         """Check if no tile can be taken."""
+        # NOTE: This early return was unreachable in the old elif structure.
+        # After the refactoring, it now runs every time score < SMALLEST_TILE,
+        # causing bots to prematurely fail turns. Verify if this check is
+        # redundant with _check_below_minimum_score() above before merging.
         if self._dice.score()[0] < SMALLEST_TILE:
             self._failed_attempt = True
             self._explanation = "Failed: Score is under 21 no tile can be taken."
