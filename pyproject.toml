@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["matplotlib", "pytest", "pytest-cov", "stable_baselines3"]
+test = ["matplotlib", "pytest", "pytest-cov", "stable_baselines3>=2.3.0"]
 
 [tool.setuptools.packages.find]
 where = ["."]
