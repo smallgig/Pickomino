@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 import warnings
-from importlib.resources import files
+
+try:
+    from importlib.resources import files
+except ImportError:
+    from importlib_resources import files  # type: ignore[import-not-found, no-redef]
+
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -161,7 +166,9 @@ class Renderer:
             # Draw tile sprite
             current_tile = player.show()
             if current_tile > 0:
-                tile_path = self._sprite_dir.joinpath(f"tile_{current_tile}.png")
+                tile_path = self._sprite_dir.joinpath(  # pyright: ignore[reportUnknownVariableType]
+                    f"tile_{current_tile}.png",
+                )
                 tile_image = pygame.image.load(str(tile_path))
                 tile_x = x + (PLAYER_WIDTH - TILE_WIDTH) // 2
                 tile_y = PLAYERS_START_Y + PLAYER_NAME_FONT_SIZE
@@ -180,7 +187,7 @@ class Renderer:
         # Draw dice images
         for index, die_name in enumerate(DICE_NAMES):
             x: int = DICE_LABEL_WIDTH + index * DICE_SPACING + (DICE_SPACING - DIE_SIZE) // 2
-            die_path = self._sprite_dir.joinpath(f"{die_name}.png")
+            die_path = self._sprite_dir.joinpath(f"{die_name}.png")  # pyright: ignore[reportUnknownVariableType]
             die_image = pygame.image.load(str(die_path))
             die_image = pygame.transform.scale(die_image, (DIE_SIZE, DIE_SIZE))
             self._window.blit(die_image, (x, y))
@@ -229,7 +236,9 @@ class Renderer:
                 x = TILES_START_X + (col % TILES_PER_ROW) * (TILE_WIDTH + TILE_SPACING)
                 y = TILES_START_Y + (col // TILES_PER_ROW) * (TILE_HEIGHT + TILES_ROW_SPACING)
 
-                tile_path = self._sprite_dir.joinpath(f"tile_{tile_num}.png")
+                tile_path = self._sprite_dir.joinpath(  # pyright: ignore[reportUnknownVariableType]
+                    f"tile_{tile_num}.png",
+                )
                 tile_image = pygame.image.load(str(tile_path))
                 self._window.blit(tile_image, (x, y))
 

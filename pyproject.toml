@@ -15,7 +15,8 @@ dependencies = [
     "pygame>=2.6.1",
     # pygame uses deprecated pkg_resources (setuptools issue)
     # See: https://setuptools.pypa.io/en/latest/pkg_resources.html
-    "setuptools<81"
+    "setuptools<81",
+    "importlib_resources>=5.0; python_version < '3.9'", # Gymnasium requires support for Python 3.8
 ]
 
 [project.optional-dependencies]
