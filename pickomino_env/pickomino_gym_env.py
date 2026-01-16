@@ -108,7 +108,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     def _tiles_vector(self) -> np.ndarray[Any, np.dtype[Any]]:
         """Return tiles table as a flat binary vector of length 16 for indexes 21..36."""
         return np.array(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
-            [1 if self._game.tiles.get_tiles()[i] else 0 for i in range(21, 37)],
+            [1 if self._game.tiles.get_tiles()[i] else 0 for i in range(SMALLEST_TILE, LARGEST_TILE + 1)],
             dtype=np.int8,
         )
 

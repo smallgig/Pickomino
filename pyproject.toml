@@ -36,6 +36,7 @@ line-length = 120
 pythonpath = ["."]
 markers = [
     "slow: marks tests as slow (skipped in pre-commit, run in CI",
+    "timeout: timeout decorator for tests",
 ]
 
 [tool.coverage.run]
