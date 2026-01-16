@@ -29,6 +29,7 @@ include = ["pickomino*"]
 
 [tool.pydocstyle]
 convention = "google"
+match = '(?!test_).*\.py'
 
 [tool.black]
 line-length = 120

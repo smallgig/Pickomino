@@ -36,10 +36,15 @@ repos:
         additional_dependencies: [ "types-requests", "types-PyYAML", "gymnasium", "numpy", "pygame" ]
         # After publishing to PyPI, add: 'pickomino-env' above.
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.7
+    rev: v0.14.13
     hooks:
       - id: ruff
       - id: ruff-format
+  - repo: https://github.com/PyCQA/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args: [ "--convention=google" ]
   - repo: local
     hooks:
       - id: pyright
