@@ -25,7 +25,7 @@ dev = ["pytest", "pytest-cov", "pytest-timeout", "matplotlib", "stable-baselines
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pickomino_env*"]
+include = ["pickomino*"]
 
 [tool.pydocstyle]
 convention = "google"
@@ -44,7 +44,7 @@ markers = [
 omit = ["config*.py"]
 
 [tool.setuptools.package-data]
-"pickomino_env" = ["py.typed"]
+"pickomino" = ["py.typed"]
 
 [tool.ruff]
 line-length = 120
