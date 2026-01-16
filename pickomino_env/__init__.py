@@ -5,6 +5,6 @@ from gymnasium.envs.registration import register  # pyright: ignore[reportUnknow
 # Only register. Gymnasium loads the class with gym.make()
 register(
     id="Pickomino-v0",
-    entry_point="pickomino_env.pickomino_gym_env:PickominoEnv",
+    entry_point="pickomino_env.pickomino:PickominoEnv",
     max_episode_steps=200,
 )
