@@ -64,6 +64,10 @@ avoid conflicts and minimize harm.
 When an incident does occur, it is important to report it promptly. To report a possible violation, **Create an issue
 and use the label: conduct.**
 
+For sensitive or confidential reports, contact the Community Moderators.
+
+Community Moderators (Project Maintainers): Jarl and Robin.
+
 Community Moderators take reports of violations seriously and will make every effort to respond in a timely manner. They
 will investigate all reports of code of conduct violations, reviewing messages, logs, and recordings, or interviewing
 witnesses and other participants. Community Moderators will keep investigation and enforcement actions as transparent as
