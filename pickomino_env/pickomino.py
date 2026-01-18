@@ -60,8 +60,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         - 4: Collect all 5's
         - 5: Collect all worm symbols
     **roll_choice** (0-1): Decision after collecting dice
-        - 0: Stop and claim a tile (end turn).
-        — 1: Roll the remaining dice again.
+        - 0: Roll the remaining dice again.
+        - 1: Stop and claim a tile (end turn).
 
     ## Observation Space
 
