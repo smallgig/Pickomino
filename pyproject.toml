@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "pickomino-env"
 version = "1.0.7"
 description = "Pickomino (Heckmeck) Gymnasium environment"
-readme = ""
+readme = "README.md"
 requires-python = ">=3.8"
 authors = [{ name = "Jarl and Robin" }]
 dependencies = [
