@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest", "pytest-cov"]
+test = ["pytest<9.0.0", "pytest-cov"]
 dev = ["pytest", "pytest-cov", "pytest-timeout", "matplotlib", "stable-baselines3>=2.3.0"]
 
 [tool.setuptools.packages.find]
