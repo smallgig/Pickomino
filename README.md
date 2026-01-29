@@ -101,7 +101,7 @@ These must be specified.
 
 | Parameter        | Type        | Default | Description                                                                                |
 |------------------|-------------|---------|--------------------------------------------------------------------------------------------|
-| `number_of_bots` | int         | --      | Number of bot opponents (1-6) you want to play against                                     |
+| `number_of_bots` | int         | 1       | Number of bot opponents (1-6) you want to play against                                     |
 | `render_mode`    | str or None | None    | Visualization mode:<br/>None (training),<br/>"human" (display), or "rgb_array" (recording) |
 
 ## Setup

@@ -113,7 +113,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     | Parameter | Type | Default | Description |
     |-----------|------|---------|-------------|
-    | `number_of_bots` | int | -- | the number of bot opponents (1-6). |
+    | `number_of_bots` | int | 1 | the number of bot opponents (1-6). |
     | `render_mode` | str or None | None | Rendering: None, “human”, or "rgb_array". |.
 
     Raises:
@@ -121,7 +121,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     """
 
-    def __init__(self, number_of_bots: int, render_mode: str | None = None) -> None:
+    def __init__(self, number_of_bots: int = 1, render_mode: str | None = None) -> None:
         """Initialize a Pickomino game environment.
 
         Creates a new Pickomino environment with the specified number of bot opponents and rendering mode. The human
