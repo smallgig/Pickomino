@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
-
 try:
     from importlib.resources import files
 except ImportError:
@@ -12,6 +10,7 @@ except ImportError:
 from typing import TYPE_CHECKING
 
 import numpy as np
+import pygame  # Uses pygame-ce, see pyproject.toml
 
 from pickomino_env.modules.constants import (
     BACKGROUND_COLOR,
@@ -58,12 +57,6 @@ if TYPE_CHECKING:
 
 
 __all__ = ["Renderer"]
-
-# pygame internally uses deprecated pkg_resources
-# See: https://setuptools.pypa.io/en/latest/pkg_resources.html
-warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
-# E402: module level import not at the top of the file. Needed to suppress warning before import.
-import pygame  # noqa: RUF100, E402 # pylint: disable=wrong-import-position, wrong-import-order
 
 
 class Renderer:
@@ -145,7 +138,7 @@ class Renderer:
         if self._window is None:
             return
 
-        font = pygame.font.Font(None, PLAYER_NAME_FONT_SIZE)
+        font = pygame.font.SysFont(None, PLAYER_NAME_FONT_SIZE)
 
         for index, player in enumerate(self._game.players):
             x = index * PLAYER_WIDTH
@@ -180,7 +173,7 @@ class Renderer:
             return
 
         # Lazy initialization: pygame not initialized during __init__(), so create font on rendering.
-        self._dice_font = pygame.font.Font(None, DICE_FONT_SIZE)
+        self._dice_font = pygame.font.SysFont(None, DICE_FONT_SIZE)
 
         y: int = DICE_SECTION_START_Y
 
