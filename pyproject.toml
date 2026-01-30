@@ -7,7 +7,7 @@ name = "pickomino-env"
 version = "1.1.1"
 description = "Pickomino (Heckmeck) Gymnasium environment"
 readme = "README.md"
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.10,<3.15"
 authors = [{ name = "Jarl and Robin" }]
 dependencies = [
     "gymnasium>=1.1.1,<2.0.0",
