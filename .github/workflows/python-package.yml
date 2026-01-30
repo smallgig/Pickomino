@@ -39,4 +39,4 @@ jobs:
       - name: Type check with Pyright
         run: pyright --project=pyproject.toml
       - name: Run pytest with coverage
-        run: pytest --ignore=tests/test_env_slow.py --cov=pickomino_env --cov-fail-under=93 --cov-report=term-missing
+        run: pytest --cov=pickomino_env --cov-fail-under=93 --cov-report=term-missing
