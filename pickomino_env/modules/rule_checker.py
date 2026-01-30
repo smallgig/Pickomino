@@ -43,6 +43,7 @@ class RuleChecker:
             for rolled, collected in zip(
                 self._dice.get_rolled(),
                 self._dice.get_collected(),
+                strict=True,
             )
         )
 

@@ -24,6 +24,9 @@ Feel free to comment on or open new issues. Please, label your issues.
 
 ## Development Setup
 
+We recommend **Python 3.14** for development (the latest supported version).
+Any Python 3.10+ works locally. CI tests run on all supported versions.
+
 ```bash
 git clone https://github.com/smallgig/Pickomino.git
 cd Pickomino

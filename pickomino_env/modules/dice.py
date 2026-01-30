@@ -85,6 +85,6 @@ class Dice:
         show_values = [1, 2, 3, 4, 5, 6]
         faces = [die_faces[v].splitlines() for v in show_values]
         return_value = ""
-        for line in zip(*faces):
+        for line in zip(*faces, strict=True):
             return_value += "   ".join(line) + "\n"
         return return_value
