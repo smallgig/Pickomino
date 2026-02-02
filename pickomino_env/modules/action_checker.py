@@ -74,6 +74,7 @@ class ActionChecker:
         """Check if action is allowed."""
         self._terminated = False
         self._truncated = False
+        self._explanation = ""
 
         # Selected Face value was not rolled.
         if self._dice.get_rolled()[action[ACTION_INDEX_DICE]] == 0:
@@ -91,7 +92,7 @@ class ActionChecker:
         remaining_dice[action[ACTION_INDEX_DICE]] = 0  # Overwrite with zero for the last face collected.
 
         # Try to roll when no dice left to roll.
-        if action[ACTION_INDEX_ROLL] == ACTION_ROLL and not remaining_dice:
+        if action[ACTION_INDEX_ROLL] == ACTION_ROLL and sum(remaining_dice) == 0:
             self._truncated = True
             self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
             return self._terminated, self._truncated, self._explanation
