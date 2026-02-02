@@ -53,6 +53,7 @@ class Bot:
         action_roll = ACTION_ROLL
         self.roll_counter += 1
         values = [1, 2, 3, 4, 5, WORM_VALUE]
+        rolled = np.array(rolled)  # type: ignore[assignment]  # pyright: ignore[reportAssignmentType]
 
         if sum(collected):
             self.roll_counter = 0
@@ -63,7 +64,12 @@ class Bot:
                 rolled[ind] = 0
         # 2. Otherwise, take the die side that contributes the most points.
         contribution = np.multiply(rolled, values)
-        action_dice = int(np.argmax(contribution))  # pyright:ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        max_value = int(np.max(contribution))  # pyright:ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        # All faces with max Contribution
+        candidates = np.where(contribution == max_value)[0]
+
+        # If equal take the face with the lowest dice
+        action_dice = int(candidates[np.argmin(rolled[candidates])])
 
         # 1. On or after the third roll, take worms if you can.
         if self.roll_counter >= MIN_ROLLS_FOR_WORM_STRATEGY and not collected[WORM_INDEX] and rolled[WORM_INDEX]:
