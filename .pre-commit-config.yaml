@@ -27,13 +27,13 @@ repos:
     rev: v4.0.2
     hooks:
       - id: pylint
-        additional_dependencies: [ "gymnasium","numpy", "pygame-ce" ]
+        additional_dependencies: [ "gymnasium","numpy", "pygame-ce", "loguru" ]
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.18.2
     hooks:
       - id: mypy
         args: [ "--strict" ]
-        additional_dependencies: [ "types-requests", "types-PyYAML", "gymnasium", "numpy", "pygame-ce" ]
+        additional_dependencies: [ "types-requests", "types-PyYAML", "gymnasium", "numpy", "pygame-ce", "loguru" ]
         # After publishing to PyPI, add: 'pickomino-env' above.
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.13
