@@ -35,6 +35,8 @@ from pickomino_env.modules.player import Player
 from pickomino_env.modules.renderer import Renderer
 from pickomino_env.modules.rule_checker import RuleChecker
 
+logger.add("local/logs/loguru.log")
+
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     """Pickomino dice and tile collection game environment.
@@ -139,9 +141,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             ValueError: If number_of_bots not in [1, MAX_BOTS] or invalid render_mode.
 
         """
-        logger.add("loguru.log")
-        logger.info("Logging started.")
-
         # Check inputs.
         if number_of_bots < 1 or number_of_bots > MAX_BOTS:
             raise ValueError(f"number_of_bots must be between 1 and {MAX_BOTS}, got {number_of_bots}.")
