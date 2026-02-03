@@ -56,7 +56,7 @@ repos:
           sys.exit(subprocess.call([sys.executable, '-m', 'pyright']))"
         pass_filenames: false
         types: [ python ]
-        additional_dependencies: [ "pyright==1.1.408" ]
+        additional_dependencies: [ "pyright==1.1.408", "loguru" ]
         args:
           - --project=pyproject.toml
       - id: pytest
