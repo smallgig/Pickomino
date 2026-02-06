@@ -65,10 +65,10 @@ class Bot:
         # 2. Otherwise, take the die side that contributes the most points.
         contribution = np.multiply(rolled, values)
         max_value = int(np.max(contribution))  # pyright:ignore[reportUnknownMemberType, reportUnknownArgumentType]
-        # All faces with max Contribution
+        # All faces with max contribution.
         candidates = np.where(contribution == max_value)[0]
 
-        # If equal take the face with the lowest dice
+        # If they are equal, take the face with the lowest dice.
         action_dice = int(candidates[np.argmin(rolled[candidates])])
 
         # 1. On or after the third roll, take worms if you can.
