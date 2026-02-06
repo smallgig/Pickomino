@@ -69,22 +69,3 @@ class Dice:
         # Using the dice sum as an index in [21..36], higher rolls can only pick 36 or lower.
         current_score = int(min(current_score, LARGEST_TILE))
         return current_score, has_worms
-
-    def __str__(self) -> str:
-        """Print the dice."""
-        die_faces: list[str] = [
-            "",  # index = 0 doesn't have a face
-            "[     ]\n[  @  ]\n[     ]",  # index 1
-            "[@    ]\n[     ]\n[    @]",  # index 2
-            "[@    ]\n[  @  ]\n[    @]",  # index 3
-            "[@   @]\n[     ]\n[@   @]",  # index 4
-            "[@   @]\n[  @  ]\n[@   @]",  # index 5
-            "\033[31m[oo@@@]\033[0m\n\033[31m[WORM!]\033[0m\n\033[31m[@@@@@]\033[0m",  # index 6
-        ]
-        # Print one dice.
-        show_values = [1, 2, 3, 4, 5, 6]
-        faces = [die_faces[v].splitlines() for v in show_values]
-        return_value = ""
-        for line in zip(*faces, strict=True):
-            return_value += "   ".join(line) + "\n"
-        return return_value
