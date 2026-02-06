@@ -4,6 +4,8 @@ from __future__ import annotations
 
 __all__ = ["Bot"]
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 
 from pickomino_env.modules.constants import (
@@ -13,6 +15,9 @@ from pickomino_env.modules.constants import (
     WORM_INDEX,
     WORM_VALUE,
 )
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 
 # pylint: disable=too-few-public-methods
@@ -50,23 +55,26 @@ class Bot:
         2. Otherwise, take the die side that contributes the most points.
         3. Quit as soon as you can take a tile.
         """
-        action_roll = ACTION_ROLL
+        action_roll: int = ACTION_ROLL
         self.roll_counter += 1
-        values = [1, 2, 3, 4, 5, WORM_VALUE]
+        values: list[int] = [1, 2, 3, 4, 5, WORM_VALUE]
         rolled = np.array(rolled)  # type: ignore[assignment]  # pyright: ignore[reportAssignmentType]
 
         if sum(collected):
             self.roll_counter = 0
 
-        # Set rolled[ind] to 0 if already collected
-        for ind, die in enumerate(collected):
+        # Set rolled[index] to 0 if already collected
+        for index, die in enumerate(collected):
             if die:
-                rolled[ind] = 0
+                rolled[index] = 0
         # 2. Otherwise, take the die side that contributes the most points.
-        contribution = np.multiply(rolled, values)
-        max_value = int(np.max(contribution))  # pyright:ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        contribution: NDArray[np.int_] = np.multiply(rolled, values)
+        max_value: int = int(np.max(contribution))  # pyright:ignore[reportUnknownMemberType, reportUnknownArgumentType]
         # All faces with max contribution.
-        candidates = np.where(contribution == max_value)[0]
+        candidates: NDArray[np.int_] = np.where(contribution == max_value)[0]
+
+        # Prefer worms over 5's by reversing the array.
+        candidates = np.flip(candidates)
 
         # If they are equal, take the face with the lowest dice.
         action_dice = int(candidates[np.argmin(rolled[candidates])])
