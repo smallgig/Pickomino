@@ -14,7 +14,6 @@ from typing import Any
 
 import gymnasium as gym
 import numpy as np
-from loguru import logger
 
 from pickomino_env.modules.action_checker import ActionChecker
 from pickomino_env.modules.bot import Bot
@@ -31,11 +30,10 @@ from pickomino_env.modules.constants import (
 )
 from pickomino_env.modules.dice import Dice
 from pickomino_env.modules.game import Game
+from pickomino_env.modules.logging_config import log
 from pickomino_env.modules.player import Player
 from pickomino_env.modules.renderer import Renderer
 from pickomino_env.modules.rule_checker import RuleChecker
-
-logger.add("local/logs/loguru.log")
 
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg]
@@ -461,6 +459,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         # Player 0 is you, from 1 and onwards are the bots.
         for player in self._game.players[1:]:
             if player.bot:
+                log(f"Bot '{player.name}' starts turn, tiles: {player.tile_stack}, score: {player.end_score()}")
                 # The bot keeps rolling (ACTION ROLL) until
                 # the heuristic decides to stop or, the game is over or, it is a failed attempt.
                 # pylint: disable=while-used
@@ -537,7 +536,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             - info: Debug information with game state details.
 
         """
-        logger.info(f"Starting step with {self._get_info()}")
+        log(f"Starting step with action={action}")
 
         # 1. Validate action.
         # 2. Process agent's turn (collect dice, take/return tile).
