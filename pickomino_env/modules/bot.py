@@ -84,7 +84,8 @@ class Bot:
             action_dice = WORM_INDEX
 
         # 3. Quit as soon as you can take a tile: dice sum for a visible tile reached and worm collected.
-        if sum(np.multiply(collected, values)) + contribution[action_dice] >= smallest and collected[WORM_INDEX]:
+        has_worm = collected[WORM_INDEX] or action_dice == WORM_INDEX
+        if sum(np.multiply(collected, values)) + contribution[action_dice] >= smallest and has_worm:
             action_roll = ACTION_STOP
 
         return action_dice, action_roll
