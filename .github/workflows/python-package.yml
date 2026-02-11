@@ -25,6 +25,7 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.SUBMODULE_PAT }}
+          persist-credentials: false
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
