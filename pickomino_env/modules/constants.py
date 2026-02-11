@@ -9,6 +9,15 @@ __all__ = [
     "ACTION_STOP",
     "ACTION_TUPLE_LENGTH",
     "BACKGROUND_COLOR",
+    "BUTTON_COLOR",
+    "BUTTON_FONT_SIZE",
+    "BUTTON_HEIGHT",
+    "BUTTON_HOVER_COLOR",
+    "BUTTON_SPACING",
+    "BUTTON_TEXT_COLOR",
+    "BUTTON_WIDTH",
+    "BUTTONS_START_X",
+    "BUTTONS_START_Y",
     "DICE_FONT_SIZE",
     "DICE_LABELS_OFFSET_Y",
     "DICE_LABELS_SPACING",
@@ -90,6 +99,17 @@ RENDER_DELAY: Final[float] = 0.5
 # Rendering window dimensions.
 WINDOW_WIDTH: Final[int] = 800
 WINDOW_HEIGHT: Final[int] = 600
+
+# Button constants - diese sollten idealerweise in constants.py stehen
+BUTTON_WIDTH = 120
+BUTTON_HEIGHT = 50
+BUTTON_SPACING = 20
+BUTTONS_START_X = WINDOW_WIDTH - BUTTON_WIDTH - 680
+BUTTONS_START_Y = WINDOW_HEIGHT - 180
+BUTTON_COLOR = (70, 130, 180)  # Steel blue
+BUTTON_HOVER_COLOR = (100, 160, 210)  # Lighter blue
+BUTTON_TEXT_COLOR = (255, 255, 255)  # White
+BUTTON_FONT_SIZE = 28
 
 # Rendering background color Red, Green, Blue (RGB).
 # Muted sage green (100, 140, 100). Dark green (34, 139, 34).

@@ -14,6 +14,15 @@ import pygame  # Uses pygame-ce, see pyproject.toml
 
 from pickomino_env.modules.constants import (
     BACKGROUND_COLOR,
+    BUTTON_COLOR,
+    BUTTON_FONT_SIZE,
+    BUTTON_HEIGHT,
+    BUTTON_HOVER_COLOR,
+    BUTTON_SPACING,
+    BUTTON_TEXT_COLOR,
+    BUTTON_WIDTH,
+    BUTTONS_START_X,
+    BUTTONS_START_Y,
     DICE_FONT_SIZE,
     DICE_LABEL_COLLECTED,
     DICE_LABEL_ROLLED,
@@ -68,6 +77,10 @@ class Renderer:
         self._window: pygame.Surface | None = None
         self._clock: pygame.time.Clock | None = None
 
+        self._action: tuple[int, int] | None = None
+        self._action_click_button: int | None = None  # 0 for roll, 1 for stop
+        self._action_click_dice: int | None = None  # 0-5 for the die faces
+
         # Screen size
         self._size: tuple[int, int] = (WINDOW_WIDTH, WINDOW_HEIGHT)
 
@@ -75,6 +88,16 @@ class Renderer:
         self._sprite_dir = files("pickomino_env").joinpath("sprites")
         # Lazy initialization: pygame not initialized during __init__(), so create font on the first render.
         self._dice_font: pygame.font.Font | None = None
+        self._button_font: pygame.font.Font | None = None
+
+        # Button rectangles
+        self._roll_button_rect: pygame.Rect | None = None
+        self._stop_button_rect: pygame.Rect | None = None
+
+        # Dice rectangles
+        self._dice_rects: list[pygame.Rect] = []
+
+        self._mouse_pos: tuple[int, int] = (0, 0)
 
     def render(
         self,
@@ -110,12 +133,17 @@ class Renderer:
             if event.type == pygame.QUIT:
                 self.close()
                 return
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self._handle_mouse_click(event.pos)
 
         # Draw background.
         self._window.fill(BACKGROUND_COLOR)  # Lighter, softer green.
 
         # Draw game state.
         self._draw_board()
+
+        # Draw buttons.
+        self._draw_buttons()
 
         pygame.display.flip()
         if self._clock is not None:
@@ -132,6 +160,40 @@ class Renderer:
             self._window,
         )
         return np.transpose(surface, (1, 0, 2))  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+
+    def _handle_mouse_click(self, pos: tuple[int, int]) -> None:
+        """Handle mouse click events."""
+        if self._roll_button_rect and self._roll_button_rect.collidepoint(pos):
+            self._action_click_button = 0  # Roll
+        elif self._stop_button_rect and self._stop_button_rect.collidepoint(pos):
+            self._action_click_button = 1  # Stop
+
+        # Check dice clicks
+        for index, dice_rect in enumerate(self._dice_rects):
+            if dice_rect.collidepoint(pos):
+                self._action_click_dice = index
+                break
+
+    def get_action(self) -> int | None:
+        """Get the selected action and reset it."""
+        action = self._action_click_button
+        self._action_click_button = None
+        return action
+
+    def get_dice_selection(self) -> int | None:
+        """Get the selected dice index (0-5) and reset it."""
+        dice_index = self._action_click_dice
+        self._action_click_dice = None
+        return dice_index
+
+    def get_full_action(self) -> tuple[int, int] | None:
+        """Get complete action: (button_action, dice_index) or None if incomplete."""
+        if self._action_click_button is not None and self._action_click_dice is not None:
+            action = (self._action_click_dice, self._action_click_button)
+            self._action_click_button = None
+            self._action_click_dice = None
+            return action
+        return None
 
     def _draw_players(self) -> None:
         """Draw player names and their top tile."""
@@ -174,6 +236,8 @@ class Renderer:
 
         # Lazy initialization: pygame not initialized during __init__(), so create font on rendering.
         self._dice_font = pygame.font.SysFont(None, DICE_FONT_SIZE)
+        # Reset dice rectangles
+        self._dice_rects = []
 
         y: int = DICE_SECTION_START_Y
 
@@ -184,6 +248,15 @@ class Renderer:
             die_image = pygame.image.load(str(die_path))
             die_image = pygame.transform.scale(die_image, (DIE_SIZE, DIE_SIZE))
             self._window.blit(die_image, (x, y))
+
+            dice_rect = pygame.Rect(x, y, DIE_SIZE, DIE_SIZE)
+            self._dice_rects.append(dice_rect)
+
+            # Hover-Effekt (gelber Rahmen)
+            is_hovered = dice_rect.collidepoint(self._mouse_pos)
+            if is_hovered:
+                highlight_rect = pygame.Rect(x - 3, y - 3, DIE_SIZE + 6, DIE_SIZE + 6)
+                pygame.draw.rect(self._window, (255, 255, 0), highlight_rect, width=3, border_radius=5)
 
         self._draw_dice_counts(0)  # Collected.
         self._draw_dice_counts(1)  # Rolled.
@@ -234,6 +307,47 @@ class Renderer:
                 )
                 tile_image = pygame.image.load(str(tile_path))
                 self._window.blit(tile_image, (x, y))
+
+    def _draw_buttons(self) -> None:
+        """Draw Roll and Stop buttons."""
+        if self._window is None:
+            return
+
+        # Lazy initialization of button font
+        if self._button_font is None:
+            self._button_font = pygame.font.SysFont(None, BUTTON_FONT_SIZE)
+
+        # Roll button
+        roll_x = BUTTONS_START_X
+        roll_y = BUTTONS_START_Y
+        self._roll_button_rect = pygame.Rect(roll_x, roll_y, BUTTON_WIDTH, BUTTON_HEIGHT)
+
+        # Stop button
+        stop_x = BUTTONS_START_X
+        stop_y = BUTTONS_START_Y + BUTTON_HEIGHT + BUTTON_SPACING
+        self._stop_button_rect = pygame.Rect(stop_x, stop_y, BUTTON_WIDTH, BUTTON_HEIGHT)
+
+        # Check hover state
+        roll_hovered = self._roll_button_rect.collidepoint(self._mouse_pos)
+        stop_hovered = self._stop_button_rect.collidepoint(self._mouse_pos)
+
+        # Draw Roll button
+        roll_color = BUTTON_HOVER_COLOR if roll_hovered else BUTTON_COLOR
+        pygame.draw.rect(self._window, roll_color, self._roll_button_rect, border_radius=10)
+        pygame.draw.rect(self._window, FONT_COLOR, self._roll_button_rect, width=2, border_radius=10)
+
+        roll_text = self._button_font.render("ROLL", True, BUTTON_TEXT_COLOR)
+        roll_text_rect = roll_text.get_rect(center=self._roll_button_rect.center)
+        self._window.blit(roll_text, roll_text_rect)
+
+        # Draw Stop button
+        stop_color = BUTTON_HOVER_COLOR if stop_hovered else BUTTON_COLOR
+        pygame.draw.rect(self._window, stop_color, self._stop_button_rect, border_radius=10)
+        pygame.draw.rect(self._window, FONT_COLOR, self._stop_button_rect, width=2, border_radius=10)
+
+        stop_text = self._button_font.render("STOP", True, BUTTON_TEXT_COLOR)
+        stop_text_rect = stop_text.get_rect(center=self._stop_button_rect.center)
+        self._window.blit(stop_text, stop_text_rect)
 
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
