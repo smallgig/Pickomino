@@ -459,7 +459,6 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         # Player 0 is you, from 1 and onwards are the bots.
         for player in self._game.players[1:]:
             if player.bot:
-                log(f"Bot '{player.name}' starts turn, tiles: {player.tile_stack}, score: {player.end_score()}")
                 # The bot keeps rolling (ACTION ROLL) until
                 # the heuristic decides to stop or, the game is over or, it is a failed attempt.
                 # pylint: disable=while-used
@@ -490,6 +489,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         Args:
             action: dice_index, roll_choice representing the bot's decision.
         """
+        log(f"state={self._game.get_state()}, action={action}")
         self._action = action
         self._game.terminated, self._game.truncated, self._game.explanation = self._game.action_checker.is_allowed(
             action,
@@ -536,7 +536,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             - info: Debug information with game state details.
 
         """
-        log(f"Starting step with action={action}")
+        log(f"state={self._game.get_state()}, action={action}")
 
         # 1. Validate action.
         # 2. Process agent's turn (collect dice, take/return tile).
