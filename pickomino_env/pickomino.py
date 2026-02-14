@@ -498,6 +498,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         # Stop immediately if action was not allowed or similar.
         if self._game.terminated or self._game.truncated:
             self._end_of_turn_reset()
+            log(f"result={self._game.get_state()}")
             return
 
         # Collect and roll the dice.
@@ -512,6 +513,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         if not self._game.tiles.highest():
             self._game.terminated = True
             self._game.explanation = "No tiles left on the table, game over."
+        log(f"result={self._game.get_state()}")
 
     def step(
         self,
@@ -553,6 +555,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
         # Illegal move
         if self._game.terminated or self._game.truncated:
+            log(f"result={self._game.get_state()}")
             return (
                 self._current_obs(),
                 0,
@@ -575,6 +578,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         if not self._game.tiles.highest():
             self._game.terminated = True
             self._game.explanation = "No tiles left on the table, game over."
+
+        log(f"result={self._game.get_state()}")
 
         return (
             self._current_obs(),
