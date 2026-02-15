@@ -1,0 +1,1 @@
+3.14  # Stable version for CI/CD, should match latest version in pyproject.toml.
