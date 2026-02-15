@@ -69,7 +69,6 @@ repos:
           '-m', 'not slow',
           '--cov=pickomino_env',
           '--cov-report=html']))"
-        additional_dependencies: [ "pytest==8.4.2", "pytest-cov==7.0.0" ]
         pass_filenames: false
         stages: [ pre-push ]  # Only run on push instead of every commit.
       - id: xenon
