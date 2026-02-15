@@ -52,11 +52,11 @@ repos:
         language: python
         entry: >
           python -c "import subprocess, sys;
-          subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', '.']);
+          subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', '.[dev]']);
           sys.exit(subprocess.call([sys.executable, '-m', 'pyright']))"
         pass_filenames: false
         types: [ python ]
-        additional_dependencies: [ "pyright==1.1.408", "loguru" ]
+        additional_dependencies: [ "pyright==1.1.408" ]
         args:
           - --project=pyproject.toml
       - id: pytest
