@@ -52,7 +52,7 @@ omit = ["config*.py"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py314"
+target-version = "py310"
 exclude = [
     "tests/",
     "local/"
@@ -125,7 +125,7 @@ exclude = ["tests/**", "**/__pycache__"]
 strict = []
 
 typeCheckingMode = "strict"
-pythonVersion = "3.14"
+pythonVersion = "3.10"
 pythonPlatform = "All"
 
 # This is required as the CI pre-commit does not download the module (numpy, pygame, and more).
