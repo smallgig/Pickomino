@@ -30,6 +30,7 @@ from pickomino_env.modules.constants import (
 )
 from pickomino_env.modules.dice import Dice
 from pickomino_env.modules.game import Game
+from pickomino_env.modules.logging_config import log
 from pickomino_env.modules.player import Player
 from pickomino_env.modules.renderer import Renderer
 from pickomino_env.modules.rule_checker import RuleChecker
@@ -488,6 +489,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         Args:
             action: dice_index, roll_choice representing the bot's decision.
         """
+        log(f"state={self._game.get_state()}, action={action}")
         self._action = action
         self._game.terminated, self._game.truncated, self._game.explanation = self._game.action_checker.is_allowed(
             action,
@@ -496,6 +498,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         # Stop immediately if action was not allowed or similar.
         if self._game.terminated or self._game.truncated:
             self._end_of_turn_reset()
+            log(f"result={self._game.get_state()}")
             return
 
         # Collect and roll the dice.
@@ -510,6 +513,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         if not self._game.tiles.highest():
             self._game.terminated = True
             self._game.explanation = "No tiles left on the table, game over."
+        log(f"result={self._game.get_state()}")
 
     def step(
         self,
@@ -534,6 +538,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             - info: Debug information with game state details.
 
         """
+        log(f"state={self._game.get_state()}, action={action}")
+
         # 1. Validate action.
         # 2. Process agent's turn (collect dice, take/return tile).
         # 3. Process all bots' turns.
@@ -549,6 +555,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
         # Illegal move
         if self._game.terminated or self._game.truncated:
+            log(f"result={self._game.get_state()}")
             return (
                 self._current_obs(),
                 0,
@@ -571,6 +578,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         if not self._game.tiles.highest():
             self._game.terminated = True
             self._game.explanation = "No tiles left on the table, game over."
+
+        log(f"result={self._game.get_state()}")
 
         return (
             self._current_obs(),
