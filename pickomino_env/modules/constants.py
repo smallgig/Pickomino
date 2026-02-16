@@ -100,7 +100,7 @@ RENDER_DELAY: Final[float] = 0.5
 WINDOW_WIDTH: Final[int] = 800
 WINDOW_HEIGHT: Final[int] = 600
 
-# Button constants - diese sollten idealerweise in constants.py stehen
+# Button constants
 BUTTON_WIDTH = 120
 BUTTON_HEIGHT = 50
 BUTTON_SPACING = 20
