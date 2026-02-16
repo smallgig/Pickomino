@@ -255,7 +255,7 @@ class Renderer:
             dice_rect = pygame.Rect(x, y, DIE_SIZE, DIE_SIZE)
             self._dice_rects.append(dice_rect)
 
-            # Hover-Effekt (gelber Rahmen)
+            # Hover effect
             is_hovered = dice_rect.collidepoint(self._mouse_pos)
             if is_hovered:
                 highlight_rect = pygame.Rect(x - 3, y - 3, DIE_SIZE + 6, DIE_SIZE + 6)
@@ -264,7 +264,7 @@ class Renderer:
         self._draw_dice_counts(0)  # Collected.
         self._draw_dice_counts(1)  # Rolled.
 
-        # Score-Label
+        # Score label
         score_y = DICE_SECTION_START_Y + DIE_SIZE + DICE_LABELS_OFFSET_Y + 2 * DICE_LABELS_SPACING
         score_text = f"Score: {self._game.dice.score()[0]}"
         score_text_surface = True
