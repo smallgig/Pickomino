@@ -27,17 +27,17 @@ jobs:
           token: ${{ secrets.SUBMODULE_PAT }}
           persist-credentials: false
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[test]"
-          pip install pyright==1.1.408 ruff
+          pip install -e ".[test,dev]"
+          pip install pyright==1.1.408 ruff==0.14.13
       - name: Lint with ruff
         run: ruff check . --exclude tests/,examples/
       - name: Type check with Pyright
         run: pyright --project=pyproject.toml
       - name: Run pytest with coverage
-        run: pytest --cov=pickomino_env --cov-report=term-missing
+        run: pytest --cov=pickomino_env --cov-report=term-missing --cov-fail-under=93

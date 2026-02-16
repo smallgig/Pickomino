@@ -27,13 +27,13 @@ repos:
     rev: v4.0.2
     hooks:
       - id: pylint
-        additional_dependencies: [ "gymnasium","numpy", "pygame-ce" ]
+        additional_dependencies: [ "gymnasium","numpy", "pygame-ce", "loguru" ]
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.18.2
     hooks:
       - id: mypy
         args: [ "--strict" ]
-        additional_dependencies: [ "types-requests", "types-PyYAML", "gymnasium", "numpy", "pygame-ce" ]
+        additional_dependencies: [ "types-requests", "types-PyYAML", "gymnasium", "numpy", "pygame-ce", "loguru" ]
         # After publishing to PyPI, add: 'pickomino-env' above.
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.13
@@ -52,7 +52,7 @@ repos:
         language: python
         entry: >
           python -c "import subprocess, sys;
-          subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', '.']);
+          subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', '.[dev]']);
           sys.exit(subprocess.call([sys.executable, '-m', 'pyright']))"
         pass_filenames: false
         types: [ python ]
@@ -62,14 +62,8 @@ repos:
       - id: pytest
         name: pytest
         language: python
-        entry: >
-          python -c "import subprocess, sys;
-          subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', '.[test]']);
-          sys.exit(subprocess.call([sys.executable, '-m', 'pytest',
-          '-m', 'not slow',
-          '--cov=pickomino_env',
-          '--cov-report=html']))"
-        additional_dependencies: [ "pytest==8.4.2", "pytest-cov==7.0.0" ]
+        entry: pytest -v -m "not slow" --cov=pickomino_env --cov-report=html
+        additional_dependencies: [ "." ]
         pass_filenames: false
         stages: [ pre-push ]  # Only run on push instead of every commit.
       - id: xenon

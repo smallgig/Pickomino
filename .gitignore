@@ -10,3 +10,4 @@ __pycache__/
 *.docx
 *_backup/
 htmlcov/
+*.log

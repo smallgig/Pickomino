@@ -32,3 +32,15 @@ class Game:  # pylint: disable=too-few-public-methods, disable=too-many-instance
         self.failed_attempt: bool = False  # Candidate for moving to class RuleChecker.
         self.explanation: str = "Constructor"  # The reason, why the terminated, truncated or failed attempt is set.
         self.current_player_index: int = 0  # 0 for the player, 1 or more for bots.
+
+    def get_state(self) -> dict[str, object]:
+        """Return the full game state for logging."""
+        return {
+            "who": self.players[self.current_player_index].name,
+            "collected": self.dice.get_collected(),
+            "rolled": self.dice.get_rolled(),
+            "score": self.dice.score(),
+            "tiles": self.tiles.get_tiles(),
+            "players": [(p.name, p.tile_stack) for p in self.players],
+            "failed": self.failed_attempt,
+        }
