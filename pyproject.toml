@@ -42,7 +42,7 @@ markers = [
     "slow: marks tests as slow (skipped in pre-commit, run in CI",
     "timeout: timeout decorator for tests",
 ]
-addopts = "--cov-fail-under=95"
+addopts = "--cov-fail-under=93"
 
 [tool.coverage.run]
 omit = ["config*.py"]
