@@ -136,6 +136,8 @@ class Renderer:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self._handle_mouse_click(event.pos)
 
+        self._mouse_pos = pygame.mouse.get_pos()
+
         # Draw background.
         self._window.fill(BACKGROUND_COLOR)  # Lighter, softer green.
 
@@ -260,6 +262,12 @@ class Renderer:
 
         self._draw_dice_counts(0)  # Collected.
         self._draw_dice_counts(1)  # Rolled.
+
+        # Score-Label
+        score_y = DICE_SECTION_START_Y + DIE_SIZE + DICE_LABELS_OFFSET_Y + 2 * DICE_LABELS_SPACING
+        score_text = f"Score: {self._game.dice.score()[0]}"
+        score_surface = self._dice_font.render(score_text, True, FONT_COLOR)
+        self._window.blit(score_surface, (DICE_LABEL_X, score_y))
 
     def _draw_dice_counts(self, row_index: int) -> None:
         """Draw the label and counts."""
