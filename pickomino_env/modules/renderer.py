@@ -290,7 +290,7 @@ class Renderer:
             label,
             label_surface_text,
             FONT_COLOR,
-        )  # noqa: RUF100, FBT003 API constraint.
+        )
         self._window.blit(label_surface, (DICE_LABEL_X, labels_y))
 
         # Draw counts.
@@ -299,7 +299,7 @@ class Renderer:
             count_surface_text = True
             count_text = self._dice_font.render(
                 str(counts[index]),
-                count_surface_text,  # noqa: RUF100, FBT003 API constraint.
+                count_surface_text,
                 FONT_COLOR,
             )
             text_width = count_text.get_width()
