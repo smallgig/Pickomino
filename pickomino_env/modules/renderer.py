@@ -68,6 +68,7 @@ if TYPE_CHECKING:
 __all__ = ["Renderer"]
 
 
+# pylint: disable=too-many-instance-attributes
 class Renderer:
     """Class Renderer."""
 
@@ -266,7 +267,8 @@ class Renderer:
         # Score-Label
         score_y = DICE_SECTION_START_Y + DIE_SIZE + DICE_LABELS_OFFSET_Y + 2 * DICE_LABELS_SPACING
         score_text = f"Score: {self._game.dice.score()[0]}"
-        score_surface = self._dice_font.render(score_text, True, FONT_COLOR)
+        score_text_surface = True
+        score_surface = self._dice_font.render(score_text, score_text_surface, FONT_COLOR)
         self._window.blit(score_surface, (DICE_LABEL_X, score_y))
 
     def _draw_dice_counts(self, row_index: int) -> None:
@@ -283,15 +285,21 @@ class Renderer:
             label = DICE_LABEL_ROLLED
             counts = self._game.dice.get_rolled()
 
-        label_surface = self._dice_font.render(label, True, FONT_COLOR)  # noqa: RUF100, FBT003 API constraint.
+        label_surface_text = True
+        label_surface = self._dice_font.render(
+            label,
+            label_surface_text,
+            FONT_COLOR,
+        )  # noqa: RUF100, FBT003 API constraint.
         self._window.blit(label_surface, (DICE_LABEL_X, labels_y))
 
         # Draw counts.
         for index in range(NUM_DIE_FACES):
             x = DICE_LABEL_WIDTH + index * DICE_SPACING + (DICE_SPACING - DIE_SIZE) // 2
+            count_surface_text = True
             count_text = self._dice_font.render(
                 str(counts[index]),
-                True,  # noqa: RUF100, FBT003 API constraint.
+                count_surface_text,  # noqa: RUF100, FBT003 API constraint.
                 FONT_COLOR,
             )
             text_width = count_text.get_width()
@@ -344,7 +352,9 @@ class Renderer:
         pygame.draw.rect(self._window, roll_color, self._roll_button_rect, border_radius=10)
         pygame.draw.rect(self._window, FONT_COLOR, self._roll_button_rect, width=2, border_radius=10)
 
-        roll_text = self._button_font.render("ROLL", True, BUTTON_TEXT_COLOR)
+        antialias = True
+
+        roll_text = self._button_font.render("ROLL", antialias, BUTTON_TEXT_COLOR)
         roll_text_rect = roll_text.get_rect(center=self._roll_button_rect.center)
         self._window.blit(roll_text, roll_text_rect)
 
@@ -353,7 +363,7 @@ class Renderer:
         pygame.draw.rect(self._window, stop_color, self._stop_button_rect, border_radius=10)
         pygame.draw.rect(self._window, FONT_COLOR, self._stop_button_rect, width=2, border_radius=10)
 
-        stop_text = self._button_font.render("STOP", True, BUTTON_TEXT_COLOR)
+        stop_text = self._button_font.render("STOP", antialias, BUTTON_TEXT_COLOR)
         stop_text_rect = stop_text.get_rect(center=self._stop_button_rect.center)
         self._window.blit(stop_text, stop_text_rect)
 
