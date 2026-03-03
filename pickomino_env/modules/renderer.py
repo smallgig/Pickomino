@@ -13,6 +13,8 @@ import numpy as np
 import pygame  # Uses pygame-ce, see pyproject.toml
 
 from pickomino_env.modules.constants import (
+    ACTION_DISPLAY_X,
+    ACTION_DISPLAY_Y,
     BACKGROUND_COLOR,
     BUTTON_COLOR,
     BUTTON_FONT_SIZE,
@@ -192,10 +194,10 @@ class Renderer:
     def get_full_action(self) -> tuple[int, int] | None:
         """Get complete action: (button_action, dice_index) or None if incomplete."""
         if self._action_click_button is not None and self._action_click_dice is not None:
-            action = (self._action_click_dice, self._action_click_button)
+            self._action = (self._action_click_dice, self._action_click_button)
             self._action_click_button = None
             self._action_click_dice = None
-            return action
+            return self._action
         return None
 
     def _draw_players(self) -> None:
@@ -367,6 +369,19 @@ class Renderer:
         stop_text_rect = stop_text.get_rect(center=self._stop_button_rect.center)
         self._window.blit(stop_text, stop_text_rect)
 
+    def _draw_action_display(self) -> None:
+        """Draw current action selection."""
+        if self._action is not None:
+            dice_idx, button_action = self._action
+            font = pygame.font.SysFont(None, 32)
+            text = f"Action: ({dice_idx}, {button_action})"
+            surface = font.render(text, True, (0, 0, 0))
+            self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y))
+
+    def set_action(self, action: tuple[int, int] | None) -> None:
+        """Manually set the action to display (for automated play)."""
+        self._action = action
+
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
         if self._window is None:
@@ -375,6 +390,7 @@ class Renderer:
         self._draw_players()
         self._draw_dice()
         self._draw_tiles()
+        self._draw_action_display()
 
     def close(self) -> None:
         """Close game."""
