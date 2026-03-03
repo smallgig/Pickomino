@@ -379,10 +379,6 @@ class Renderer:
             surface = font.render(text, antialias, (0, 0, 0))
             self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y))
 
-    def set_action(self, action: tuple[int, int] | None) -> None:
-        """Manually set the action to display (for automated play)."""
-        self._action = action
-
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
         if self._window is None:
