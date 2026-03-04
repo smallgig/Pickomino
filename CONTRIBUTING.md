@@ -65,12 +65,13 @@ An issue is complete when:
 - Run all pre-commit checks: `pre-commit run --all-files`
 - Ensure tests pass: `pytest`
 - Add tests for new features (maintain 95%+ coverage)
+- Note: As a project policy, we only accept/merge Pull Requests from branches on this repository (not from forks). Our GitHub Actions/CI workflows use repository-scoped tokens and a submodule, which cannot be run safely for Pull Requests opened from forks.
 
 ## Code Style
 
-Ruff, black, pylint, pyright, mypy (strict mode)
-Google-style docstrings
-Type hints required.
+- Ruff, black, pylint, pyright, mypy (strict mode)
+- Google-style docstrings
+- Type hints required.
 
 ## Questions?
 
