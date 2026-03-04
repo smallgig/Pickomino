@@ -158,9 +158,10 @@ class Renderer:
         """Return pixel array for recording."""
         # Like _render_human. But capture as an array.
         if self._window is None:
-            raise RuntimeError(  # noqa: RUF100, TRY003 message variable unnecessary.
-                "Window not initialised.",
-            )
+            pygame.init()
+            self._window = pygame.display.set_mode(self._size)
+            self._clock = pygame.time.Clock()
+
         surface = pygame.surfarray.array3d(  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
             self._window,
         )

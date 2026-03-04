@@ -62,8 +62,14 @@ repos:
       - id: pytest
         name: pytest
         language: python
-        entry: pytest -v -m "not slow" --cov=pickomino_env --cov-report=html
-        additional_dependencies: [ "." ]
+        entry: >
+          python -c "import subprocess, sys;
+          subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', '.[test]']);
+          sys.exit(subprocess.call([sys.executable, '-m', 'pytest',
+          '-m', 'not slow',
+          '--cov=pickomino_env',
+          '--cov-report=html']))"
+        additional_dependencies: [ "pytest>=8.3.5,<9.0.0", "pytest-cov>=5.0,<6.0" ]
         pass_filenames: false
         stages: [ pre-push ]  # Only run on push instead of every commit.
       - id: xenon
