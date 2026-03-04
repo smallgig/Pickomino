@@ -13,6 +13,7 @@ import numpy as np
 import pygame  # Uses pygame-ce, see pyproject.toml
 
 from pickomino_env.modules.constants import (
+    ACTION_COLOR,
     ACTION_DISPLAY_X,
     ACTION_DISPLAY_Y,
     ACTION_FONT_SIZE,
@@ -378,7 +379,7 @@ class Renderer:
             font = pygame.font.SysFont(None, ACTION_FONT_SIZE)
             text = f"Action: ({dice_idx}, {button_action})"
             antialias = True
-            surface = font.render(text, antialias, (0, 0, 0))
+            surface = font.render(text, antialias, (ACTION_COLOR))
             self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y))
 
     def _draw_board(self) -> None:
