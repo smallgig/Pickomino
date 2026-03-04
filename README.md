@@ -15,6 +15,8 @@
 [![Type hints: mypy](https://img.shields.io/badge/type%20hints-mypy-brightgreen.svg)](http://mypy-lang.org/)
 [![pytest: 95%+ coverage](https://img.shields.io/badge/pytest-95%25%2B%20coverage-brightgreen)](https://pytest.org/)
 
+![Image](https://github.com/user-attachments/assets/3df93fb5-ed77-45f0-9128-ab9cf2004c10)
+
 ## Description
 
 An environment conforming to the **Gymnasium** API for the dice game **Pickomino (Heckmeck am Bratwurmeck)**
