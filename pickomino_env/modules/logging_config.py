@@ -2,11 +2,14 @@
 
 __all__ = ["log"]
 
+import tempfile
+from pathlib import Path
+
 try:  # pylint: disable=too-many-try-statements
     from loguru import logger
 
     logger.remove()  # Remove default stderr handler.
-    logger.add("pickomino.log", mode="w")
+    logger.add(Path(tempfile.gettempdir()) / "pickomino.log", mode="w")
 
     def log(message: str) -> None:
         """Log a debug message if loguru is available."""
