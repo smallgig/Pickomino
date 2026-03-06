@@ -195,7 +195,10 @@ class Renderer:
         return dice_index
 
     def get_full_action(self) -> tuple[int, int] | None:
-        """Get complete action: (button_action, dice_index) or None if incomplete."""
+        """Get the complete action: (button_action, dice_index) or None if incomplete.
+
+        Only used during manual play via main.py.
+        """
         if self._action_click_button is not None and self._action_click_dice is not None:
             self._action = (self._action_click_dice, self._action_click_button)
             self._action_click_button = None
@@ -373,13 +376,13 @@ class Renderer:
         self._window.blit(stop_text, stop_text_rect)
 
     def _draw_action_display(self) -> None:
-        """Draw current action selection."""
+        """Draw the current action selection. Only active during manual play via main.py."""
         if self._action is not None and self._window is not None:
             dice_idx, button_action = self._action
             font = pygame.font.SysFont(None, ACTION_FONT_SIZE)
             text = f"Action: ({dice_idx}, {button_action})"
             antialias = True
-            surface = font.render(text, antialias, (ACTION_COLOR))
+            surface = font.render(text, antialias, ACTION_COLOR)
             self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y))
 
     def _draw_board(self) -> None:
