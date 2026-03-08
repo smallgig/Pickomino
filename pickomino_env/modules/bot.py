@@ -73,7 +73,7 @@ class Bot:
         action_roll: int = ACTION_ROLL
         self.roll_counter += 1
         values: list[int] = [1, 2, 3, 4, 5, WORM_VALUE]
-        rolled = np.array(rolled)  # type: ignore[assignment]  # pyright: ignore[reportAssignmentType]
+        rolled_arr = np.array(rolled)  # pyright: ignore[reportAssignmentType]
 
         if sum(collected):
             self.roll_counter = 0
@@ -81,9 +81,9 @@ class Bot:
         # Set rolled[index] to 0 if already collected
         for index, die in enumerate(collected):
             if die:
-                rolled[index] = 0
+                rolled_arr[index] = 0
         # 2. Otherwise, take the die side that contributes the most points.
-        contribution: NDArray[np.int_] = np.multiply(rolled, values)
+        contribution: NDArray[np.int_] = np.multiply(rolled_arr, values)
         max_value: int = int(np.max(contribution))  # pyright:ignore[reportUnknownMemberType, reportUnknownArgumentType]
         # All faces with max contribution.
         candidates: NDArray[np.int_] = np.where(contribution == max_value)[0]
@@ -92,14 +92,14 @@ class Bot:
         candidates = np.flip(candidates)
 
         # If they are equal, take the face with the lowest dice.
-        action_dice = int(candidates[np.argmin(rolled[candidates])])
+        action_dice = int(candidates[np.argmin(rolled_arr[candidates])])
 
         # 1. On or after the third roll, take worms if you can.
-        if self.roll_counter >= MIN_ROLLS_FOR_WORM_STRATEGY and not collected[WORM_INDEX] and rolled[WORM_INDEX]:
+        if self.roll_counter >= MIN_ROLLS_FOR_WORM_STRATEGY and not collected[WORM_INDEX] and rolled_arr[WORM_INDEX]:
             action_dice = WORM_INDEX
 
         # After selecting action_dice, check if rolling is even possible.
-        action_roll = self._no_dice_remaining_after_collect(collected, rolled, action_dice, action_roll)
+        action_roll = self._no_dice_remaining_after_collect(collected, rolled_arr, action_dice, action_roll)
 
         # 3. Quit as soon as you can take a tile: dice sum for a visible tile reached and worm collected.
         worm_collected = bool(collected[WORM_INDEX]) or action_dice == WORM_INDEX
