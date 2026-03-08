@@ -10,7 +10,7 @@ from __future__ import annotations
 __all__ = ["PickominoEnv"]
 
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import gymnasium as gym
 import numpy as np
@@ -35,6 +35,9 @@ from pickomino_env.modules.logging_config import log
 from pickomino_env.modules.player import Player
 from pickomino_env.modules.renderer import Renderer
 from pickomino_env.modules.rule_checker import RuleChecker
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg]
@@ -192,7 +195,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         self.render_mode = render_mode
         self._renderer = Renderer(self.render_mode)
 
-    def render(self) -> np.ndarray | list[np.ndarray] | None:  # type: ignore[override]
+    def render(self) -> NDArray[np.uint8] | None:  # type: ignore[override]
         """Render the current game state.
 
             Renders the environment to screen or returns an RGB array depending on render_mode.
