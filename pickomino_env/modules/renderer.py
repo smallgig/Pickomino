@@ -13,6 +13,10 @@ import numpy as np
 import pygame  # Uses pygame-ce, see pyproject.toml
 
 from pickomino_env.modules.constants import (
+    ACTION_COLOR,
+    ACTION_DISPLAY_X,
+    ACTION_DISPLAY_Y,
+    ACTION_FONT_SIZE,
     BACKGROUND_COLOR,
     BUTTON_COLOR,
     BUTTON_FONT_SIZE,
@@ -156,9 +160,10 @@ class Renderer:
         """Return pixel array for recording."""
         # Like _render_human. But capture as an array.
         if self._window is None:
-            raise RuntimeError(  # noqa: RUF100, TRY003 message variable unnecessary.
-                "Window not initialised.",
-            )
+            pygame.init()
+            self._window = pygame.display.set_mode(self._size)
+            self._clock = pygame.time.Clock()
+
         surface = pygame.surfarray.array3d(  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
             self._window,
         )
@@ -190,12 +195,15 @@ class Renderer:
         return dice_index
 
     def get_full_action(self) -> tuple[int, int] | None:
-        """Get complete action: (button_action, dice_index) or None if incomplete."""
-        if self._action_click_button is not None and self._action_click_dice is not None:
-            action = (self._action_click_dice, self._action_click_button)
-            self._action_click_button = None
+        """Get the complete action: (dice_index, button_action) or None if incomplete.
+
+        Only used during manual play via main.py.
+        """
+        if self._action_click_dice is not None and self._action_click_button is not None:
+            self._action = (self._action_click_dice, self._action_click_button)
             self._action_click_dice = None
-            return action
+            self._action_click_button = None
+            return self._action
         return None
 
     def _draw_players(self) -> None:
@@ -367,6 +375,16 @@ class Renderer:
         stop_text_rect = stop_text.get_rect(center=self._stop_button_rect.center)
         self._window.blit(stop_text, stop_text_rect)
 
+    def _draw_action_display(self) -> None:
+        """Draw the current action selection. Only active during manual play via main.py."""
+        if self._action is not None and self._window is not None:
+            dice_idx, button_action = self._action
+            font = pygame.font.SysFont(None, ACTION_FONT_SIZE)
+            text = f"Action: ({dice_idx}, {button_action})"
+            antialias = True
+            surface = font.render(text, antialias, ACTION_COLOR)
+            self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y))
+
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
         if self._window is None:
@@ -375,6 +393,7 @@ class Renderer:
         self._draw_players()
         self._draw_dice()
         self._draw_tiles()
+        self._draw_action_display()
 
     def close(self) -> None:
         """Close game."""

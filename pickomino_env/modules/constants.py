@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 __all__ = [
+    "ACTION_COLOR",
+    "ACTION_DISPLAY_X",
+    "ACTION_DISPLAY_Y",
+    "ACTION_FONT_SIZE",
     "ACTION_INDEX_DICE",
     "ACTION_INDEX_ROLL",
     "ACTION_ROLL",
@@ -154,3 +158,9 @@ TILE_SPACING: Final[int] = 10
 TILES_ROW_SPACING: Final[int] = 10
 TILES_START_X: Final[int] = 150
 TILES_START_Y: Final[int] = 380
+
+# Display action.
+ACTION_DISPLAY_X = 20
+ACTION_DISPLAY_Y = DICE_SECTION_START_Y - 30
+ACTION_FONT_SIZE = 28
+ACTION_COLOR = (0, 0, 0)

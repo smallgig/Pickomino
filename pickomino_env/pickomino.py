@@ -10,7 +10,7 @@ from __future__ import annotations
 __all__ = ["PickominoEnv"]
 
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import gymnasium as gym
 import numpy as np
@@ -26,6 +26,7 @@ from pickomino_env.modules.constants import (
     MAX_BOTS,
     NUM_DICE,
     RENDER_DELAY,
+    RENDER_FPS,
     SMALLEST_TILE,
 )
 from pickomino_env.modules.dice import Dice
@@ -34,6 +35,9 @@ from pickomino_env.modules.logging_config import log
 from pickomino_env.modules.player import Player
 from pickomino_env.modules.renderer import Renderer
 from pickomino_env.modules.rule_checker import RuleChecker
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 
 class PickominoEnv(gym.Env):  # type: ignore[type-arg]
@@ -122,6 +126,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     """
 
+    # ClassVar conflicts with gymnasium.Env.metadata instance variable declaration.
+    metadata: dict[str, Any] = {"render_modes": ["human", "rgb_array"], "render_fps": RENDER_FPS}  # noqa: RUF012
+
     def __init__(self, number_of_bots: int = 1, render_mode: str | None = None) -> None:
         """Initialize a Pickomino game environment.
 
@@ -185,10 +192,10 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         )
         # Action space is a tuple. First action: which dice to take. Second action: roll again or not.
         self.action_space = gym.spaces.MultiDiscrete([6, 2])
-        self._render_mode = render_mode
-        self._renderer = Renderer(self._render_mode)
+        self.render_mode = render_mode
+        self._renderer = Renderer(self.render_mode)
 
-    def render(self) -> np.ndarray | list[np.ndarray] | None:  # type: ignore[override]
+    def render(self) -> NDArray[np.uint8] | None:  # type: ignore[override]
         """Render the current game state.
 
             Renders the environment to screen or returns an RGB array depending on render_mode.
@@ -201,7 +208,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             ValueError: If render_mode was None at initialization.
 
         """
-        if self._render_mode is None:
+        if self.render_mode is None:
             raise ValueError(
                 "render() called with render_mode=None."
                 "Specify render_mode when creating environment: "
@@ -473,7 +480,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                         self._game.tiles.smallest(),
                     )
                     self._step_bot(bot_action)
-                if self._render_mode is not None:
+                if self.render_mode is not None:
                     self.render()  # pyright: ignore[reportUnknownMemberType]
                     time.sleep(RENDER_DELAY)
             bot_action = 0, 0  # Reset for next player.

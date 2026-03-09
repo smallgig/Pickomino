@@ -39,8 +39,8 @@ class Tiles:
         return self.tiles
 
     def is_empty(self) -> bool:
-        """Check if the table is empty."""
-        return not self.tiles.values()
+        """Check if no available tiles remain on the table."""
+        return not any(self.tiles.values())
 
     def highest(self) -> int:
         """Get the highest tile on the table."""
