@@ -343,6 +343,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         """
         # Check rules before collecting dice.
         self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_already_collected()
+        if self._game.failed_attempt:
+            return
 
         self._game.dice.collect(self._action[ACTION_INDEX_DICE])
 
@@ -351,18 +353,28 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self._game.current_player_index,
             self._action,
         )
+        if self._game.failed_attempt:
+            return
+
         self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_no_worms(
             self._action,
         )
+        if self._game.failed_attempt:
+            return
 
         # Action is to roll
         if self._action[ACTION_INDEX_ROLL] == ACTION_ROLL:
             self._game.dice.roll()
             self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_already_collected()
+            if self._game.failed_attempt:
+                return
             self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_no_tile_to_take(
                 self._game.current_player_index,
                 self._action,
             )
+            if self._game.failed_attempt:
+                return
+
             self._game.failed_attempt, self._game.explanation = self._game.rule_checker.set_failed_no_worms(
                 self._action,
             )
