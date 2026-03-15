@@ -57,7 +57,7 @@ The observation is a `dict` with shape `(4,)` with the values corresponding to t
 **Note:** There are eight dice to roll and collect. A die has six sides with the number of eyes one through
 five, but a worm instead of a six.
 The values correspond to the number of eyes, with the worm also having the value five (and not six!).
-The 16 tiles are numbered 21 to 36 and have worm values from one to four in spread in four groups.
+The 16 tiles are numbered 21 to 36 and have worm values from one to four spread in four groups.
 The game is for two to seven players. Here your Reinforcement Learning Agent is the first player. The
 other players are computer bots.
 The bots play, according to a heuristic. When you create the environment,
