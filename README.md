@@ -79,7 +79,7 @@ can be greater than the score.
 ## Starting State
 
 * `dice_collected` = [0, 0, 0, 0, 0, 0].
-* `dice_rolled` = [3, 0, 1, 2, 0, 2] Random dice, sum = 8.
+* `dice_rolled` = [3, 0, 1, 2, 0, 2] (Random dice, sum = 8.)
 * `tiles_table` = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].
 * `tile_players` = [0, 0, 0] (with number_of_bots = 2).
 
