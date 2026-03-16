@@ -221,6 +221,11 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             self._game.current_player_index,
         )
 
+    @property
+    def renderer(self) -> Renderer:
+        """Get the renderer for manual play interaction."""
+        return self._renderer
+
     def _create_players(self) -> None:
         """Create the human (agent) player (player 0) and bot opponents with assigned names."""
         names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
