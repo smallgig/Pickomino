@@ -2,7 +2,8 @@
 ## Rewards
 
 The goal is to collect tiles in a stack. The winner is the player, which at the end of the game has the most worms
-on her tiles. For the Reinforcement Learning Agent, a reward equal to the value (worms) of a tile is given when the tile is picked. For a failed attempt
+on her tiles. For the Reinforcement Learning Agent a reward equal to the value
+(worms) of a tile is given when the tile is picked. For a failed attempt
 (see rulebook), a corresponding negative reward is given. When a bot steals your
 tile, a double reward is given, consisting of the value of the tile and the reduction in the opponent's score.
 
@@ -28,11 +29,6 @@ Truncation: Attempt to break the rules, the game continues, and you have to give
 
 Note that a Failed Attempt means: If a tile is present, put it back on the table and get a negative reward.
 However, the game continues, so the Episode does not end.
-
-## Bug Bounty
-
-Found a bug? Valid reports are rewarded with a physical copy of the Pickomino board
-game. See [SECURITY.md](SECURITY.md) for scope, timelines, and how to report.
 
 ## Arguments
 
@@ -80,12 +76,4 @@ while not terminated and not truncated:
 
 print(f"Episode finished. Total reward: {total_reward}")
 env.close()
-```
-```markdown
-## Security & Bug Bounty
-
-Found a bug? Valid reports are rewarded with a physical copy of the Pickomino board
-game. See [SECURITY.md](SECURITY.md) for scope, timelines, and how to report.
-```
-*Bug Bounty v1.0 — March 2026*
 ```

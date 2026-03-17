@@ -1,10 +1,6 @@
 ```python
-"""Gymnasium Environment for the game Pickomino, Heckmeck in German.
+"""Gymnasium Environment for the game Pickomino, Heckmeck in German."""
 
-This environment is part of the Pickomino Reinforcement Learning environment.
-For more information, see the `SECURITY & BUG BOUNTY POLICY <SECURITY.md>`_.
-
-"""
 from gymnasium.envs.registration import register  # pyright: ignore[reportUnknownVariableType]
 
 # Only register. Gymnasium loads the class with gym.make()
