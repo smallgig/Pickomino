@@ -84,10 +84,11 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     ## Rewards
 
-    Reward is the worm value of the tile claimed or returned during the turn:
+    Reward is related to the worm value of the tile claimed or returned during the turn:
 
-    **+4 to +1**: Successfully claiming a high-value tile (36, 35, ..., 21)
-    **-1 to -4**: Returning a tile due to bust (A tile being stolen gives no (zero) reward)
+    **+4 to +1**: Successfully claiming a high-value tile from the table (36, 35, ..., 21).
+    **+8 to +2**: Stealing a tile from an opponent (reward is 2x worm value).
+    **-1 to -4**: Returning a tile due to bust (A tile being stolen gives no (zero) reward).
 
 
     Each tile (21-36) carries 1-4 worm symbols. The reward matches the worm count.
@@ -386,12 +387,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             steal_index: Index of opponent to steal from.
 
         Returns:
-            Worm value of stolen tile.
+            Worm value of stolen tile (doubled for stealing).
         """
         tile_to_return: int = self._game.players[steal_index].remove_tile()  # Remove the tile from the player.
         self._game.players[self._game.current_player_index].add_tile(tile_to_return)
         worm_index = tile_to_return - SMALLEST_TILE
-        return self._game.tiles.worm_values[worm_index]
+        return 2 * self._game.tiles.worm_values[worm_index]
 
     def _step_tiles(self) -> int:
         """Pick or return a tile based on the dice sum at the end of the turn.
