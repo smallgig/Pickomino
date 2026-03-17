@@ -1,4 +1,3 @@
-```python
 """Gymnasium Environment for the game Pickomino, Heckmeck in German."""
 
 from gymnasium.envs.registration import register  # pyright: ignore[reportUnknownVariableType]
@@ -9,4 +8,3 @@ register(
     entry_point="pickomino_env.pickomino:PickominoEnv",
     max_episode_steps=200,
 )
-```
