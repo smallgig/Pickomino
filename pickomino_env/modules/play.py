@@ -34,7 +34,8 @@ class ManualPlay:  # pylint: disable=too-few-public-methods.
             _, _, game_terminated, _, _ = env.step((selection, roll_choice))
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Entry point for manual play."""
     manual_play = ManualPlay()
     # Keep offering to play until the user does not want to play again.
     while True:  # pylint: disable=while-used
@@ -45,3 +46,7 @@ if __name__ == "__main__":
         play_again: bool = bool(int(input("Play again? Enter '1', else '0': ")))
         if not play_again:
             break
+
+
+if __name__ == "__main__":
+    main()

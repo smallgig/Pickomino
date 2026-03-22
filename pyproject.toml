@@ -15,6 +15,9 @@ dependencies = [
     "pygame-ce>=2.5.2,<3.0.0",
 ]
 
+[project.scripts]
+pickomino-play = "pickomino_env.modules.play:main"
+
 [project.optional-dependencies]
 test = [
     "pytest>=8.3.5,<9.0.0",
