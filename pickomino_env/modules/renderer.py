@@ -268,9 +268,10 @@ class Renderer:
             dice_rect = pygame.Rect(x, y, DIE_SIZE, DIE_SIZE)
             self._dice_rects.append(dice_rect)
 
-            # Hover effect
+            # Hover/selection effect: highlight on mouse-over or when selected
             is_hovered = dice_rect.collidepoint(self._mouse_pos)
-            if is_hovered:
+            is_selected = self._action_click_dice == index
+            if is_hovered or is_selected:
                 highlight_rect = pygame.Rect(
                     x - HIGHLIGHT_OFFSET,  
                     y - HIGHLIGHT_OFFSET,  
