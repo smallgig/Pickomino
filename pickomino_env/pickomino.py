@@ -497,9 +497,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                         self._game.tiles.smallest(),
                     )
                     self._step_bot(bot_action)
-                if self.render_mode is not None:
-                    self.render()  # pyright: ignore[reportUnknownMemberType]
-                    time.sleep(RENDER_DELAY)
+                    if self.render_mode is not None:
+                        self.render()  # pyright: ignore[reportUnknownMemberType]
+                        time.sleep(RENDER_DELAY)
             bot_action = 0, 0  # Reset for next player.
             self._game.current_player_index += 1
 
