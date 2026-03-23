@@ -104,6 +104,9 @@ class Renderer:
 
         self._mouse_pos: tuple[int, int] = (0, 0)
 
+        # Error message.
+        self._error_message: str | None = None
+
     def render(
         self,
         dice: Dice,
@@ -205,6 +208,9 @@ class Renderer:
             self._action_click_button = None
             return self._action
         return None
+
+    def set_error_message(self, message: str | None) -> None:
+        self._error_message = message
 
     def _draw_players(self) -> None:
         """Draw player names and their top tile."""
@@ -385,6 +391,13 @@ class Renderer:
             surface = font.render(text, antialias, ACTION_COLOR)
             self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y))
 
+    def _draw_error_message(self) -> None:
+        if self._error_message is None or self._window is None:
+            return
+        font = pygame.font.SysFont(None, ACTION_FONT_SIZE)
+        surface = font.render(f"Error: {self._error_message}", True, (200, 0, 0))
+        self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y + ACTION_FONT_SIZE + 5))
+
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
         if self._window is None:
@@ -394,6 +407,7 @@ class Renderer:
         self._draw_dice()
         self._draw_tiles()
         self._draw_action_display()
+        self._draw_error_message()
 
     def close(self) -> None:
         """Close game."""
