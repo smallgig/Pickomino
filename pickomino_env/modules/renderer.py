@@ -273,17 +273,18 @@ class Renderer:
             is_selected = self._action_click_dice == index
             if is_hovered or is_selected:
                 highlight_rect = pygame.Rect(
-                    x - HIGHLIGHT_OFFSET,  
-                    y - HIGHLIGHT_OFFSET,  
-                    DIE_SIZE + HIGHLIGHT_EXPAND,  
-                    DIE_SIZE + HIGHLIGHT_EXPAND, )
+                    x - HIGHLIGHT_OFFSET,
+                    y - HIGHLIGHT_OFFSET,
+                    DIE_SIZE + HIGHLIGHT_EXPAND,
+                    DIE_SIZE + HIGHLIGHT_EXPAND,
+                )
                 pygame.draw.rect(
                     self._window,
-                    HIGHLIGHT_COLOR, 
+                    HIGHLIGHT_COLOR,
                     highlight_rect,
-                    width=HIGHLIGHT_WIDTH, 
-                    border_radius=HIGHLIGHT_RADIUS, )
-
+                    width=HIGHLIGHT_WIDTH,
+                    border_radius=HIGHLIGHT_RADIUS,
+                )
         self._draw_dice_counts(0)  # Collected.
         self._draw_dice_counts(1)  # Rolled.
 
