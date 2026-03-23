@@ -244,7 +244,12 @@ class Renderer:
         """Draw the dice section with counts."""
         if self._window is None:
             return
-
+        
+        HIGHLIGHT_OFFSET = 3  
+        HIGHLIGHT_EXPAND = 6 
+        HIGHLIGHT_COLOR = (255, 255, 0)  
+        HIGHLIGHT_WIDTH = 3  
+        HIGHLIGHT_RADIUS = 5 
         # Lazy initialization: pygame not initialized during __init__(), so create font on rendering.
         self._dice_font = pygame.font.SysFont(None, DICE_FONT_SIZE)
         # Reset dice rectangles
@@ -266,8 +271,17 @@ class Renderer:
             # Hover effect
             is_hovered = dice_rect.collidepoint(self._mouse_pos)
             if is_hovered:
-                highlight_rect = pygame.Rect(x - 3, y - 3, DIE_SIZE + 6, DIE_SIZE + 6)
-                pygame.draw.rect(self._window, (255, 255, 0), highlight_rect, width=3, border_radius=5)
+                highlight_rect = pygame.Rect(
+                    x - HIGHLIGHT_OFFSET,  
+                    y - HIGHLIGHT_OFFSET,  
+                    DIE_SIZE + HIGHLIGHT_EXPAND,  
+                    DIE_SIZE + HIGHLIGHT_EXPAND, )
+                pygame.draw.rect(
+                    self._window,
+                    HIGHLIGHT_COLOR, 
+                    highlight_rect,
+                    width=HIGHLIGHT_WIDTH, 
+                    border_radius=HIGHLIGHT_RADIUS, )
 
         self._draw_dice_counts(0)  # Collected.
         self._draw_dice_counts(1)  # Rolled.
