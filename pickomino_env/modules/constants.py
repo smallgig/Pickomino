@@ -43,6 +43,7 @@ __all__ = [
     "NUM_DICE",
     "NUM_DIE_FACES",
     "PLAYERS_START_Y",
+    "PLAYER_TILE_SPACING",
     "PLAYER_HIGHLIGHT_COLOR",
     "PLAYER_NAME_FONT_SIZE",
     "PLAYER_WIDTH",
@@ -109,7 +110,7 @@ BUTTON_WIDTH = 120
 BUTTON_HEIGHT = 50
 BUTTON_SPACING = 20
 BUTTONS_START_X = WINDOW_WIDTH - BUTTON_WIDTH - 870
-BUTTONS_START_Y = WINDOW_HEIGHT - 290
+BUTTONS_START_Y = WINDOW_HEIGHT - 270
 BUTTON_COLOR = (70, 130, 180)  # Steel blue
 BUTTON_HOVER_COLOR = (100, 160, 210)  # Lighter blue
 BUTTON_TEXT_COLOR = (255, 255, 255)  # White
@@ -125,6 +126,7 @@ PLAYERS_START_Y: Final[int] = 20
 PLAYER_NAME_FONT_SIZE: Final[int] = 28
 PLAYER_HIGHLIGHT_COLOR: Final[tuple[int, int, int]] = (65, 105, 225)  # Blue
 PLAYER_WIDTH: Final[int] = 120
+PLAYER_TILE_SPACING: Final[int] = 50
 
 # Dice rendering.
 DICE_NAMES: Final[tuple[str, ...]] = (
@@ -135,7 +137,7 @@ DICE_NAMES: Final[tuple[str, ...]] = (
     "dice_5",
     "dice_worm",
 )
-DICE_SECTION_START_Y: Final[int] = 180
+DICE_SECTION_START_Y: Final[int] = 250
 DIE_SIZE: Final[int] = 100
 # Horizontal space reserved for left labels (affecting dice positioning).
 DICE_LABEL_WIDTH: Final[int] = 100
@@ -151,16 +153,16 @@ DICE_LABEL_X: Final[int] = 10
 DICE_FONT_SIZE: Final[int] = 30
 
 # Tile rendering.
-TILE_WIDTH: Final[int] = 60  # 37
-TILE_HEIGHT: Final[int] = 100  # 89
+TILE_WIDTH: Final[int] = 100
+TILE_HEIGHT: Final[int] = 140
 TILES_PER_ROW: Final[int] = 8
-TILE_SPACING: Final[int] = 10
-TILES_ROW_SPACING: Final[int] = 10
-TILES_START_X: Final[int] = 150
-TILES_START_Y: Final[int] = 380
+TILE_SPACING: Final[int] = 8
+TILES_ROW_SPACING: Final[int] = -15
+TILES_START_X: Final[int] = 170
+TILES_START_Y: Final[int] = 480
 
 # Display action.
 ACTION_DISPLAY_X = 20
-ACTION_DISPLAY_Y = DICE_SECTION_START_Y - 30
+ACTION_DISPLAY_Y = DICE_SECTION_START_Y - 100
 ACTION_FONT_SIZE = 28
 ACTION_COLOR = (0, 0, 0)

@@ -47,6 +47,7 @@ from pickomino_env.modules.constants import (
     PLAYER_NAME_FONT_SIZE,
     PLAYER_WIDTH,
     PLAYERS_START_Y,
+    PLAYER_TILE_SPACING,
     RENDER_FPS,
     RENDER_MODE_HUMAN,
     RENDER_MODE_RGB_ARRAY,
@@ -244,7 +245,7 @@ class Renderer:
                     f"tile_{current_tile}.png",
                 )
                 tile_image = pygame.image.load(str(tile_path))
-                tile_x = x + (PLAYER_WIDTH - TILE_WIDTH) // 2
+                tile_x = x + (PLAYER_WIDTH - TILE_WIDTH + PLAYER_TILE_SPACING) // 2
                 tile_y = PLAYERS_START_Y + PLAYER_NAME_FONT_SIZE
                 self._window.blit(tile_image, (tile_x, tile_y))
 
