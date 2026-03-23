@@ -104,18 +104,23 @@ class Renderer:
 
         self._mouse_pos: tuple[int, int] = (0, 0)
 
+        # Game over.
+        self._game_over: bool = False
+
     def render(
         self,
         dice: Dice,
         players: list[Player],
         tiles: Tiles,
         current_player_index: int,
+        game_terminated: bool
     ) -> NDArray[np.uint8] | None:  # pyright: ignore[reportInvalidTypeForm]
         """Render the environment."""
         self._game.dice = dice
         self._game.players = players
         self._game.tiles = tiles
         self._game.current_player_index = current_player_index
+        self._game.terminated = game_terminated
 
         if self._render_mode is None:
             return None
@@ -147,10 +152,11 @@ class Renderer:
         self._window.fill(BACKGROUND_COLOR)  # Lighter, softer green.
 
         # Draw game state.
-        self._draw_board()
-
-        # Draw buttons.
-        self._draw_buttons()
+        if self._game.terminated:
+            self._draw_game_over()
+        else:
+            self._draw_board()
+            self._draw_buttons()
 
         pygame.display.flip()
         if self._clock is not None:
@@ -384,6 +390,16 @@ class Renderer:
             antialias = True
             surface = font.render(text, antialias, ACTION_COLOR)
             self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y))
+
+    def _draw_game_over(self) -> None:
+        if self._window is None:
+            return
+        self._window.fill(BACKGROUND_COLOR)
+        font = pygame.font.SysFont(None, 80)
+        antialias = True
+        surface = font.render("GAME OVER", antialias, (200, 0, 0))
+        rect = surface.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        self._window.blit(surface, rect)
 
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
