@@ -98,7 +98,7 @@ RENDER_MODE_RGB_ARRAY: Final[str] = "rgb_array"
 
 # Rendering frequency and delay for bots.
 RENDER_FPS: Final[int] = 60  # Frames Per Second.
-RENDER_DELAY: Final[float] = 0.5
+RENDER_DELAY: Final[float] = 2
 
 # Rendering window dimensions.
 WINDOW_WIDTH: Final[int] = 1000
