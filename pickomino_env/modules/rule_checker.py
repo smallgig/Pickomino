@@ -50,7 +50,7 @@ class RuleChecker:
         else:
             self._explanation = (
                 f"Failed: Collected was {self._dice.get_collected()}\n"
-                f"No possible rolled dice to taken in {self._dice.get_rolled()}"
+                f"No possible rolled dice to take in {self._dice.get_rolled()}"
             )
 
         return self._failed_attempt, self._explanation
