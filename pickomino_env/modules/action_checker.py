@@ -12,9 +12,7 @@ from pickomino_env.modules.constants import (
     ACTION_ROLL,
     ACTION_STOP,
     ACTION_TUPLE_LENGTH,
-    NO_RED,
     NUM_DIE_FACES,
-    RED,
 )
 
 if TYPE_CHECKING:
@@ -79,13 +77,13 @@ class ActionChecker:
         # Selected Face value was not rolled.
         if self._dice.get_rolled()[action[ACTION_INDEX_DICE]] == 0:
             self._truncated = True
-            self._explanation = RED + "Truncated: Selected Face value not rolled" + NO_RED
+            self._explanation = "Truncated: Selected Face value not rolled"
             return self._terminated, self._truncated, self._explanation
 
         # Dice already collected cannot be taken again.
         if self._dice.get_collected()[action[ACTION_INDEX_DICE]] != 0:
             self._truncated = True
-            self._explanation = RED + "Truncated: Dice already collected cannot be taken again" + NO_RED
+            self._explanation = "Truncated: Dice already collected cannot be taken again"
             return self._terminated, self._truncated, self._explanation
 
         remaining_dice = self._dice.get_rolled().copy()  # Copy in order not to overwrite the real rolled variable.
@@ -94,7 +92,7 @@ class ActionChecker:
         # Try to roll when no dice left to roll.
         if action[ACTION_INDEX_ROLL] == ACTION_ROLL and sum(remaining_dice) == 0:
             self._truncated = True
-            self._explanation = RED + "Truncated: No Dice left to roll and roll action selected." + NO_RED
+            self._explanation = "Truncated: No Dice left to roll and roll action selected."
             return self._terminated, self._truncated, self._explanation
 
         return self._terminated, self._truncated, self._explanation

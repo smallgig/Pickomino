@@ -47,6 +47,7 @@ from pickomino_env.modules.constants import (
     PLAYER_NAME_FONT_SIZE,
     PLAYER_WIDTH,
     PLAYERS_START_Y,
+    PLAYERS_TILE_SPACING,
     RENDER_FPS,
     RENDER_MODE_HUMAN,
     RENDER_MODE_RGB_ARRAY,
@@ -106,18 +107,26 @@ class Renderer:
 
         self._mouse_pos: tuple[int, int] = (0, 0)
 
-    def render(
+        # Error message.
+        self._error_message: str | None = None
+
+    # pylint: disable=too-many-arguments
+    def render(  # noqa: PLR0913
         self,
+        *,
         dice: Dice,
         players: list[Player],
         tiles: Tiles,
         current_player_index: int,
+        game_truncated: bool,
+        explanation: str,
     ) -> NDArray[np.uint8] | None:  # pyright: ignore[reportInvalidTypeForm]
         """Render the environment."""
         self._game.dice = dice
         self._game.players = players
         self._game.tiles = tiles
         self._game.current_player_index = current_player_index
+        self._error_message = explanation if game_truncated else None
 
         if self._render_mode is None:
             return None
@@ -238,7 +247,7 @@ class Renderer:
                     f"tile_{current_tile}.png",
                 )
                 tile_image = pygame.image.load(str(tile_path))
-                tile_x = x + (PLAYER_WIDTH - TILE_WIDTH) // 2
+                tile_x = x + (PLAYER_WIDTH - TILE_WIDTH + PLAYERS_TILE_SPACING) // 2
                 tile_y = PLAYERS_START_Y + PLAYER_NAME_FONT_SIZE
                 self._window.blit(tile_image, (tile_x, tile_y))
 
@@ -387,6 +396,15 @@ class Renderer:
             surface = font.render(text, antialias, ACTION_COLOR)
             self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y))
 
+    def _draw_error_message(self) -> None:
+        """Draw the error message. Only active if the last action is invalid."""
+        if self._error_message is None or self._window is None:
+            return
+        font = pygame.font.SysFont(None, ACTION_FONT_SIZE)
+        antialias = True
+        surface = font.render(f"Error: {self._error_message}", antialias, (200, 0, 0))
+        self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y + ACTION_FONT_SIZE + 5))
+
     def _draw_board(self) -> None:
         """Draw the game board with tiles and dice."""
         if self._window is None:
@@ -396,6 +414,7 @@ class Renderer:
         self._draw_dice()
         self._draw_tiles()
         self._draw_action_display()
+        self._draw_error_message()
 
     def close(self) -> None:
         """Close game."""

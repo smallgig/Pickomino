@@ -215,10 +215,12 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                 "e.g. gymnasium.make('Pickomino-v0', render_mode='human')",
             )
         return self._renderer.render(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
-            self._game.dice,
-            self._game.players,
-            self._game.tiles,
-            self._game.current_player_index,
+            dice=self._game.dice,
+            players=self._game.players,
+            tiles=self._game.tiles,
+            current_player_index=self._game.current_player_index,
+            game_truncated=self._game.truncated,
+            explanation=self._game.explanation,
         )
 
     @property

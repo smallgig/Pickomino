@@ -7,11 +7,7 @@ from typing import TYPE_CHECKING
 from pickomino_env.modules.constants import (
     ACTION_INDEX_ROLL,
     ACTION_STOP,
-    GREEN,
-    NO_GREEN,
-    NO_RED,
     NUM_DICE,
-    RED,
     SMALLEST_TILE,
 )
 
@@ -50,11 +46,11 @@ class RuleChecker:
         self._failed_attempt = not can_take
 
         if can_take:
-            self._explanation = GREEN + "Good case" + NO_GREEN
+            self._explanation = "Good case"
         else:
             self._explanation = (
-                RED + f"Failed: Collected was {self._dice.get_collected()}\n"
-                f"No possible rolled dice to taken in {self._dice.get_rolled()}" + NO_RED
+                f"Failed: Collected was {self._dice.get_collected()}\n"
+                f"No possible rolled dice to take in {self._dice.get_rolled()}"
             )
 
         return self._failed_attempt, self._explanation
@@ -73,10 +69,10 @@ class RuleChecker:
         if self._dice.score()[0] < SMALLEST_TILE:
             if action[ACTION_INDEX_ROLL] == ACTION_STOP:
                 self._failed_attempt = True
-                self._explanation = RED + "Failed: 21 not reached and action stop" + NO_RED
+                self._explanation = "Failed: 21 not reached and action stop"
             if sum(self._dice.get_collected()) == NUM_DICE:
                 self._failed_attempt = True
-                self._explanation = RED + "Failed: 21 not reached and no dice left" + NO_RED
+                self._explanation = "Failed: 21 not reached and no dice left"
 
     def _check_no_tile_available(self, current_player_index: int) -> None:
         """Check if no tile can be taken."""
@@ -99,7 +95,7 @@ class RuleChecker:
             and steal_index is None
         ):
             self._failed_attempt = True
-            self._explanation = RED + "Failed: No tile on table or from another player can be taken" + NO_RED
+            self._explanation = "Failed: No tile on table or from another player can be taken"
 
     def set_failed_no_worms(self, action: tuple[int, int]) -> tuple[bool, str]:
         """Set failed attempt for no worm collected.
@@ -108,6 +104,6 @@ class RuleChecker:
         """
         if not self._dice.score()[1] and action[ACTION_INDEX_ROLL] == ACTION_STOP:
             self._failed_attempt = True
-            self._explanation = RED + "Failed: No worm collected" + NO_RED
+            self._explanation = "Failed: No worm collected"
 
         return self._failed_attempt, self._explanation
