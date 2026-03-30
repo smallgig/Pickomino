@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import argparse
+
+from pickomino_env.modules.constants import MAX_BOTS
 from pickomino_env.pickomino import PickominoEnv
 
 
@@ -36,11 +39,17 @@ class ManualPlay:  # pylint: disable=too-few-public-methods.
 
 def main() -> None:
     """Entry point for manual play."""
+    parser = argparse.ArgumentParser(description="Play Pickomino manually.")
+    parser.add_argument("--number-of-bots", type=int, default=1)
+    args = parser.parse_args()
+
+    if not 1 <= args.number_of_bots <= MAX_BOTS:
+        parser.error(f"--number-of-bots must be between 1 and {MAX_BOTS}.")
+
     manual_play = ManualPlay()
     # Keep offering to play until the user does not want to play again.
     while True:  # pylint: disable=while-used
-        game_number_of_bots: int = int(input("Enter number of bots you want to play against (0 - 6): "))
-        game_env = PickominoEnv(game_number_of_bots, render_mode="human")
+        game_env = PickominoEnv(args.number_of_bots, render_mode="human")
         manual_play.play(game_env)
 
         play_again: bool = bool(int(input("Play again? Enter '1', else '0': ")))

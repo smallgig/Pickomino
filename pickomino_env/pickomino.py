@@ -311,7 +311,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         """Start a new episode.
 
         Reset the environment to an initial state. Includes reinitializing the game,
-        players and rolling the initial dice.
+        players, and rolling the initial dice.
 
         Args:
             seed: Random seed for reproducible episodes. If None, the environment's Pseudo-Random Number Generator
@@ -593,7 +593,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         # Collect and roll the dice
         self._step_dice()
 
-        # Action is to stop or failed attempt, get reward from step tiles.
+        # Action is to stop or a failed attempt, get reward from step tiles.
         if self._action[ACTION_INDEX_ROLL] == ACTION_STOP or self._game.failed_attempt:
             reward = self._step_tiles()
             self._game.current_player_index = 1
