@@ -112,6 +112,23 @@ These must be specified.
 
 `pip install pickomino-env`
 
+## Play manually
+
+Playing a few games manually is a great way to understand the rules and game dynamics
+before training a Reinforcement Learning agent. Launch the game with the pygame GUI:
+
+```
+pickomino-play
+```
+
+To play against more bots:
+
+```
+pickomino-play --number-of-bots=3
+```
+
+Valid range: 1-6 bots.
+
 ## Usage example
 
 ```python

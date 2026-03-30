@@ -98,7 +98,7 @@ class Bot:
         if self.roll_counter >= MIN_ROLLS_FOR_WORM_STRATEGY and not collected[WORM_INDEX] and rolled_arr[WORM_INDEX]:
             action_dice = WORM_INDEX
 
-        # After selecting action_dice, check if rolling is even possible.
+        # After selecting action dice, check if rolling is even possible.
         action_roll = self._no_dice_remaining_after_collect(collected, rolled_arr, action_dice, action_roll)
 
         # 3. Quit as soon as you can take a tile: dice sum for a visible tile reached and worm collected.
