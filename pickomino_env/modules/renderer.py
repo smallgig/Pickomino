@@ -426,7 +426,7 @@ class Renderer:
         self._window.blit(surface, (ACTION_DISPLAY_X, ACTION_DISPLAY_Y + ACTION_FONT_SIZE + 5))
 
     def _show_score(self, font_small: pygame.font.Font) -> None:
-        """Show score on game over screen."""
+        """Show the scores on the game over screen."""
         if self._window is None:
             return
 
@@ -440,7 +440,7 @@ class Renderer:
         self._window.blit(surf, surf.get_rect(center=(x, y + SCORES_POS)))
 
     def _determine_winner(self, font_small: pygame.font.Font) -> None:
-        """Determine winner at the end of the game."""
+        """Determine the winner at the end of the game."""
         if self._window is None:
             return
 
@@ -448,7 +448,7 @@ class Renderer:
         all_scores: list[int] = [p.end_score() for p in self._game.players]
         max_score = max(all_scores)
 
-        # Among players with the highest score, pick the one with the highest tile
+        # Among players with the highest score, pick the one with the highest tile.
         candidates = [p for p in self._game.players if p.end_score() == max_score]
         winner = max(candidates, key=lambda p: p.highest_tile())
 
@@ -488,7 +488,7 @@ class Renderer:
             )
 
     def _draw_game_over(self) -> None:
-        """Draw game over when game is terminated."""
+        """Draw the game over screen when the game is terminated."""
         if self._window is None:
             return
         self._window.fill(BACKGROUND_COLOR)
