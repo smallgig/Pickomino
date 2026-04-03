@@ -16,7 +16,7 @@
 [![pytest: 95%+ coverage](https://img.shields.io/badge/pytest-95%25%2B%20coverage-brightgreen)](https://pytest.org/)
 
 <div align="center">
-    <img src="https://github.com/user-attachments/assets/3df93fb5-ed77-45f0-9128-ab9cf2004c10" width="500">
+    <img src="https://raw.githubusercontent.com/smallgig/Pickomino/main/assets/pickomino-demo.gif" width="500" alt="Animated demo of the Pickomino game played manually.">
 </div>
 
 ## Description
