@@ -30,7 +30,7 @@ when to roll and when to stop.
 ## Action Space
 The action space is a `Tuple` of two integers:
 
-`action = [die_face (0–5), action_type (0=roll, 1=stop)]`
+`action = (die_face (0–5), action_type (0=roll, 1=stop))`
 
 | Index | die_face | action_type |
 |-------|-----------|-------------|
