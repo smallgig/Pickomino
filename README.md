@@ -55,17 +55,17 @@ four groups. The game supports two to seven players. The RL agent is player one;
 the remaining players are computer bots controlled by a heuristic. The number of
 bots is set when creating the environment.
 
-For the full rules see the [Pickomino rulebook](https://github.com/smallgig/Pickomino/raw/main/pickomino-rulebook.pdf) or
-[play online](https://www.maartenpoirot.com/pickomino/).
-To try the environment manually, see [Play manually](#play-manually).
-The bot heuristic is described [here](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/).
-
 The goal is to collect tiles in a stack. The winner is the player, which at the end of the game has the most worms
 on her tiles. For the Reinforcement Learning Agent a reward equal to the value
 (worms) of a tile is given when the tile is picked. For a failed attempt
 (see rulebook), a corresponding negative reward is given. When a bot steals your
 tile, no negative reward is given. Hence, the total reward at the end of the game
 can be greater than the score.
+
+For the full rules see the [Pickomino rulebook](https://github.com/smallgig/Pickomino/raw/main/pickomino-rulebook.pdf) or
+[play online](https://www.maartenpoirot.com/pickomino/).
+To try the environment manually, see [Play manually](#play-manually).
+The bot heuristic is described [here](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/).
 
 ## Info Dictionary
 
