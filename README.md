@@ -164,7 +164,7 @@ env.close()
 ## Security & Bug Bounty
 
 Found a bug? Valid reports are rewarded with a physical copy of the Pickomino board
-game. See [SECURITY.md](SECURITY.md) for scope, timelines, and how to report.
+game. See [SECURITY.md](https://github.com/smallgig/Pickomino/blob/main/SECURITY.md) for scope, timelines, and how to report.
 
 ## Resources
 
