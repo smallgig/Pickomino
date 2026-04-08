@@ -85,19 +85,21 @@ can be greater than the score.
 
 ## Episode End
 
-The episode ends if one of the following occurs:
-
-1. Termination: If there are no more tiles to take on the table = Game Over.
-2. Termination: Action out of allowed range [0–5, 0-1].
+Termination occurs when there are no more tiles to take on the table — Game Over.
 
 ### Truncation
+Truncation occurs when the agent attempts an illegal move (e.g. taking a tile
+not currently available). The game continues and a new valid action is required.
 
-Truncation: Attempt to break the rules, the game continues, and you have to give a new valid action.
+### Invalid Actions
+Out-of-range actions (outside [0–5] or [0–1]) raise a `ValueError` and do not
+affect the episode state.
 
 ### Failed Attempt
-
-Note that a Failed Attempt means: If a tile is present, put it back on the table and get a negative reward.
-However, the game continues, so the Episode does not end.
+A Failed Attempt occurs when the agent fails to secure a tile. If the agent has
+a stack of already picked tiles of at least one, then the top tile is returned to the table and a negative reward is applied.
+If the stack is empty, nothing happens and the reward is zero. The game continues
+— the episode does not end.
 
 ## Arguments
 
