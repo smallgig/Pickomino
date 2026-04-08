@@ -1,6 +1,8 @@
 # Pickomino-Env
 
 [![PyPI version](https://img.shields.io/pypi/v/pickomino-env.svg)](https://pypi.org/project/pickomino-env/)
+[![CI](https://github.com/smallgig/Pickomino/actions/workflows/python-package.yml/badge.svg)](https://github.com/smallgig/Pickomino/actions/workflows/python-package.yml)
+[![Publish](https://github.com/smallgig/Pickomino/actions/workflows/python-publish.yml/badge.svg)](https://github.com/smallgig/Pickomino/actions/workflows/python-publish.yml)
 [![Python 3.10-3.14](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://www.python.org/downloads/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://docs.astral.sh/ruff/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/)
