@@ -11,6 +11,12 @@ faith and on a best-effort basis. Please read this document carefully before rep
 
 -----
 
+## Supported Versions
+
+Only the latest tagged release is supported. Bug bounty rewards apply to bugs reproducible on the latest tagged release only. `main` is a work in progress and not eligible.
+
+-----
+
 ## Reward
 
 Valid bug reports are rewarded with **one physical copy of the Pickomino/Heckmeck board
@@ -90,6 +96,12 @@ released.**
 
 -----
 
+## PR Review Process
+
+PRs are reviewed on a best-effort basis. Expect the same timelines as bug reports. A fix PR should reference the original issue. The maintainer may rewrite or close PRs without notice.
+
+-----
+
 ## Rules
 
 - This program is not a legal contract. It operates entirely on mutual good faith.
@@ -100,5 +112,12 @@ released.**
   necessary to demonstrate it.
 - The maintainer will credit all valid reporters by name (or handle) in the changelog
   and release notes, unless the reporter requests otherwise.
+
+-----
+
+## Contribution Policy
+
+- **No AI-generated contributions.** PRs that are clearly AI-generated slop will be closed without review.
+- **No malicious contributions.** Any PR introducing intentional vulnerabilities, backdoors, or sabotage will be rejected and reported.
 
 -----
