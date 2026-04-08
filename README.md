@@ -116,7 +116,17 @@ These must be specified.
 We recommend installing in a virtual environment:
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# macOS/Linux
+source .venv/bin/activate
+
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+
+# Windows cmd.exe
+.venv\Scripts\activate.bat
+
+# Windows Git Bash
+source .venv/Scripts/activate
 pip install pickomino-env
 ```
 
