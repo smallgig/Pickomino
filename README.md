@@ -1,6 +1,8 @@
 # Pickomino-Env
 
 [![PyPI version](https://img.shields.io/pypi/v/pickomino-env.svg)](https://pypi.org/project/pickomino-env/)
+[![CI](https://github.com/smallgig/Pickomino/actions/workflows/python-package.yml/badge.svg)](https://github.com/smallgig/Pickomino/actions/workflows/python-package.yml)
+[![Publish](https://github.com/smallgig/Pickomino/actions/workflows/python-publish.yml/badge.svg)](https://github.com/smallgig/Pickomino/actions/workflows/python-publish.yml)
 [![Python 3.10-3.14](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://www.python.org/downloads/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://docs.astral.sh/ruff/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/)
@@ -26,33 +28,29 @@ Goal: train a Reinforcement Learning agent for optimal play. Meaning, decide whi
 when to roll and when to stop.
 
 ## Action Space
+The action space is `MultiDiscrete([6, 2])`. The `step()` method accepts both
+the ndarray returned by `action_space.sample()` and a plain Python tuple.
 
-The Action space is a tuple with two integers.
-Tuple (int, int)
+`action = (die_face (0–5), action_type (0=roll, 1=stop))`
 
-Action = [dice_face (0-5), action_type (0=roll, 1=stop)].
-
-- 0-5: Face of the dice, which you want to take, where:
-    - 0 -> face 1
-    - 1 -> face 2
-    - 2 -> face 3
-    - 3 -> face 4
-    - 4 -> face 5
-    - 5 -> face worm
-
-
-- 0-1: Roll (0) or stop (1).
+| Index | die_face | action_type |
+|-------|-----------|-------------|
+| 0–5   | Die face to collect: 0→1 eye, 1→2 eyes, 2→3 eyes, 3→4 eyes, 4→5 eyes, 5→worm | — |
+| 0–1   | — | 0 = roll again, 1 = stop and take a tile |
 
 ## Observation Space
+The observation is a `dict` with 4 keys:
 
-The observation is a `dict` with shape `(4,)` with the values corresponding to the following: dice, table and player.
+| Key            | Min | Max | Shape               |
+|----------------|-----|-----|---------------------|
+| dice_collected | 0   | 8   | (6,)                |
+| dice_rolled    | 0   | 8   | (6,)                |
+| tiles_table    | 0   | 1   | (16,)               |
+| tile_players   | 0   | 36  | (number_of_players,) |
 
-| Observation    | Min | Max | Shape             |
-|----------------|-----|-----|-------------------|
-| dice_collected | 0   | 8   | (6,)              |
-| dice_rolled    | 0   | 8   | (6,)              |
-| tiles_table    | 0   | 1   | (16,)             |
-| tile_players   | 0   | 36  | number_of_players |
+There are eight dice, each with faces 1–5 plus a worm. The worm is a sixth
+distinct die face, but it scores 5 points — the same as the 5-eye face — so it
+is not a sixth distinct point value.
 
 **Note:** There are eight dice to roll and collect. A die has six sides with the number of eyes one through
 five, but a worm instead of a six.
@@ -76,6 +74,30 @@ on her tiles. For the Reinforcement Learning Agent a reward equal to the value
 tile, no negative reward is given. Hence, the total reward at the end of the game
 can be greater than the score.
 
+For the full rules see the [Pickomino rulebook](https://github.com/smallgig/Pickomino/raw/main/pickomino-rulebook.pdf) or
+[play online](https://www.maartenpoirot.com/pickomino/).
+To try the environment manually, see [Play manually](#play-manually).
+The bot heuristic is described [here](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/).
+
+## Info Dictionary
+
+The `info` dictionary is returned at every step. It is intended for debugging and
+logging, not for learning.
+
+| Key                   | Type                                | Description                                                          |
+|-----------------------|-------------------------------------|----------------------------------------------------------------------|
+| `dice_collected`      | `list[int]`                         | Counts of each die face collected this turn                          |
+| `dice_rolled`         | `list[int]`                         | Counts of each die face in the current roll                          |
+| `terminated`          | `bool`                              | Whether the episode has terminated                                   |
+| `truncated`           | `bool`                              | Whether the game was truncated due to the last action                |
+| `tiles_table_vec`     | `numpy.ndarray[int8]`, shape `(16,)`| Binary vector of tiles currently available on the table              |
+| `smallest_tile`       | `int`                               | Lowest-numbered tile still on the table                              |
+| `explanation`         | `str`                               | Reason for the last termination, truncation, or failed attempt       |
+| `player_stack`        | `list[int]`                         | All tiles currently held by the agent                                |
+| `player_score`        | `int`                               | Agent's current score (sum of worm values)                           |
+| `current_player_index`| `int`                               | Index of the player whose turn it is                                 |
+| `bot_scores`          | `list[int]`                         | Scores of all bots, in order                                         |
+
 ## Starting State
 
 * `dice_collected` = [0, 0, 0, 0, 0, 0].
@@ -85,19 +107,23 @@ can be greater than the score.
 
 ## Episode End
 
-The episode ends if one of the following occurs:
-
-1. Termination: If there are no more tiles to take on the table = Game Over.
-2. Termination: Action out of allowed range [0–5, 0-1].
+Termination occurs when there are no more tiles to take on the table — Game Over.
 
 ### Truncation
+Truncation occurs when the agent attempts an illegal action during dice
+selection or rolling (e.g. selecting a face that was not rolled, selecting a
+face already collected this turn, or choosing to roll when no dice remain).
+The game continues and a new valid action is required.
 
-Truncation: Attempt to break the rules, the game continues, and you have to give a new valid action.
+### Invalid Actions
+Out-of-range actions (outside [0–5] or [0–1]) raise a `ValueError` and do not
+affect the episode state.
 
 ### Failed Attempt
-
-Note that a Failed Attempt means: If a tile is present, put it back on the table and get a negative reward.
-However, the game continues, so the Episode does not end.
+A Failed Attempt occurs when the agent fails to secure a tile. If the agent has
+a stack of already picked tiles of at least one, then the top tile is returned to the table and a negative reward is applied.
+If the stack is empty, nothing happens and the reward is zero. The game continues
+— the episode does not end.
 
 ## Arguments
 
@@ -110,31 +136,51 @@ These must be specified.
 
 ## Setup
 
-`pip install pickomino-env`
+- Python 3.10–3.14
 
-## Play manually
+## Installation
+We recommend installing in a virtual environment:
+```bash
+python -m venv .venv
+# macOS/Linux
+source .venv/bin/activate
 
-Playing a few games manually is a great way to understand the rules and game dynamics
-before training a Reinforcement Learning agent. Launch the game with the pygame GUI:
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
 
+# Windows cmd.exe
+.venv\Scripts\activate.bat
+
+# Windows Git Bash
+source .venv/Scripts/activate
+pip install pickomino-env
 ```
+
+Verify your installation:
+```bash
 pickomino-play
 ```
 
-To play against more bots:
-
+## Play manually
+Playing a few games manually is a great way to understand the rules and game dynamics
+before training a Reinforcement Learning agent. Launch the game with the pygame GUI:
+```bash
+pickomino-play
 ```
+To play against more bots:
+```bash
 pickomino-play --number-of-bots=3
 ```
-
-Valid range: 1-6 bots.
+Valid range: 1–6 bots.
 
 ## Usage example
-
 ```python
 import gymnasium as gym
 
-# Create environment
+# render_mode options:
+#   None         — no rendering, fastest (default, recommended for training)
+#   "human"      — pygame window, requires a display
+#   "rgb_array"  — returns RGB array, useful for recording
 env = gym.make("Pickomino-v0", render_mode="human", number_of_bots=2)
 
 # Reset and get initial observation
@@ -146,16 +192,13 @@ truncated = False
 total_reward = 0
 
 while not terminated and not truncated:
-    # Agent selects action: (dice_face, roll_choice)
+    # Agent selects action: (die_face, roll_choice)
     action = env.action_space.sample()  # Random action for demo
-
     # Step environment
     obs, reward, terminated, truncated, info = env.step(action)
     total_reward += reward
-
     if truncated:
         print(f"Invalid action: {info['explanation']}")
-        break
 
 print(f"Episode finished. Total reward: {total_reward}")
 env.close()
