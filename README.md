@@ -28,34 +28,46 @@ Goal: train a Reinforcement Learning agent for optimal play. Meaning, decide whi
 when to roll and when to stop.
 
 ## Action Space
+
 The action space is `MultiDiscrete([6, 2])`. The `step()` method accepts both
 the ndarray returned by `action_space.sample()` and a plain Python tuple.
 
 `action = (die_face (0–5), action_type (0=roll, 1=stop))`
 
-| Index | die_face | action_type |
-|-------|-----------|-------------|
-| 0–5   | Die face to collect: 0→1 eye, 1→2 eyes, 2→3 eyes, 3→4 eyes, 4→5 eyes, 5→worm | — |
-| 0–1   | — | 0 = roll again, 1 = stop and take a tile |
+| Index | die_face                                                                     | action_type                              |
+|-------|------------------------------------------------------------------------------|------------------------------------------|
+| 0–5   | Die face to collect: 0→1 eye, 1→2 eyes, 2→3 eyes, 3→4 eyes, 4→5 eyes, 5→worm | —                                        |
+| 0–1   | —                                                                            | 0 = roll again, 1 = stop and take a tile |
 
 ## Observation Space
-The observation is a `dict` with 4 keys:
 
-| Key            | Min | Max | Shape               |
-|----------------|-----|-----|---------------------|
-| dice_collected | 0   | 8   | (6,)                |
-| dice_rolled    | 0   | 8   | (6,)                |
-| tiles_table    | 0   | 1   | (16,)               |
+The observation is a `dict` with four keys:
+
+| Key            | Min | Max | Shape                |
+|----------------|-----|-----|----------------------|
+| dice_collected | 0   | 8   | (6,)                 |
+| dice_rolled    | 0   | 8   | (6,)                 |
+| tiles_table    | 0   | 1   | (16,)                |
 | tile_players   | 0   | 36  | (number_of_players,) |
 
 There are eight dice, each with faces 1–5 plus a worm. The worm is a sixth
-distinct die face, but it scores 5 points — the same as the 5-eye face — so it
+distinct die face, but it scores 5 points. The same as the 5-eye face — so it
 is not a sixth distinct point value.
 
-The 16 tiles are numbered 21–36 with worm values from one to four, spread across
-four groups. The game supports two to seven players. The RL agent is player one;
-the remaining players are computer bots controlled by a heuristic. The number of
-bots is set when creating the environment.
+**Note:** There are eight dice to roll and collect. A die has six sides with the number of eyes one through
+five, but a worm instead of a six.
+The values correspond to the number of eyes, with the worm also having the value five (and not six!).
+The 16 tiles are numbered 21 to 36 and have worm values from one to four spread in four groups.
+The game is for two to seven players. Here your Reinforcement Learning Agent is the first player. The
+other players are computer bots.
+The bots play, according to a heuristic. When you create the environment,
+you have to define the number of bots.
+
+For a more detailed description of the rules, see the file pickomino-rulebook.pdf.
+You can play the game online here: https://www.maartenpoirot.com/pickomino/.
+The heuristic used by the bots is described here: https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/.
+
+## Rewards
 
 The goal is to collect tiles in a stack. The winner is the player, which at the end of the game has the most worms
 on her tiles. For the Reinforcement Learning Agent a reward equal to the value
@@ -64,7 +76,8 @@ on her tiles. For the Reinforcement Learning Agent a reward equal to the value
 tile, no negative reward is given. Hence, the total reward at the end of the game
 can be greater than the score.
 
-For the full rules see the [Pickomino rulebook](https://github.com/smallgig/Pickomino/raw/main/pickomino-rulebook.pdf) or
+For the full rules see the [Pickomino rulebook](https://github.com/smallgig/Pickomino/raw/main/pickomino-rulebook.pdf)
+or
 [play online](https://www.maartenpoirot.com/pickomino/).
 To try the environment manually, see [Play manually](#play-manually).
 The bot heuristic is described [here](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/).
@@ -74,19 +87,19 @@ The bot heuristic is described [here](https://frozenfractal.com/blog/2015/5/3/ho
 The `info` dictionary is returned at every step. It is intended for debugging and
 logging, not for learning.
 
-| Key                   | Type                                | Description                                                          |
-|-----------------------|-------------------------------------|----------------------------------------------------------------------|
-| `dice_collected`      | `list[int]`                         | Counts of each die face collected this turn                          |
-| `dice_rolled`         | `list[int]`                         | Counts of each die face in the current roll                          |
-| `terminated`          | `bool`                              | Whether the episode has terminated                                   |
-| `truncated`           | `bool`                              | Whether the game was truncated due to the last action                |
-| `tiles_table_vec`     | `numpy.ndarray[int8]`, shape `(16,)`| Binary vector of tiles currently available on the table              |
-| `smallest_tile`       | `int`                               | Lowest-numbered tile still on the table                              |
-| `explanation`         | `str`                               | Reason for the last termination, truncation, or failed attempt       |
-| `player_stack`        | `list[int]`                         | All tiles currently held by the agent                                |
-| `player_score`        | `int`                               | Agent's current score (sum of worm values)                           |
-| `current_player_index`| `int`                               | Index of the player whose turn it is                                 |
-| `bot_scores`          | `list[int]`                         | Scores of all bots, in order                                         |
+| Key                    | Type                                 | Description                                                    |
+|------------------------|--------------------------------------|----------------------------------------------------------------|
+| `dice_collected`       | `list[int]`                          | Counts of each die face collected this turn                    |
+| `dice_rolled`          | `list[int]`                          | Counts of each die face in the current roll                    |
+| `terminated`           | `bool`                               | Whether the episode has terminated                             |
+| `truncated`            | `bool`                               | Whether the game was truncated due to the last action          |
+| `tiles_table_vec`      | `numpy.ndarray[int8]`, shape `(16,)` | Binary vector of tiles currently available on the table        |
+| `smallest_tile`        | `int`                                | Lowest-numbered tile still on the table                        |
+| `explanation`          | `str`                                | Reason for the last termination, truncation, or failed attempt |
+| `player_stack`         | `list[int]`                          | All tiles currently held by the agent                          |
+| `player_score`         | `int`                                | Agent's current score (sum of worm values)                     |
+| `current_player_index` | `int`                                | Index of the player whose turn it is                           |
+| `bot_scores`           | `list[int]`                          | Scores of all bots, in order                                   |
 
 ## Starting State
 
@@ -100,19 +113,24 @@ logging, not for learning.
 Termination occurs when there are no more tiles to take on the table — Game Over.
 
 ### Truncation
+
 Truncation occurs when the agent attempts an illegal action during dice
-selection or rolling (e.g. selecting a face that was not rolled, selecting a
+selection or rolling (for example, selecting a face that was not rolled, selecting a
 face already collected this turn, or choosing to roll when no dice remain).
-The game continues and a new valid action is required.
+The game continues, and a new valid action is required.
 
 ### Invalid Actions
+
 Out-of-range actions (outside [0–5] or [0–1]) raise a `ValueError` and do not
 affect the episode state.
 
 ### Failed Attempt
+
 A Failed Attempt occurs when the agent fails to secure a tile. If the agent has
-a stack of already picked tiles of at least one, then the top tile is returned to the table and a negative reward is applied.
-If the stack is empty, nothing happens and the reward is zero. The game continues
+a stack of already picked tiles, then the top tile is returned to the table, and a negative
+reward is
+applied.
+If the stack is empty, nothing happens, and the reward is zero. The game continues
 — the episode does not end.
 
 ## Arguments
@@ -129,7 +147,9 @@ These must be specified.
 - Python 3.10–3.14
 
 ## Installation
+
 We recommend installing in a virtual environment:
+
 ```bash
 python -m venv .venv
 # macOS/Linux
@@ -147,20 +167,26 @@ pip install pickomino-env
 ```
 
 Verify your installation:
+
 ```bash
 pickomino-play
 ```
 
 ## Play manually
+
 Playing a few games manually is a great way to understand the rules and game dynamics
 before training a Reinforcement Learning agent. Launch the game with the pygame GUI:
+
 ```bash
 pickomino-play
 ```
+
 To play against more bots:
+
 ```bash
 pickomino-play --number-of-bots=3
 ```
+
 Valid range: 1–6 bots.
 
 To change the bot play speed, adjust the `RENDER_DELAY` constant in `constants.py`.
@@ -171,6 +197,7 @@ RENDER_DELAY: Final[float] = 2
 ``` 
 
 ## Usage example
+
 ```python
 import gymnasium as gym
 
@@ -200,6 +227,12 @@ while not terminated and not truncated:
 print(f"Episode finished. Total reward: {total_reward}")
 env.close()
 ```
+
+## Security & Bug Bounty
+
+Found a bug? Valid reports are rewarded with a physical copy of the Pickomino board
+game. See [SECURITY.md](https://github.com/smallgig/Pickomino/blob/main/SECURITY.md) for scope, timelines, and how to
+report.
 
 ## Resources
 
