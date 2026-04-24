@@ -9,7 +9,9 @@ access should contact the maintainer.
 
 ## Running Tests
 Tests are run automatically via GitHub Actions on every push and pull request.
-PRs from forks will not trigger CI — contact the maintainer for access.
+PRs from forks will trigger CI, but the run may fail because secrets needed to
+access the private `tests` submodule are not available to forked workflows.
+Contact the maintainer if you need help validating changes against the full test suite.
 
 ## Pre-commit
 A subset of checks runs via pre-commit hooks on every commit. Tests also run
