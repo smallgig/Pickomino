@@ -36,14 +36,10 @@ If you know the physical game, note the following simplifications:
 choose a lower-valued tile like in the physical game.
 - **Stealing:** always performed when possible, you cannot choose.
 - **Win condition:** determined correctly when playing manually with GUI (most worms wins, ties
-broken by highest tile). When training without a renderer, no winner is declared 
+broken by highest tile). When training without a renderer, no winner is declared
 use total reward as your metric. But care, stolen tiles do not reduce your reward,
 total reward can exceed your final score.
 - **Stack height:** not included in the observation (visible in the physical game).
-- **Bot heuristic:** based on [Frozen Fractal's strategy](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/). 
-The article does not define what to do when two die faces contribute equally. 
-This implementation breaks ties by preferring worms over 5s, 
-then picking the face with the fewest dice showing.
 
 ## Action Space
 
@@ -212,7 +208,7 @@ A higher value slows the bots down, a lower value speeds them up.
 
 ```python
 RENDER_DELAY: Final[float] = 2
-``` 
+```
 
 ## Usage example
 
