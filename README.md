@@ -27,6 +27,18 @@ An environment conforming to the **Gymnasium** API for the dice game **Pickomino
 Goal: train a Reinforcement Learning agent for optimal play. Meaning, decide which face of the dice to collect,
 when to roll and when to stop.
 
+## Features
+
+- **Gymnasium API**: Fully compatible with the [Gymnasium](https://gymnasium.farama.org/) RL framework
+- **Manual Play**: Interactive Pygame GUI for exploring game mechanics
+- **Bot Opponents**: Built-in heuristic bots for training against
+- **Customizable**: Adjustable number of bots, render delay, and game rules
+- **Well-Tested**: 95%+ test coverage with pytest
+- **Type-Hinted**: Full type annotations and strict mypy checking
+- **Reward Shaping**: Configurable reward functions for RL training
+
+---
+
 ## Differences from the Physical Game
 
 If you know the physical game, note the following simplifications:
@@ -204,6 +216,43 @@ Verify your installation:
 pickomino-play
 ```
 
+## Quick Start
+
+```python
+import gymnasium as gym
+
+# Create the environment
+env = gym.make("Pickomino-v0", render_mode="human", number_of_bots=2)
+
+# Reset and get initial observation
+obs, info = env.reset(seed=42)
+
+# Run one episode
+terminated = False
+truncated = False
+total_reward = 0
+
+while not terminated and not truncated:
+    # Agent selects action: (die_face, roll_choice)
+    action = env.action_space.sample()  # Random action for demo
+    # Step environment
+    obs, reward, terminated, truncated, info = env.step(action)
+    total_reward += reward
+    if truncated:
+        print(f"Invalid action: {info['explanation']}")
+
+print(f"Episode finished. Total reward: {total_reward}")
+env.close()
+```
+
+For manual play with the GUI:
+
+```bash
+pickomino-play
+```
+
+---
+
 ## Play manually
 
 Playing a few games manually is a great way to understand the rules and game dynamics
@@ -274,6 +323,21 @@ report.
 - **Bot Strategy:** [How to Win at Pickomino](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/)
 - **Repository:** [smallgig/Pickomino](https://github.com/smallgig/Pickomino)
 - **Gymnasium:** [https://gymnasium.farama.org/](https://gymnasium.farama.org/)
+
+## Citation
+
+If you use Pickomino-Env in your research, please cite:
+
+```bibtex
+@software{pickomino_env,
+  title = {Pickomino-Env: A Gymnasium Environment for the Dice Game Pickomino},
+  url = {https://github.com/smallgig/Pickomino},
+  year = {2025},
+  author = {Jarl and Robin}
+}
+```
+
+---
 
 ## License
 
