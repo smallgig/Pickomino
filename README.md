@@ -31,7 +31,7 @@ when to roll and when to stop.
 
 If you know the physical game, note the following simplifications:
 
-- **A Failed attempt:** the highest tile on the table is removed, not turned face-down.
+- **Failed Attempt:** the highest tile on the table is removed, not turned face-down.
 - **Tile selection:** the best reachable tile is always taken automatically, you cannot
   choose a lower-valued tile like in the physical game.
 - **Stealing:** always performed when possible, you cannot choose.
