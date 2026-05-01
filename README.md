@@ -31,14 +31,14 @@ when to roll and when to stop.
 
 If you know the physical game, note the following simplifications:
 
-- **Failed attempt:** the highest tile on the table is removed, not turned face-down.
+- **A Failed attempt:** the highest tile on the table is removed, not turned face-down.
 - **Tile selection:** the best reachable tile is always taken automatically, you cannot
-choose a lower-valued tile like in the physical game.
+  choose a lower-valued tile like in the physical game.
 - **Stealing:** always performed when possible, you cannot choose.
-- **Win condition:** determined correctly when playing manually with GUI (most worms wins, ties
-broken by highest tile). When training without a renderer, no winner is declared
-use total reward as your metric. But take care, stolen tiles do not reduce your reward,
-total reward can exceed your final score.
+- **Win condition:** determined correctly when playing manually with GUI (most worms win, ties
+  broken by the highest tile). When training without a renderer, no winner is declared
+  use total reward as your metric. But take care, stolen tiles do not reduce your reward,
+  total reward can exceed your final score.
 - **Stack height:** not included in the observation (visible in the physical game).
 
 ## Action Space
@@ -161,18 +161,18 @@ These must be specified.
 The bots use the following heuristic, inspired by
 [Frozen Fractal's strategy](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/):
 
-- **Take the highest-contributing face.** Choose the die face where
-   `count × face value` is greatest. Worms count as 5.
+- **Take the highest-contributing face.** Select the die face where
+  `count × face value` is greatest. Worms count as 5.
 - **Tie-breaking.** When two faces contribute equally: prefer worms over 5s.
-   If still tied, prefer the face with the fewest dice keeping more dice
-   available for future rolls. Hence, for example, three 4s are preferred
-   over four 3s.
+  If still tied, prefer the face with the fewest dice keeping more dice
+  available for future rolls. Hence, for example, three 4s are preferred
+  over four 3s.
 - **Worm priority on early rolls.** If no dice have been collected yet and
-   this is the third roll or later, take worms if available, regardless of
-   contribution.
+  this is the third roll or later, take worms if available, regardless of
+  contribution.
 - **Stop as soon as a tile is reachable.** Once the running total meets or
-   exceeds the lowest available tile value and a worm has been collected,
-   the bot stops.
+  exceeds the lowest available tile value, and a worm has been collected,
+  the bot stops.
 
 ## Setup
 

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=82", "wheel"]
+requires = ["setuptools>=82.0.1", "wheel>=0.47.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -23,8 +23,8 @@ test = [
     "pytest>=8.3.5,<9.0.0",
     "pytest-cov>=7.0,<8.0",
     "pytest-timeout>=2.0,<3.0",
-    "matplotlib>=3.0,<4.0",
-    "stable-baselines3>=2.3.0, <3.0",
+    "matplotlib>=3.10.9,<4.0",
+    "stable-baselines3>=2.8.0, <3.0",
 ]
 dev = ["loguru>=0.7.3,<1.0.0"]
 
@@ -53,7 +53,7 @@ fail_under = 95
 omit = ["config*.py"]
 
 [tool.setuptools.package-data]
-"pickomino" = ["py.typed"]
+"pickomino_env" = ["py.typed", "sprites/*.png"]
 
 [tool.ruff]
 line-length = 120
@@ -85,7 +85,7 @@ ignore = [
     "D203", # Conflicts with D211 (no blank line before class wins)
     "D213", # Conflicts with D212 (first line summary wins)
     "D413", # No blank line after docstring allowed (Google style).
-    "COM812", # Trailing comma missing, black wins
+    "COM812", # A trailing comma missing, black wins
 ]
 
 [tool.pylint.master]
