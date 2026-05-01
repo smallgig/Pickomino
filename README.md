@@ -36,7 +36,7 @@ If you know the physical game, note the following simplifications:
   choose a lower-valued tile like in the physical game.
 - **Stealing:** always performed when possible, you cannot choose.
 - **Win condition:** determined correctly when playing manually with GUI (most worms win, ties
-  broken by the highest tile). When training without a renderer, no winner is declared
+  broken by the highest tile). When training without a renderer, no winner is declared;
   use total reward as your metric. But take care, stolen tiles do not reduce your reward,
   total reward can exceed your final score.
 - **Stack height:** not included in the observation (visible in the physical game).
