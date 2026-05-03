@@ -21,11 +21,44 @@
     <img src="https://raw.githubusercontent.com/smallgig/Pickomino/main/assets/pickomino-demo.gif" width="500" alt="Animated demo of the Pickomino game played manually.">
 </div>
 
+## Table of Contents
+
+- [Description](#description)
+- [Features](#features)
+- [Differences from the Physical Game](#differences-from-the-physical-game)
+- [Action Space](#action-space)
+- [Observation Space](#observation-space)
+- [Rewards](#rewards)
+- [Info Dictionary](#info-dictionary)
+- [Starting State](#starting-state)
+- [Episode End](#episode-end)
+- [Arguments](#arguments)
+- [Bot Heuristic](#bot-heuristic)
+- [Setup](#setup)
+- [Installation](#installation)
+- [Play Manually](#play-manually)
+- [Usage Example](#usage-example)
+- [Security & Bug Bounty](#security--bug-bounty)
+- [Contributing](#contributing)
+- [Resources](#resources)
+- [License](#license)
+
 ## Description
 
-An environment conforming to the **Gymnasium** API for the dice game **Pickomino (Heckmeck am Bratwurmeck)**
+An environment conforming to the **Gymnasium** API for the dice game **Pickomino (Heckmeck am Bratwurmeck)**.
 Goal: train a Reinforcement Learning agent for optimal play. Meaning, decide which face of the dice to collect,
 when to roll and when to stop.
+
+## Features
+
+- Fully **Gymnasium-compliant** API (`step`, `reset`, `render`, `close`)
+- Configurable **1–6 bot opponents** with a built-in heuristic strategy
+- Three **render modes**: `None` (training, fastest), `"human"` (pygame GUI), `"rgb_array"` (recording)
+- **MultiDiscrete action space** for die face selection and roll/stop decisions
+- **Reward shaping** based on worm values of collected tiles
+- **Truncation** on illegal actions — the game continues without ending the episode
+- **95%+ test coverage** with CI on Python 3.10–3.14
+- Published on [PyPI](https://pypi.org/project/pickomino-env/) — install with a single command
 
 ## Differences from the Physical Game
 
@@ -48,10 +81,10 @@ the ndarray returned by `action_space.sample()` and a plain Python tuple.
 
 `action = (die_face (0–5), action_type (0=roll, 1=stop))`
 
-| Index | die_face                                                                     | action_type                              |
-|-------|------------------------------------------------------------------------------|------------------------------------------|
+| Index | die_face                                                                       | action_type                              |
+|-------|--------------------------------------------------------------------------------|------------------------------------------|
 | 0–5   | Die face to collect: 0→1 eye, 1→2 eyes, 2→3 eyes, 3→4 eyes, 4→5 eyes, 5→worm | —                                        |
-| 0–1   | —                                                                            | 0 = roll again, 1 = stop and take a tile |
+| 0–1   | —                                                                              | 0 = roll again, 1 = stop and take a tile |
 
 ## Observation Space
 
@@ -74,7 +107,7 @@ The values correspond to the number of eyes, with the worm also having the value
 The 16 tiles are numbered 21 to 36 and have worm values from one to four spread in four groups.
 The game is for two to seven players. Here your Reinforcement Learning Agent is the first player. The
 other players are computer bots.
-The bots play, according to a heuristic. When you create the environment,
+The bots play according to a heuristic. When you create the environment,
 you have to define the number of bots.
 
 For a more detailed description of the rules, see the file pickomino-rulebook.pdf.
@@ -83,17 +116,21 @@ The heuristic used by the bots is described here: https://frozenfractal.com/blog
 
 ## Rewards
 
-The goal is to collect tiles in a stack. The winner is the player, which at the end of the game has the most worms
-on her tiles. For the Reinforcement Learning Agent a reward equal to the value
-(worms) of a tile is given when the tile is picked. For a failed attempt
-(see rulebook), a corresponding negative reward is given. When a bot steals your
-tile, no negative reward is given. Hence, the total reward at the end of the game
-can be greater than the score.
+The goal is to collect tiles in a stack. The winner is the player who at the end of the game has the most worms
+on their tiles.
+
+| Event                        | Reward                          |
+|------------------------------|---------------------------------|
+| Tile collected               | `+` worm value of the tile      |
+| Failed attempt               | `−` worm value of the top tile  |
+| Bot steals your tile         | `0` (no penalty)                |
+| Stack is empty, failed attempt | `0`                           |
+
+**Note:** Because stolen tiles do not incur a penalty, total reward at the end of the game can exceed your final score.
 
 For the full rules see the [Pickomino rulebook](https://github.com/smallgig/Pickomino/raw/main/pickomino-rulebook.pdf)
-or
-[play online](https://www.maartenpoirot.com/pickomino/).
-To try the environment manually, see [Play manually](#play-manually).
+or [play online](https://www.maartenpoirot.com/pickomino/).
+To try the environment manually, see [Play Manually](#play-manually).
 The bot heuristic is described [here](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/).
 
 ## Info Dictionary
@@ -124,6 +161,8 @@ logging, not for learning.
 
 ## Episode End
 
+### Termination
+
 Termination occurs when there are no more tiles to take on the table — Game Over.
 
 ### Truncation
@@ -142,8 +181,7 @@ affect the episode state.
 
 A Failed Attempt occurs when the agent fails to secure a tile. If the agent has
 a stack of already picked tiles, then the top tile is returned to the table, and a negative
-reward is
-applied.
+reward is applied.
 If the stack is empty, nothing happens, and the reward is zero. The game continues
 — the episode does not end.
 
@@ -204,7 +242,7 @@ Verify your installation:
 pickomino-play
 ```
 
-## Play manually
+## Play Manually
 
 Playing a few games manually is a great way to understand the rules and game dynamics
 before training a Reinforcement Learning agent. Launch the game with the pygame GUI:
@@ -228,7 +266,7 @@ A higher value slows the bots down, a lower value speeds them up.
 RENDER_DELAY: Final[float] = 2
 ```
 
-## Usage example
+## Usage Example
 
 ```python
 import gymnasium as gym
@@ -266,11 +304,19 @@ Found a bug? Valid reports are rewarded with a physical copy of the Pickomino bo
 game. See [SECURITY.md](https://github.com/smallgig/Pickomino/blob/main/SECURITY.md) for scope, timelines, and how to
 report.
 
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening issues or
+pull requests. For bugs and feature requests, open a [GitHub Issue](https://github.com/smallgig/Pickomino/issues).
+New contributors can start with issues labelled
+[good first issue](https://github.com/smallgig/Pickomino/labels/good%20first%20issue).
+
 ## Resources
 
 - **Game Rules:** [Pickomino Rulebook](https://github.com/smallgig/Pickomino/blob/main/pickomino-rulebook.pdf)
 - **Play Online:** [Maarteen Poirot's Pickomino](https://www.maartenpoirot.com/pickomino/)
 - **Play Board Game Arena:** [Pickomino with elo system](https://boardgamearena.com/14/pickomino?table=818236942)
+- **Strategy Discussion:** [Playing the Odds — One Worm at a Time](https://boardgamegeek.com/thread/129610/pickomino-playing-the-odds-one-worm-at-a-time)
 - **Bot Strategy:** [How to Win at Pickomino](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/)
 - **Repository:** [smallgig/Pickomino](https://github.com/smallgig/Pickomino)
 - **Gymnasium:** [https://gymnasium.farama.org/](https://gymnasium.farama.org/)
