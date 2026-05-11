@@ -195,6 +195,7 @@ source .venv/bin/activate
 
 # Windows Git Bash
 source .venv/Scripts/activate
+
 pip install pickomino-env
 ```
 
