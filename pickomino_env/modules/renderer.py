@@ -295,9 +295,18 @@ class Renderer:
         self._draw_dice_counts(0)  # Collected.
         self._draw_dice_counts(1)  # Rolled.
 
-        # Score label
+        # Score label — shows preview score when a die face is selected.
         score_y = DICE_SECTION_START_Y + DIE_SIZE + DICE_LABELS_OFFSET_Y + 2 * DICE_LABELS_SPACING
-        score_text = f"Score: {self._game.dice.score()[0]}"
+        current_score = self._game.dice.score()[0]
+        if self._action_click_dice is not None:
+            # Die face values: faces 0-4 score 1-5 points, face 5 (worm) also scores 5 points.
+            die_face_values = [1, 2, 3, 4, 5, 5]
+            face_value = die_face_values[self._action_click_dice]
+            added = self._game.dice.get_rolled()[self._action_click_dice] * face_value
+            preview_score = current_score + added
+            score_text = f"Score: {current_score} \u2192 {preview_score}"
+        else:
+            score_text = f"Score: {current_score}"
         score_text_surface = True
         score_surface = self._dice_font.render(score_text, score_text_surface, FONT_COLOR)
         self._window.blit(score_surface, (DICE_LABEL_X, score_y))
