@@ -55,9 +55,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     ## Action Space
 
-    A tuple `(dice_face, roll_choice)` of two discrete values:
+    A tuple `(die_face, roll_choice)` of two discrete values:
 
-    **dice_face** (0-5): Which die face to collect from the current roll
+    **die_face** (0-5): Which die face to collect from the current roll
         - 0: Collect all 1's
         - 1: Collect all 2's
         - 2: Collect all 3's
@@ -112,14 +112,14 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     ## Arguments
 
-    env = gymnasium.make("Pickomino-v0”, render_mode="human")
+    env = gymnasium.make("Pickomino-v0", render_mode="human")
     obs, info = env.reset(seed=42)
     obs, reward, terminated, truncated, info = env.step((0, 1))
 
     | Parameter | Type | Default | Description |
     |-----------|------|---------|-------------|
     | `number_of_bots` | int | 1 | the number of bot opponents (1-6). |
-    | `render_mode` | str or None | None | Rendering: None, “human”, or "rgb_array". |.
+    | `render_mode` | str or None | None | Rendering: None, "human", or "rgb_array". |.
 
     Raises:
         ValueError: If `number_of_bots` is not in [1, 6] or invalid `render_mode`.
@@ -508,7 +508,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         acquisition or loss, and rolls new dice for the next player's turn.
 
         Args:
-            action: dice_index, roll_choice representing the bot's decision.
+            action: die_face, roll_choice representing the bot's decision.
         """
         log(f"state={self._game.get_state()}, action={action}")
         self._action = action
@@ -546,8 +546,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         stop (taking/returning tiles). Then all bot players automatically execute their turns.
 
         Args:
-            action: dice_index, roll_choice where:
-                dice_index (0-5): Which die faces to collect.
+            action: die_face, roll_choice where:
+                die_face (0-5): Which die faces to collect.
                 roll_choice: 0 to stop and claim a tile, 1 to roll again.
 
         Returns:
