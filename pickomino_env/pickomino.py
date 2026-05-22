@@ -10,7 +10,7 @@ from __future__ import annotations
 __all__ = ["PickominoEnv"]
 
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import gymnasium as gym
 import numpy as np
@@ -154,9 +154,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
             raise ValueError(f"render_mode must be on of {valid_modes}, got '{render_mode}'")
 
         self._action: tuple[int, int] = 0, 0
-        self._number_of_bots: int = number_of_bots
         self._game: Game = Game()
-        self._create_players()
+        self._create_players(number_of_bots)
         # Define what the AI Agent can observe.
         # Dict space gives us structured, human-readable observations.
         # 6 possible faces of the dice. Max 8 dice.
@@ -221,11 +220,11 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         """Get the renderer for manual play interaction."""
         return self._renderer
 
-    def _create_players(self) -> None:
+    def _create_players(self, number_of_bots: int) -> None:
         """Create the human (agent) player (player 0) and bot opponents with assigned names."""
         names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         self._game.players.append(self._game.you)
-        for i in range(self._number_of_bots):
+        for i in range(number_of_bots):
             self._game.players.append(Player(bot=True, name=names[i]))
 
     def _tiles_vector(self) -> np.ndarray[Any, np.dtype[Any]]:
@@ -331,7 +330,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         # IMPORTANT. Must call this first. Seed the random number generator.
         super().reset(seed=seed)
         self._game = Game(random_generator=self.np_random)
-        self._create_players()
+        tile_players_space = cast("gym.spaces.Dict", self.observation_space)["tile_players"]
+        num_bots = cast("gym.spaces.Box", tile_players_space).shape[0] - 1
+        self._create_players(num_bots)
         self._game.dice.roll()
         return self._current_obs(), self._get_info()
 
