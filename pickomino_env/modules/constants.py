@@ -14,6 +14,7 @@ __all__ = [
     "ACTION_TUPLE_LENGTH",
     "ANTIALIAS",
     "BACKGROUND_COLOR",
+    "BOT_NAMES",
     "BUTTONS_START_X",
     "BUTTONS_START_Y",
     "BUTTON_BORDER_RADIUS",
@@ -85,6 +86,7 @@ NUM_DIE_FACES: Final[int] = 6
 MAX_BOTS: Final[int] = 6
 WORM_INDEX: Final[int] = 5
 WORM_VALUE: Final[int] = 5
+BOT_NAMES: Final[tuple[str, ...]] = ("Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot")
 
 # Action constants.
 ACTION_INDEX_DICE: Final[int] = 0
