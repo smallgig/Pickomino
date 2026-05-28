@@ -142,3 +142,24 @@ reportUnknownMemberType = "none"
 reportUnknownParameterType = "none"
 reportUnnecessaryIsInstance = "none"
 reportUnknownArgumentType = "none"
+
+[tool.mypy]
+strict = true
+allow_redefinition = true
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+no_implicit_optional = true
+pretty = true
+show_error_codes = true
+show_error_context = true
+show_traceback = true
+strict_equality = true
+strict_optional = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = false
+exclude = "^build/|^docs/"
