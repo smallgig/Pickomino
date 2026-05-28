@@ -196,7 +196,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         self.render_mode = render_mode
         self._renderer = Renderer(self.render_mode)
 
-    def render(self) -> NDArray[np.uint8] | None:  # pyright: ignore[reportIncompatibleMethodOverride]
+    def render(  # type: ignore[override] # pyright: ignore[reportIncompatibleMethodOverride]
+        self,
+    ) -> NDArray[np.uint8] | None:
         """Render the current game state.
 
             Renders the environment to screen or returns an RGB array depending on render_mode.
