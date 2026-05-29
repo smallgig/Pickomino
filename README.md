@@ -27,6 +27,18 @@ An environment conforming to the **Gymnasium** API for the dice game **Pickomino
 Goal: train a Reinforcement Learning agent for optimal play. Meaning, decide which face of the dice to collect,
 when to roll and when to stop.
 
+## Features
+
+|                              |                                                                             |
+|------------------------------|-----------------------------------------------------------------------------|
+| **Gymnasium API**            | Standard `reset` / `step` / `render` / `close` interface                    |
+| **Push-your-luck mechanics** | Lock in die faces one at a time, decide when to stop before busting         |
+| **Non-trivial decisions**    | Optimal play requires probability reasoning, not just greedy face selection |
+| **Multi-player bots**        | Play against 1–6 heuristic bot opponents                                    |
+| **Reproducible episodes**    | Full seed support via `env.reset(seed=42)`                                  |
+| **Three render modes**       | `None` (headless), `"human"` (pygame window), `"rgb_array"` (recording)     |
+| **SB3 compatible**           | Dict observation space works with Stable-Baselines3 and other RL libraries  |
+
 ## Differences from the Physical Game
 
 If you know the physical game, note the following simplifications:
@@ -36,8 +48,8 @@ If you know the physical game, note the following simplifications:
   choose a lower-valued tile like in the physical game.
 - **Stealing:** always performed when possible, you cannot choose.
 - **Win condition:** determined correctly when playing manually with GUI (most worms win, ties
-  broken by the highest tile). When training without a renderer, no winner is declared;
-  use total reward as your metric. But take care, stolen tiles do not reduce your reward,
+  broken by the highest tile). When training without a renderer, no winner is declared.
+  Use total reward as your metric. But take care, stolen tiles do not reduce your reward,
   total reward can exceed your final score.
 - **Stack height:** not included in the observation (visible in the physical game).
 
@@ -184,7 +196,8 @@ We recommend installing in a virtual environment:
 
 ```bash
 python -m venv .venv
-# macOS/Linux
+
+# macOS / Linux
 source .venv/bin/activate
 
 # Windows PowerShell
@@ -199,37 +212,15 @@ source .venv/Scripts/activate
 pip install pickomino-env
 ```
 
-Verify your installation:
+Verify the installation:
 
 ```bash
 pickomino-play
 ```
 
-## Play manually
+---
 
-Playing a few games manually is a great way to understand the rules and game dynamics
-before training a Reinforcement Learning agent. Launch the game with the pygame GUI:
-
-```bash
-pickomino-play
-```
-
-To play against more bots:
-
-```bash
-pickomino-play --number-of-bots=3
-```
-
-Valid range: 1–6 bots.
-
-To change the bot play speed, adjust the `RENDER_DELAY` constant in `constants.py`.
-A higher value slows the bots down, a lower value speeds them up.
-
-```python
-RENDER_DELAY: Final[float] = 2
-```
-
-## Usage example
+## Quick Start
 
 ```python
 import gymnasium as gym
@@ -261,20 +252,58 @@ print(f"Episode finished. Total reward: {total_reward}")
 env.close()
 ```
 
+## Play Manually
+
+Playing a few games by hand is the fastest way to understand the rules and the strategic depth before training an agent.
+Launch the pygame GUI:
+
+```bash
+# One bot (default)
+pickomino-play
+
+# Up to six bots
+pickomino-play --number-of-bots=3
+```
+
+To adjust bot play speed, change `RENDER_DELAY` in `constants.py`. A higher value slows bots down. A lower
+value speeds them up.
+
+```python
+RENDER_DELAY: Final[float] = 2
+```
+
 ## Security & Bug Bounty
 
-Found a bug? Valid reports are rewarded with a physical copy of the Pickomino board
-game. See [SECURITY.md](https://github.com/smallgig/Pickomino/blob/main/SECURITY.md) for scope, timelines, and how to
-report.
+Found a bug? Valid reports are rewarded with a **physical copy of the Pickomino board game**.
+See [SECURITY.md](https://github.com/smallgig/Pickomino/blob/main/SECURITY.md) for scope, timelines, and reporting
+instructions.
+
+## Contributing
+
+Contributions are welcome. The project runs sprints with issues assigned to contributors.
+
+1. Browse or open an issue on [GitHub Issues](https://github.com/smallgig/Pickomino/issues)
+2. Create a branch using the format `<issue-number>-<brief-description>`
+3. Run `pre-commit run --all-files` before pushing
+4. Open a Pull Request from your branch to the main branch.
+
+See [CONTRIBUTING.md](https://github.com/smallgig/Pickomino/blob/main/CONTRIBUTING.md) for the full workflow, code style
+requirements, and definition of done.
 
 ## Resources
 
-- **Game Rules:** [Pickomino Rulebook](https://github.com/smallgig/Pickomino/blob/main/pickomino-rulebook.pdf)
-- **Play Online:** [Maarteen Poirot's Pickomino](https://www.maartenpoirot.com/pickomino/)
-- **Play Board Game Arena:** [Pickomino with elo system](https://boardgamearena.com/14/pickomino?table=818236942)
-- **Bot Strategy:** [How to Win at Pickomino](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/)
-- **Repository:** [smallgig/Pickomino](https://github.com/smallgig/Pickomino)
-- **Gymnasium:** [https://gymnasium.farama.org/](https://gymnasium.farama.org/)
+- **Game Rules** — [Pickomino Rulebook](https://github.com/smallgig/Pickomino/blob/main/pickomino-rulebook.pdf)
+- **Play Online** — [Maarteen Poirot's Pickomino](https://www.maartenpoirot.com/pickomino/)
+- **Play on Board Game Arena** — [Pickomino with Elo](https://boardgamearena.com/14/pickomino?table=818236942)
+- **Strategy Discussion
+  ** — [Playing the Odds — One Worm at a Time](https://boardgamegeek.com/thread/129610/pickomino-playing-the-odds-one-worm-at-a-time)
+- **Bot Strategy** — [How to Win at Pickomino](https://frozenfractal.com/blog/2015/5/3/how-to-win-at-pickomino/)
+- **Gymnasium Docs** — [gymnasium.farama.org](https://gymnasium.farama.org/)
+
+## Contact
+
+Maintained by [smallgig](https://github.com/smallgig).
+For questions or ideas, open an issue with the label `question`.
 
 ## License
 
