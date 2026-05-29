@@ -22,6 +22,7 @@ from pickomino_env.modules.constants import (
     ACTION_INDEX_ROLL,
     ACTION_ROLL,
     ACTION_STOP,
+    BOT_NAMES,
     LARGEST_TILE,
     MAX_BOTS,
     NUM_DICE,
@@ -195,7 +196,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         self.render_mode = render_mode
         self._renderer = Renderer(self.render_mode)
 
-    def render(self) -> NDArray[np.uint8] | None:  # type: ignore[override]
+    def render(  # type: ignore[override]
+        self,
+    ) -> NDArray[np.uint8] | None:
         """Render the current game state.
 
             Renders the environment to screen or returns an RGB array depending on render_mode.
@@ -223,10 +226,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     def _create_players(self) -> None:
         """Create the human (agent) player (player 0) and bot opponents with assigned names."""
-        names = ["Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"]
         self._game.players.append(self._game.you)
         for i in range(self._number_of_bots):
-            self._game.players.append(Player(bot=True, name=names[i]))
+            self._game.players.append(Player(bot=True, name=BOT_NAMES[i]))
 
     def _tiles_vector(self) -> np.ndarray[Any, np.dtype[Any]]:
         """Return available tiles as a flat binary vector of length 16 for indexes 21..36."""
