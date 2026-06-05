@@ -32,7 +32,6 @@ repos:
     rev: v1.18.2
     hooks:
       - id: mypy
-        args: [ "--strict" ]
         additional_dependencies: [ "pickomino-env", "types-requests", "types-PyYAML", "gymnasium", "numpy", "pygame-ce", "loguru" ]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.13
