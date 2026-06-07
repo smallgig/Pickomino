@@ -196,7 +196,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         self.render_mode = render_mode
         self._renderer = Renderer(self.render_mode)
 
-    def render(  # type: ignore[override]
+    def render(
         self,
     ) -> NDArray[np.uint8] | None:
         """Render the current game state.

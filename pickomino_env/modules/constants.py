@@ -27,7 +27,12 @@ __all__ = [
     "BUTTON_TEXT_COLOR",
     "BUTTON_WIDTH",
     "BUTTON_Y_OFFSET",
+    "DICE_COUNT_ROW_COLLECTED",
+    "DICE_COUNT_ROW_ROLLED",
     "DICE_FONT_SIZE",
+    "DICE_HOVER_BORDER_RADIUS",
+    "DICE_HOVER_BORDER_WIDTH",
+    "DICE_HOVER_OFFSET",
     "DICE_LABELS_OFFSET_Y",
     "DICE_LABELS_SPACING",
     "DICE_LABEL_COLLECTED",
@@ -35,6 +40,7 @@ __all__ = [
     "DICE_LABEL_WIDTH",
     "DICE_LABEL_X",
     "DICE_NAMES",
+    "DICE_SCORE_ROW_INDEX",
     "DICE_SECTION_START_Y",
     "DICE_SPACING",
     "DIE_SIZE",
@@ -167,6 +173,9 @@ DICE_LABEL_WIDTH: Final[int] = 100
 DICE_SPACING: Final[int] = (WINDOW_WIDTH - DICE_LABEL_WIDTH) // NUM_DIE_FACES
 
 # Dice counts.
+DICE_COUNT_ROW_COLLECTED: Final[int] = 0
+DICE_COUNT_ROW_ROLLED: Final[int] = 1
+DICE_SCORE_ROW_INDEX: Final[int] = 2
 DICE_LABEL_COLLECTED: Final[str] = "Collected:"
 DICE_LABEL_ROLLED: Final[str] = "Rolled:"
 DICE_LABELS_OFFSET_Y: Final[int] = 5  # Distance from dice image bottom to labels.
@@ -184,6 +193,9 @@ TILES_ROW_SPACING: Final[int] = -15
 TILES_START_X: Final[int] = 170
 TILES_START_Y: Final[int] = 480
 TILES_HOVER_COLOR: Final[tuple[int, int, int]] = (255, 255, 0)
+DICE_HOVER_OFFSET: Final[int] = 3
+DICE_HOVER_BORDER_WIDTH: Final[int] = 3
+DICE_HOVER_BORDER_RADIUS: Final[int] = 5
 
 # Display action.
 ACTION_DISPLAY_X: Final[int] = 20

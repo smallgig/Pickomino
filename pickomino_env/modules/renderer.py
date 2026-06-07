@@ -33,7 +33,12 @@ from pickomino_env.modules.constants import (
     BUTTON_Y_OFFSET,
     BUTTONS_START_X,
     BUTTONS_START_Y,
+    DICE_COUNT_ROW_COLLECTED,
+    DICE_COUNT_ROW_ROLLED,
     DICE_FONT_SIZE,
+    DICE_HOVER_BORDER_RADIUS,
+    DICE_HOVER_BORDER_WIDTH,
+    DICE_HOVER_OFFSET,
     DICE_LABEL_COLLECTED,
     DICE_LABEL_ROLLED,
     DICE_LABEL_WIDTH,
@@ -41,6 +46,7 @@ from pickomino_env.modules.constants import (
     DICE_LABELS_OFFSET_Y,
     DICE_LABELS_SPACING,
     DICE_NAMES,
+    DICE_SCORE_ROW_INDEX,
     DICE_SECTION_START_Y,
     DICE_SPACING,
     DIE_SIZE,
@@ -289,14 +295,25 @@ class Renderer:
             # Hover effect
             is_hovered = dice_rect.collidepoint(self._mouse_pos) or self._action_click_dice == index
             if is_hovered:
-                highlight_rect = pygame.Rect(x - 3, y - 3, DIE_SIZE + 6, DIE_SIZE + 6)
-                pygame.draw.rect(self._window, TILES_HOVER_COLOR, highlight_rect, width=3, border_radius=5)
+                highlight_rect = pygame.Rect(
+                    x - DICE_HOVER_OFFSET,
+                    y - DICE_HOVER_OFFSET,
+                    DIE_SIZE + 2 * DICE_HOVER_OFFSET,
+                    DIE_SIZE + 2 * DICE_HOVER_OFFSET,
+                )
+                pygame.draw.rect(
+                    self._window,
+                    TILES_HOVER_COLOR,
+                    highlight_rect,
+                    width=DICE_HOVER_BORDER_WIDTH,
+                    border_radius=DICE_HOVER_BORDER_RADIUS,
+                )
 
-        self._draw_dice_counts(0)  # Collected.
-        self._draw_dice_counts(1)  # Rolled.
+        self._draw_dice_counts(DICE_COUNT_ROW_COLLECTED)  # Collected.
+        self._draw_dice_counts(DICE_COUNT_ROW_ROLLED)  # Rolled.
 
         # Score label
-        score_y = DICE_SECTION_START_Y + DIE_SIZE + DICE_LABELS_OFFSET_Y + 2 * DICE_LABELS_SPACING
+        score_y = DICE_SECTION_START_Y + DIE_SIZE + DICE_LABELS_OFFSET_Y + DICE_SCORE_ROW_INDEX * DICE_LABELS_SPACING
         score_text = f"Score: {self._game.dice.score()[0]}"
         score_text_surface = True
         score_surface = self._dice_font.render(score_text, score_text_surface, FONT_COLOR)
@@ -309,7 +326,7 @@ class Renderer:
 
         # Draw labels.
         labels_y: int = DICE_SECTION_START_Y + DIE_SIZE + DICE_LABELS_OFFSET_Y + row_index * DICE_LABELS_SPACING
-        if row_index == 0:  # Collected.
+        if row_index == DICE_COUNT_ROW_COLLECTED:
             label: str = DICE_LABEL_COLLECTED
             counts: list[int] = self._game.dice.get_collected()
         else:  # Rolled.
