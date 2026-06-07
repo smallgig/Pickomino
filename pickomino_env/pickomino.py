@@ -113,14 +113,14 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
 
     ## Arguments
 
-    env = gymnasium.make("Pickomino-v0”, render_mode="human")
+    env = gymnasium.make("Pickomino-v0", render_mode="human")
     obs, info = env.reset(seed=42)
     obs, reward, terminated, truncated, info = env.step((0, 1))
 
     | Parameter | Type | Default | Description |
     |-----------|------|---------|-------------|
     | `number_of_bots` | int | 1 | the number of bot opponents (1-6). |
-    | `render_mode` | str or None | None | Rendering: None, “human”, or "rgb_array". |.
+    | `render_mode` | str or None | None | Rendering: None, "human", or "rgb_array". |.
 
     Raises:
         ValueError: If `number_of_bots` is not in [1, 6] or invalid `render_mode`.
@@ -196,7 +196,7 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
         self.render_mode = render_mode
         self._renderer = Renderer(self.render_mode)
 
-    def render(  # type: ignore[override]
+    def render(
         self,
     ) -> NDArray[np.uint8] | None:
         """Render the current game state.
@@ -217,6 +217,8 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
                 "Specify render_mode when creating environment: "
                 "e.g. gymnasium.make('Pickomino-v0', render_mode='human')",
             )
+        # This wrapper delegates to Renderer, which lives in a separate module because
+        # renderer.py uses a try/except ImportError for importlib.resources compatibility.
         return self._renderer.render(self._game)  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
 
     @property
