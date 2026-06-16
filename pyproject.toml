@@ -24,7 +24,7 @@ test = [
     "pytest-cov>=7.0,<8.0",
     "pytest-timeout>=2.0,<3.0",
     "matplotlib>=3.10.9,<4.0",
-    "stable-baselines3>=2.8.0, <3.0",
+    "stable-baselines3[extra]>=2.8.0, <3.0",
 ]
 dev = ["loguru>=0.7.3,<1.0.0"]
 
@@ -142,3 +142,10 @@ reportUnknownMemberType = "none"
 reportUnknownParameterType = "none"
 reportUnnecessaryIsInstance = "none"
 reportUnknownArgumentType = "none"
+
+[tool.mypy]
+strict = true
+pretty = true
+show_error_codes = true
+show_error_context = true
+show_traceback = true

@@ -5,7 +5,7 @@ from __future__ import annotations
 try:
     from importlib.resources import files
 except ImportError:
-    from importlib_resources import files  # type: ignore[import-not-found, no-redef]
+    from importlib_resources import files  # type: ignore[no-redef]
 
 from typing import TYPE_CHECKING
 
