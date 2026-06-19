@@ -201,6 +201,9 @@ class PickominoEnv(gym.Env):  # type: ignore[type-arg]
     ) -> NDArray[np.uint8] | None:
         """Render the current game state.
 
+            Wrapper required to raise ValueError when render_mode is None,
+            before delegating to Renderer.
+
             Renders the environment to screen or returns an RGB array depending on render_mode.
 
         Returns:
